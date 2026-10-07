@@ -1,0 +1,30 @@
+# Сборки и архивы релизов
+dist/
+*.zip
+
+# Зависимости и инструменты (если появятся)
+node_modules/
+package-lock.json.bak
+
+# Секреты и локальные настройки
+.env
+.env.*
+*.pem
+*.key
+
+# Редакторы и система
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Логи и временные файлы
+*.log
+*.tmp
+__pycache__/
+*.pyc
+
+# Локальные профили тестового браузера и черновики
+.playwright/
+scratch/

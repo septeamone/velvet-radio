@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru" class="no-anim">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Velvet Radio</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+
+  <main class="app">
+    <header>
+      <h1 class="brand">Velvet Radio</h1>
+      <button id="theme" class="icon-btn glass" aria-label="Сменить тему">
+        <svg class="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg>
+      </button>
+    </header>
+
+    <label class="search glass">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+      <input id="q" type="search" placeholder="Поиск станции" autocomplete="off">
+    </label>
+
+    <nav class="tabs glass" role="tablist">
+      <span class="thumb"></span>
+      <button role="tab" data-tab="all" class="on">Все</button>
+      <button role="tab" data-tab="fav">Избранное</button>
+    </nav>
+
+    <ul id="list" class="list"></ul>
+
+    <footer class="player glass">
+      <div class="now">
+        <div id="nowLogo" class="logo idle">♪</div>
+        <div class="now-text">
+          <div id="nowTitle" class="now-title">Выберите станцию</div>
+          <div id="subRow" class="sub-row">
+            <div id="nowSub" class="now-sub">Нажмите на любую из списка</div>
+            <svg class="hint" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+          </div>
+          <button id="retry" class="retry">Повторить</button>
+        </div>
+        <button id="toggle" class="play" aria-label="Играть / пауза">
+          <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>
+          <svg class="i-pause" viewBox="0 0 24 24"><path d="M7.5 5.5h3.2v13H7.5zM13.3 5.5h3.2v13h-3.2z"/></svg>
+        </button>
+      </div>
+      <div class="vol">
+        <svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/></svg>
+        <input id="vol" type="range" min="0" max="1" step="0.01" aria-label="Громкость">
+      </div>
+      <canvas id="viz" class="off" aria-hidden="true"></canvas>
+    </footer>
+
+    <a id="tg" class="tg" href="https://t.me/sushtrsx" target="_blank" rel="noopener" title="Мой Telegram">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      <span>Мой Telegram</span>
+    </a>
+  </main>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
