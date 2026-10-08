@@ -21,13 +21,18 @@ const media = (action) => () => chrome.runtime.sendMessage({ type: 'media', acti
 for (const [a, act] of [['play', 'play'], ['pause', 'pause'], ['nexttrack', 'next'], ['previoustrack', 'previous']]) {
   try { ms.setActionHandler(a, media(act)); } catch { /* браузер не знает такое действие */ }
 }
-function setMedia(st, tier, track) {
+// MediaSession не принимает chrome-extension://, поэтому логотип из пакета отдаём как blob:
+const art = {};
+const artwork = (id) => (art[id] ??= fetch(chrome.runtime.getURL(`logos/${id}.png`)).then((r) => r.blob()).then(URL.createObjectURL));
+async function setMedia(st, tier, track) {
+  const src = await artwork(st.id).catch(() => null);
+  if (!current) return; // станцию успели остановить, пока грузился логотип
   ms.playbackState = 'playing';
   ms.metadata = new MediaMetadata({
     title: track ?? st.name,
     artist: track ? st.name : st.genre,
     album: `${tier.kbps} kbps`,
-    artwork: [{ src: chrome.runtime.getURL(`logos/${st.id}.png`), sizes: '128x128', type: 'image/png' }],
+    artwork: src ? [{ src, sizes: '128x128', type: 'image/png' }] : [],
   });
 }
 const report = (patch) => chrome.runtime.sendMessage({ type: 'status', patch }).catch(() => {});
