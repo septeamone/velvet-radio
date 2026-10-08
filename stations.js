@@ -76,7 +76,7 @@ export const STATIONS = [
   { id: 'zvezda', name: 'Радио Звезда', genre: 'Разное', mark: 'З', hue: 5, qualities: [
     q(128, 'https://icecast-zvezda.mediacdn.ru/radio/zvezda/zvezda_128', 'https://zvezda-radio-rzv.mediacdn.ru/radio/zvezda/zvezda_128')] },
   { id: 'comedy', name: 'Comedy Radio', genre: 'Юмор', mark: 'C', hue: 60, qualities: [
-    hid(96, 'http://23.105.238.4/gpm-comedyradio495.aacp', 'http://rmg.hostingradio.ru/gpm-comedyradio495.aacp'),
+    hid(96, 'http://rmg.hostingradio.ru/gpm-comedyradio495.aacp'),
     hls(128, 'https://hls-01-gpm.hostingradio.ru/comedyradio495/playlist.m3u8')] },
 ];
 
