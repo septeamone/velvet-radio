@@ -164,7 +164,8 @@ const codecOf = (c) => (c.isHls ? 'HLS' : /aac/i.test(c.url) ? 'AAC' : /\.(ogg|o
 
 async function start(id, kbps) {
   const my = ++session;
-  clearInterval(watchdog); clearInterval(trackTimer);   // прежний поток не трогаем: он играет, пока новый подключается (см. onConnected)
+  clearInterval(watchdog); clearInterval(trackTimer);   // прежний поток при включённых плавных переходах не трогаем: он играет, пока новый подключается (см. onConnected)
+  if (!fadeOn) dispose();                               // переходы выключены: как раньше, старая станция обрывается сразу
   const st = byId(id);
   if (!st) { dispose(); return; }
   const tiers = st.qualities.filter((q) => q.kbps <= kbps).reverse(); // выбранное качество, затем ниже
