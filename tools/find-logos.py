@@ -12,16 +12,19 @@ UA = {'User-Agent': 'VelvetRadio-tools/1.5 (logo search; https://github.com/sept
 S = 128
 
 
-def get(url, binary=False, timeout=20):
-    for attempt in range(3):
+def get(url, binary=False, timeout=10):
+    """Загрузка через curl с жёстким общим лимитом времени и размера (медленные сайты иначе подвешивают чтение)."""
+    for attempt in range(2):
         try:
-            data = urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=timeout).read()
-            return data if binary else json.loads(data)
-        except urllib.error.HTTPError as e:
-            if e.code == 429: time.sleep(4 * (attempt + 1)); continue
-            return None
+            r = subprocess.run(['curl', '-s', '-L', '-m', str(timeout), '--max-filesize', '3000000', '-A', UA['User-Agent'], '-w', '%{http_code}', url], capture_output=True)
         except Exception:
             return None
+        body, code = r.stdout[:-3], r.stdout[-3:].decode('ascii', 'ignore')
+        if code == '429': time.sleep(4 * (attempt + 1)); continue
+        if not code.startswith('2') or not body: return None
+        if binary: return body
+        try: return json.loads(body)
+        except Exception: return None
     return None
 
 
@@ -51,6 +54,13 @@ def candidates(st):
         for p in sorted(((j or {}).get('query', {}).get('pages', {})).values(), key=lambda p: p.get('index', 9)):
             if p.get('thumbnail'): c.append((f'wiki-{lang}', p['thumbnail']['source'], p['title']))
         time.sleep(0.4)
+    # Wikimedia Commons: файлы с «logo» в названии
+    j = get('https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=3&gsrsearch=' + urllib.parse.quote(name + ' logo') +
+            '&prop=imageinfo&iiprop=url&iiurlwidth=256&format=json')
+    for p in sorted(((j or {}).get('query', {}).get('pages', {})).values(), key=lambda p: p.get('index', 9)):
+        ii = (p.get('imageinfo') or [{}])[0]
+        if ii.get('thumburl') and name.split()[0].lower() in p['title'].lower(): c.append(('commons', ii['thumburl'], p['title']))
+    time.sleep(0.4)
     q = urllib.parse.urlencode({'name': name, 'countrycode': st['country'], 'limit': 6, 'hidebroken': 'true', 'order': 'votes', 'reverse': 'true'})
     for host in ('de1', 'de2', 'nl1'):
         j = get(f'https://{host}.api.radio-browser.info/json/stations/search?{q}')
@@ -58,6 +68,28 @@ def candidates(st):
             for s in j:
                 if s.get('favicon'): c.append(('rb', s['favicon'], s['name']))
             break
+    # сайты станций из radio-browser: apple-touch-icon / og:image / крупная иконка
+    import re
+    seen = set()
+    for host in ('de1', 'de2', 'nl1'):
+        j = get(f'https://{host}.api.radio-browser.info/json/stations/search?{q}')
+        if j is None: continue
+        for s in j:
+            home = (s.get('homepage') or '').strip()
+            if not home.startswith('http') or home in seen: continue
+            seen.add(home)
+            html = get(home, binary=True, timeout=12)
+            if not html: continue
+            t = html.decode('utf-8', 'ignore')[:200000]
+            QT, AP = chr(34), chr(39)                       # двойная и одинарная кавычки (так проще, чем экранировать)
+            Q, NQ = '[' + QT + AP + ']', '[^' + QT + AP + ']'
+            for rx in (r'<link[^>]+rel=' + Q + 'apple-touch-icon' + NQ + '*' + Q + r'[^>]*href=' + Q + '(' + NQ + '+)',
+                       r'<meta[^>]+property=' + Q + 'og:image' + Q + r'[^>]+content=' + Q + '(' + NQ + '+)',
+                       r'<link[^>]+rel=' + Q + '(?:shortcut )?icon' + Q + r'[^>]*sizes=' + Q + r'(?:\d+x)?(?:96|128|144|152|180|192|256|512)[^>]*href=' + Q + '(' + NQ + '+)'):
+                m = re.search(rx, t, re.I)
+                if m: c.append(('site', urllib.parse.urljoin(home, m.group(1)), home))
+            if len(seen) >= 3: break
+        break
     return c
 
 
@@ -85,7 +117,7 @@ def main():
             if min(im.size) < 64 or im.format in ('GIF',) and getattr(im, 'is_animated', False): continue
             tag = f'{src}{got}'
             to_logo(im).save(out / f'{st["id"]}.{tag}.png'); rows.append((st['id'], tag, title, im.size)); got += 1
-            if got >= 3: break
+            if got >= 4: break
         print(st['id'], 'кандидатов:', got)
     json.dump(rows, open(out / 'index.json', 'w', encoding='utf-8'), ensure_ascii=False)
     # контрольные листы по 30 кандидатов
