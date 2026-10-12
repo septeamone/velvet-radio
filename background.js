@@ -19,7 +19,7 @@ function setState(patch, { onlyIfActive = false } = {}) {
     if (onlyIfActive && cur.status === 'stopped') return cur; // станцию уже остановили — запоздавший отчёт не нужен
     const next = { ...cur, ...patch };
     await chrome.storage.session.set({ state: next });
-    await renderAction(next);
+    if (Object.keys(patch).some((k) => k !== 'volume')) await renderAction(next);   // громкость значок не меняет
     chrome.runtime.sendMessage({ type: 'state', state: next }).catch(() => {});
     return next;
   };
@@ -64,7 +64,7 @@ async function play(id, kbps) {
   const { settings = {} } = await chrome.storage.local.get('settings');
   const want = kbps ?? maxKbps(station);
   await setState({ stationId: id, kbps: want, status: 'loading', track: null, notice: null, viz: false, codec: null });
-  chrome.runtime.sendMessage({ target: 'offscreen', cmd: 'play', id, kbps: want, volume, prebuffer: [4, 8, 12].includes(settings.buffer) ? settings.buffer : 4, fade: settings.fade !== false }).catch(() => {});
+  chrome.runtime.sendMessage({ target: 'offscreen', cmd: 'play', id, kbps: want, volume, fade: settings.fade !== false, wait: settings.buffer }).catch(() => {});
 }
 
 async function stop() {
@@ -102,9 +102,9 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       case 'play': await play(msg.id, msg.kbps); break;
       case 'stop': await stop(); break;
       case 'volume':
+        chrome.runtime.sendMessage({ target: 'offscreen', cmd: 'volume', volume: msg.value }).catch(() => {});
         await chrome.storage.local.set({ volume: msg.value });
         await setState({ volume: msg.value });
-        chrome.runtime.sendMessage({ target: 'offscreen', cmd: 'volume', volume: msg.value }).catch(() => {});
         break;
       case 'media': // кнопки мультимедиа из offscreen (MediaSession)
         if (msg.action === 'play') { if (['stopped', 'error'].includes((await getState()).status)) await toggle(); }

@@ -363,3 +363,10 @@ input[type=range] { height: 16px; }
 .about a { color: var(--muted); text-underline-offset: 3px; }
 .about a:hover { color: var(--accent); }
 .icon-btn.on { box-shadow: inset 0 1px 0 var(--glass-hi), 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* — смена темы без переходов у каждого элемента; плавность даёт перекрёстное затухание снимков — */
+:root.theme-switch *, :root.theme-switch *::before, :root.theme-switch *::after { transition: none !important; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .26s; }
+
+/* — плашки списка без размытия фона под каждой: сотни backdrop-filter тормозили и прокрутку, и смену темы — */
+.row.glass, .crow.glass { backdrop-filter: none; -webkit-backdrop-filter: none; }

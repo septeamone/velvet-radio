@@ -1,7 +1,7 @@
 // Настройки, резервная копия, синхронизация между компьютерами и проверка станций. Только данные, разрешений не требует.
 import { STATIONS, shown } from './stations.js';
 
-export const DEFAULTS = { saver: false, buffer: 4, fade: true, resume: false, sync: false };
+export const DEFAULTS = { saver: false, buffer: 9, fade: true, resume: false, sync: false };
 export const getSettings = async () => ({ ...DEFAULTS, ...((await chrome.storage.local.get('settings')).settings ?? {}) });
 export async function saveSettings(patch) {
   const next = { ...(await getSettings()), ...patch };

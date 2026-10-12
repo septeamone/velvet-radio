@@ -1,15 +1,22 @@
 import { STATIONS, LOGOS } from './stations.js';
 import { fetchTrack } from './nowplaying.js';
 
-const CONNECT_MS = 15000;  // сколько ждём старта потока (включая набор буфера)
-const PREBUFFER_S = 4;     // запас звука перед стартом: сглаживает просадки сети и нагрузки на ПК
+// Запас звука перед стартом. Пока элемент на паузе, «живой» поток продолжает приходить и копится в сетевых буферах (в `buffered` видно лишь ~2.3 с),
+// поэтому ожидание перед стартом — это и есть запас: 9 с (по умолчанию) дают ноль заиканий, при 4–6 с на потоках 320 они появляются (замерено).
+// Время ожидания выбирает пользователь в настройках (4 / 9 / 14 с).
+const WAIT_CHOICES = [4, 9, 14];
+const DEFAULT_WAIT_S = 9;
+const CONNECT_MARGIN_MS = 6000;   // сколько сверх ожидания даём на соединение с сервером
 const STALL_MS = 9000;     // сколько терпим «зависший» звук
 const BANDS = 32;
 
 let session = 0;           // номер текущего запуска: старые попытки сами отменяются
 let current = null;        // { audio, hls, analyser, data }
 let volume = 0.8;
-let prebuffer = PREBUFFER_S, fadeOn = true;   // из настроек окна; по умолчанию как раньше
+// Ухо слышит громкость логарифмически: квадрат делает ползунок «живым» по всей длине. Пол 0.002 (−54 дБ, на слух тишина) нужен, чтобы Chrome
+// не закрыл аудио-документ как «беззвучный» через 30 секунд, если громкость на нуле.
+const level = (v) => Math.max(v * v, 0.002);
+let fadeOn = true, startWaitS = DEFAULT_WAIT_S;   // из настроек окна
 let vizPort = null;
 let ctx = null;
 let trackTimer = 0, watchdog = 0, vizTimer = 0;
@@ -61,7 +68,7 @@ function tryUrl(url, isHls, withCors, my) {
   return new Promise((resolve) => {
     const audio = new Audio();
     if (withCors) audio.crossOrigin = 'anonymous';
-    audio.volume = fadeOn ? 0 : volume;       // при плавном старте звук нарастает из тишины (rampIn)
+    audio.volume = fadeOn ? 0 : level(volume);       // при плавном старте звук нарастает из тишины (rampIn)
     let hls = null, done = false;
     const finish = (ok) => {
       if (done) return;
@@ -75,7 +82,7 @@ function tryUrl(url, isHls, withCors, my) {
     };
     const onPlaying = () => finish(true);
     const onError = () => finish(false);
-    const timer = setTimeout(() => finish(false), CONNECT_MS);
+    const timer = setTimeout(() => finish(false), startWaitS * 1000 + CONNECT_MARGIN_MS);
     audio.addEventListener('playing', onPlaying);
     audio.addEventListener('error', onError);
     if (isHls && window.Hls && Hls.isSupported()) {
@@ -92,7 +99,7 @@ function tryUrl(url, isHls, withCors, my) {
       const wait = setInterval(() => {
         if (done) return clearInterval(wait);
         const b = audio.buffered, ahead = b.length ? b.end(b.length - 1) - audio.currentTime : 0;
-        if (ahead >= prebuffer || (ahead > 0.5 && Date.now() - t0 > 9000)) { clearInterval(wait); audio.play().catch(() => {}); }
+        if (ahead > 0.5 && Date.now() - t0 > startWaitS * 1000) { clearInterval(wait); audio.play().catch(() => {}); }
       }, 150);
     }
   });
@@ -137,10 +144,10 @@ async function rampIn(c) {
   const t0 = performance.now();
   while (performance.now() - t0 < FADE_IN_MS) {
     if (current !== c) return;
-    c.audio.volume = volume * ((performance.now() - t0) / FADE_IN_MS);
+    c.audio.volume = level(volume) * ((performance.now() - t0) / FADE_IN_MS);
     await sleep(16);
   }
-  if (current === c) c.audio.volume = volume;
+  if (current === c) c.audio.volume = level(volume);
 }
 const codecOf = (c) => (c.isHls ? 'HLS' : /aac/i.test(c.url) ? 'AAC' : /\.(ogg|opus)/i.test(c.url) ? 'OGG' : 'MP3');
 
@@ -230,11 +237,11 @@ chrome.runtime.onConnect.addListener((port) => {
 /* ---------- команды от background ---------- */
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.target !== 'offscreen') return;
-  if (msg.cmd === 'play') { volume = msg.volume; prebuffer = msg.prebuffer ?? PREBUFFER_S; fadeOn = msg.fade !== false; start(msg.id, msg.kbps); }
+  if (msg.cmd === 'play') { volume = msg.volume; fadeOn = msg.fade !== false; startWaitS = WAIT_CHOICES.includes(msg.wait) ? msg.wait : DEFAULT_WAIT_S; start(msg.id, msg.kbps); }
   else if (msg.cmd === 'stop') {
     session++; ms.playbackState = 'none'; ms.metadata = null;
     const c = current;
     fadeOutCurrent().then(() => { if (current === c) dispose(); });
   }
-  else if (msg.cmd === 'volume') { volume = msg.volume; if (current) current.audio.volume = volume; }
+  else if (msg.cmd === 'volume') { volume = msg.volume; if (current) current.audio.volume = level(volume); }
 });

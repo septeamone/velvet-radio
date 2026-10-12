@@ -50,9 +50,15 @@ async function initTheme() {
   applyTheme(theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
   requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('no-anim')));
 }
+// Смена темы: переходы цветов у сотен «стеклянных» плашек и размытых пятен фона отключаются на миг, а плавность даёт
+// перекрёстное затухание снимков (View Transitions: считает видеокарта, а не страница). Раньше анимировалось всё сразу, отсюда падал FPS.
 $('#theme').addEventListener('click', () => {
-  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-  applyTheme(next);
+  const root = document.documentElement;
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.classList.add('theme-switch');
+  const done = () => requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('theme-switch')));
+  if (document.startViewTransition) document.startViewTransition(() => applyTheme(next)).finished.then(done, done);
+  else { applyTheme(next); done(); }
   persist({ theme: next });
 });
 
@@ -429,7 +435,14 @@ $('#retry').addEventListener('click', () => playStation(ui.state.stationId ?? ui
 
 const vol = $('#vol');
 const paintVol = () => vol.style.setProperty('--p', `${vol.value * 100}%`);
-vol.addEventListener('input', () => { paintVol(); send({ type: 'volume', value: +vol.value }); });
+let volSave = 0;
+vol.addEventListener('input', () => {
+  paintVol();
+  const value = +vol.value;
+  chrome.runtime.sendMessage({ target: 'offscreen', cmd: 'volume', volume: value }).catch(() => {});   // сразу в плеер, без обходов через фон
+  clearTimeout(volSave);
+  volSave = setTimeout(() => send({ type: 'volume', value }), 200);                                  // сохранение и состояние — с паузой, а не на каждое движение
+});
 
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type !== 'state') return;
@@ -612,7 +625,7 @@ function renderHealth() {
 }
 function syncSettingsUI() {
   settingsEl.querySelectorAll('input[data-set]').forEach((el) => { el.checked = !!ui.settings[el.dataset.set]; });
-  const seg = $('#bufseg'), vals = [4, 8, 12];
+  const seg = $('#bufseg'), vals = [4, 9, 14];
   seg.style.setProperty('--i', Math.max(0, vals.indexOf(ui.settings.buffer)));
   seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', +b.dataset.k === ui.settings.buffer));
   $('#ver').textContent = `Velvet Radio ${chrome.runtime.getManifest().version}`;

@@ -18,7 +18,7 @@ Velvet Radio — красивое радио для Chrome: больше 400 с�
 • Русский и английский интерфейс
 • Фильтр по жанрам, управление с клавиатуры, названия песен прямо в списке
 • Плавные переходы между станциями
-• Настройки: экономия трафика, запас звука, запуск при старте Chrome, синхронизация и резервная копия избранного
+• Настройки: экономия трафика, ожидание перед стартом, запуск при старте Chrome, синхронизация и резервная копия избранного
 • Улучшена стабильность потока
 
 ВОЗМОЖНОСТИ
@@ -53,7 +53,7 @@ WHAT'S NEW IN 1.5
 • Russian and English interface
 • Genre filter, keyboard control, song titles right in the list
 • Smooth transitions between stations
-• Settings: data saver, audio buffer, resume on Chrome start, sync and backup of favorites
+• Settings: data saver, wait before playback, resume on Chrome start, sync and backup of favorites
 • Improved stream stability
 
 FEATURES

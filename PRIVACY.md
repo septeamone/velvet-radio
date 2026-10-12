@@ -6,7 +6,7 @@
 
 Velvet Radio — расширение Chrome для прослушивания интернет-радио. Разработчик **не собирает, не хранит на своих серверах и не продаёт** никакие данные пользователей. У расширения нет серверов, аккаунтов, аналитики, рекламы и трекеров.
 
-**Что хранится на вашем компьютере** (`chrome.storage`, не покидает браузер): тема оформления, язык, вид списка стран, избранные станции, порядок станций, выбранное качество, последняя станция, громкость, настройки (экономия трафика, плавные переходы, запас звука, запуск при старте Chrome, синхронизация), результаты проверки станций, текущее состояние плеера (только на время сеанса).
+**Что хранится на вашем компьютере** (`chrome.storage`, не покидает браузер): тема оформления, язык, вид списка стран, избранные станции, порядок станций, выбранное качество, последняя станция, громкость, настройки (экономия трафика, плавные переходы, запуск при старте Chrome, синхронизация), результаты проверки станций, текущее состояние плеера (только на время сеанса).
 
 **Синхронизация (по вашему желанию).** Если вы включите её в настройках, избранное, порядок станций, качество, тему и язык сохраняются в `chrome.storage.sync`, то есть передаются через ваш аккаунт Chrome на ваши другие компьютеры. Это делает сам Chrome по правилам Google, разработчик к этим данным доступа не имеет. По умолчанию синхронизация выключена.
 
@@ -30,7 +30,7 @@ Velvet Radio is a Chrome extension for listening to internet radio. The develope
 
 **Who the extension contacts.** To play audio, the browser connects to the radio stations' streaming servers; to show the current song it requests public data from the stations' websites. Like any website, these servers see your IP address and standard browser headers. The extension sends them no personal data, uses no cookies, and sends nothing beyond the stream or song-title request itself.
 
-**Settings and sync.** Stored locally: theme, language, country-list view, favourites, station order, quality, volume, settings (data saver, smooth transitions, buffer size, resume on Chrome start, sync) and station-check results. If you turn on **Sync** in the settings, favourites, order, quality, theme and language are stored in `chrome.storage.sync`, i.e. passed through your Chrome account to your other computers by Chrome itself; the developer has no access to them. Sync is off by default. The **Backup** buttons write and read a file on your computer only.
+**Settings and sync.** Stored locally: theme, language, country-list view, favourites, station order, quality, volume, settings (data saver, smooth transitions, resume on Chrome start, sync) and station-check results. If you turn on **Sync** in the settings, favourites, order, quality, theme and language are stored in `chrome.storage.sync`, i.e. passed through your Chrome account to your other computers by Chrome itself; the developer has no access to them. Sync is off by default. The **Backup** buttons write and read a file on your computer only.
 
 **Song search.** Only if you click the song title, a new tab opens with a Google search for that title. Google's policy applies on that tab.
 
