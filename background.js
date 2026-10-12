@@ -1,6 +1,7 @@
-import { STATIONS, maxKbps, sortByOrder, pickKbps } from './stations.js';
+import { STATIONS, maxKbps, sortByOrder, pickKbps, stationsOf } from './stations.js';
 
-const byId = (id) => STATIONS.find((s) => s.id === id);
+const index = new Map(STATIONS.map((s) => [s.id, s]));
+const byId = (id) => index.get(id);
 const DEFAULT = { stationId: null, kbps: null, status: 'stopped', volume: 0.8, track: null, notice: null, viz: false };
 
 async function getState() {
@@ -10,12 +11,19 @@ async function getState() {
   return { ...DEFAULT, volume: volume ?? DEFAULT.volume };
 }
 
-async function setState(patch) {
-  const next = { ...(await getState()), ...patch };
-  await chrome.storage.session.set({ state: next });
-  await renderAction(next);
-  chrome.runtime.sendMessage({ type: 'state', state: next }).catch(() => {});
-  return next;
+// Записи состояния идут строго по очереди: иначе два быстрых сообщения затирают друг друга.
+let queue = Promise.resolve();
+function setState(patch, { onlyIfActive = false } = {}) {
+  const job = async () => {
+    const cur = await getState();
+    if (onlyIfActive && cur.status === 'stopped') return cur; // станцию уже остановили — запоздавший отчёт не нужен
+    const next = { ...cur, ...patch };
+    await chrome.storage.session.set({ state: next });
+    await renderAction(next);
+    chrome.runtime.sendMessage({ type: 'state', state: next }).catch(() => {});
+    return next;
+  };
+  return (queue = queue.then(job, job));
 }
 
 async function renderAction(state) {
@@ -69,10 +77,10 @@ async function toggle() {
   await playSaved(st.stationId ?? last ?? sortByOrder(order)[0].id);
 }
 
-async function step(dir) {
+async function step(dir) { // «следующая / предыдущая» ходит по станциям той же страны, что играет сейчас
   const { order } = await chrome.storage.local.get('order');
-  const list = sortByOrder(order);
   const st = await getState();
+  const list = sortByOrder(order, stationsOf(byId(st.stationId)?.country ?? 'RU'));
   const cur = list.findIndex((s) => s.id === st.stationId);
   await playSaved(list[(cur < 0 ? (dir > 0 ? 0 : list.length - 1) : cur + dir + list.length) % list.length].id);
 }
@@ -91,13 +99,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         chrome.runtime.sendMessage({ target: 'offscreen', cmd: 'volume', volume: msg.value }).catch(() => {});
         break;
       case 'media': // кнопки мультимедиа из offscreen (MediaSession)
-        if (msg.action === 'play') { if ((await getState()).status === 'stopped') await toggle(); }
+        if (msg.action === 'play') { if (['stopped', 'error'].includes((await getState()).status)) await toggle(); }
         else if (msg.action === 'pause') await stop();
         else if (msg.action === 'next') await step(1);
         else if (msg.action === 'previous') await step(-1);
         break;
       case 'status': // от offscreen
-        if ((await getState()).status !== 'stopped') await setState(msg.patch);
+        await setState(msg.patch, { onlyIfActive: true });
         break;
     }
     sendResponse(await getState());

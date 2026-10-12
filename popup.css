@@ -27,9 +27,9 @@
 }
 
 * { box-sizing: border-box; margin: 0; -webkit-tap-highlight-color: transparent; }
-html { width: 420px; height: 600px; background: transparent; }
+html { width: 480px; height: 600px; background: transparent; }
 html, body { overflow: hidden; }
-body { position: relative; width: 408px; height: 588px; margin: 6px; border-radius: 24px; }
+body { position: relative; width: 468px; height: 588px; margin: 6px; border-radius: 24px; }
 body::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 20; box-shadow: inset 0 0 0 1px var(--stroke), inset 0 1px 0 var(--glass-hi); }
 body {
   font: 14px/1.35 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
@@ -48,7 +48,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .b3 { background: var(--c3); bottom: -110px; left: 10px; animation: drift 20s ease-in-out infinite alternate; }
 @keyframes drift { to { transform: translate(26px, 18px) scale(1.08); } }
 
-.app { position: relative; height: 100%; display: flex; flex-direction: column; gap: 7px; padding: 12px 14px 0; --ph: 110px; }
+.app { position: relative; height: 100%; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px 0; --ph: 100px; }
 
 .glass {
   background: var(--glass);
@@ -61,29 +61,30 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 
 header { display: flex; align-items: center; justify-content: space-between; }
 h1 { font-size: 22px; font-weight: 650; letter-spacing: -.02em; }
-.icon-btn { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; transition: transform .25s var(--ease), background-color .45s ease; }
+.icon-btn { width: 28px; height: 28px; border-radius: 50%; flex: none; text-decoration: none; color: inherit; display: grid; place-items: center; transition: transform .25s var(--ease), background-color .45s ease; }
 .icon-btn:hover { transform: scale(1.07); }
 .icon-btn:active { transform: scale(.94); }
-.icon-btn svg { grid-area: 1 / 1; width: 18px; height: 18px; transition: opacity .35s ease, transform .5s var(--ease); }
+.icon-btn svg { grid-area: 1 / 1; width: 16px; height: 16px; transition: opacity .35s ease, transform .5s var(--ease); }
 .i-moon { opacity: 0; transform: rotate(-70deg) scale(.5); }
 :root[data-theme="dark"] .i-sun { opacity: 0; transform: rotate(70deg) scale(.5); }
 :root[data-theme="dark"] .i-moon { opacity: 1; transform: none; }
 
-.search { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border-radius: 13px; color: var(--muted); transition: box-shadow .3s ease, background-color .45s ease; }
+.search { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 13px; color: var(--muted); transition: box-shadow .3s ease, background-color .45s ease; }
 .search:focus-within { box-shadow: inset 0 1px 0 var(--glass-hi), 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent), 0 8px 24px var(--shadow); }
 .search svg { width: 17px; height: 17px; flex: none; }
 .search input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--text); font: inherit; }
 .search input::placeholder { color: var(--muted); }
 .search input::-webkit-search-cancel-button { display: none; }
 
-.tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border-radius: 13px; }
-.tabs button { position: relative; z-index: 1; height: 27px; border-radius: 10px; font-weight: 550; color: var(--muted); transition: color .3s ease; }
+.tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 3px; border-radius: 13px; }
+.tabs button { position: relative; z-index: 1; height: 25px; border-radius: 10px; font-weight: 550; color: var(--muted); transition: color .3s ease; }
 .tabs button.on { color: var(--text); }
-.thumb { position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 10px; background: var(--glass-hi); box-shadow: 0 2px 8px var(--shadow); transition: transform .4s var(--ease), background-color .45s ease; }
+.thumb { position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc((100% - 6px) / 3); border-radius: 10px; background: var(--glass-hi); box-shadow: 0 2px 8px var(--shadow); transition: transform .4s var(--ease), background-color .45s ease; }
 .tabs[data-tab="fav"] .thumb { transform: translateX(100%); }
+.tabs[data-tab="countries"] .thumb { transform: translateX(200%); }
 
 /* — список — */
-.list { flex: 1; min-height: 0; overflow-y: auto; list-style: none; padding: 6px 2px calc(var(--ph) + 52px); margin: -6px -2px 0;
+.list { flex: 1; min-height: 0; overflow-y: auto; list-style: none; padding: 6px 2px calc(var(--ph) + 20px); margin: -6px -2px 0;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12px); mask-image: linear-gradient(to bottom, transparent 0, #000 12px); display: flex; flex-direction: column; gap: 6px; scrollbar-width: thin; scrollbar-color: var(--track) transparent; }
 .row { display: flex; align-items: center; gap: 11px; padding: 5px 9px; border-radius: 14px; cursor: pointer; flex: none; animation: rise .45s var(--ease) backwards; animation-delay: calc(var(--i) * 18ms); transition: transform .25s var(--ease), background-color .3s ease, border-color .45s ease, box-shadow .3s ease, opacity .3s ease; }
 .row:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--glass) 60%, var(--glass-hi)); }
@@ -142,7 +143,7 @@ h1 { font-size: 22px; font-weight: 650; letter-spacing: -.02em; }
 .empty { text-align: center; color: var(--muted); padding: 36px 20px; animation: rise .4s var(--ease); }
 
 /* — плеер — */
-.player { position: absolute; left: 16px; right: 16px; bottom: 40px; z-index: 5; border-radius: 20px; padding: 8px 12px 9px; display: flex; flex-direction: column; gap: 5px;
+.player { position: absolute; left: 12px; right: 12px; bottom: 10px; z-index: 5; border-radius: 20px; padding: 7px 11px 8px; display: flex; flex-direction: column; gap: 4px;
   background: var(--glass-deep); backdrop-filter: blur(34px) saturate(190%); -webkit-backdrop-filter: blur(34px) saturate(190%); }
 .now { display: flex; align-items: center; gap: 10px; }
 .now-text { flex: 1; min-width: 0; }
@@ -231,17 +232,11 @@ input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.15); }
 .row.loading .logo { animation: logo-glow 1.8s ease-in-out infinite; }
 @keyframes logo-glow { 50% { transform: scale(1.06); } }
 
-/* — подвал: ссылка на Telegram — */
-.tg { position: absolute; left: 50%; bottom: 9px; z-index: 6; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 12px 0 8px; border-radius: 13px;
-  font-size: 12px; font-weight: 600; letter-spacing: .01em; color: var(--muted); text-decoration: none; white-space: nowrap;
-  background: var(--glass); backdrop-filter: blur(22px) saturate(170%); -webkit-backdrop-filter: blur(22px) saturate(170%);
-  box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 0 0 1px var(--stroke), 0 6px 16px var(--shadow);
-  transition: transform .3s var(--ease), color .3s ease, box-shadow .3s ease, background-color .45s ease; }
-.tg svg { width: 17px; height: 17px; fill: #2aabee; stroke: none; transition: transform .45s var(--ease), filter .3s ease; }
-.tg:hover, .tg:focus-visible { transform: translateX(-50%) translateY(-1px); color: var(--text); outline: none;
-  box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 0 0 1px color-mix(in srgb, #2aabee 55%, var(--stroke)), 0 8px 22px color-mix(in srgb, #2aabee 28%, transparent); }
-.tg:hover svg, .tg:focus-visible svg { transform: rotate(-12deg) scale(1.12); filter: drop-shadow(0 0 6px color-mix(in srgb, #2aabee 60%, transparent)); }
-.tg:active { transform: translateX(-50%) scale(.96); }
+/* — Telegram: круглая иконка в шапке рядом с темой — */
+.tg:hover, .tg:focus-visible { outline: none; color: #2aabee; box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 0 0 1px color-mix(in srgb, #2aabee 55%, var(--stroke)), 0 6px 18px color-mix(in srgb, #2aabee 28%, transparent); }
+.tg:hover svg, .tg:focus-visible svg { transform: translate(1px, -1px) rotate(-6deg) scale(1.1); }
+.lang-btn { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: var(--muted); }
+.lang-btn:hover { color: var(--text); }
 
 /* — перетаскивание плашек — */
 .row { user-select: none; -webkit-user-select: none; }
@@ -253,12 +248,12 @@ input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.15); }
 .sorting, .sorting .row { cursor: grabbing !important; }
 
 /* мягкая подложка внизу: список растворяется перед подвалом, строки не лезут под ссылку на Telegram */
-.app::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 48px; z-index: 4; pointer-events: none;
+.app::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 22px; z-index: 4; pointer-events: none;
   background: linear-gradient(to top, color-mix(in srgb, var(--base2) 94%, transparent) 30%, transparent); transition: background .55s ease; }
 
 /* — название: по центру, строгое, один вес и один бархатный оттенок — */
-header { position: relative; justify-content: center; min-height: 30px; }
-header .icon-btn { position: absolute; right: 0; top: 50%; margin-top: -16px; }
+header { position: relative; justify-content: center; min-height: 28px; }
+.tools { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 6px; }
 .brand { margin: 0; font: 650 15px/1 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif; letter-spacing: .26em; text-transform: uppercase; text-indent: .26em; /* выравнивает по центру с учётом разрядки */
   user-select: none; color: var(--brand-ink); transition: color .45s ease; }
 
@@ -274,3 +269,44 @@ header .icon-btn { position: absolute; right: 0; top: 50%; margin-top: -16px; }
 input[type=range] { height: 16px; }
 /* кнопки качества стали ниже: расширяем невидимую область нажатия, чтобы по ним по-прежнему легко попадать */
 .seg button::after { content: ''; position: absolute; inset: -5px -1px; }
+
+[hidden] { display: none !important; }
+
+/* — строка поиска и переключатель вида стран — */
+.searchrow { display: flex; align-items: center; gap: 6px; }
+.searchrow .search { flex: 1; min-width: 0; }
+.vtoggle { position: relative; display: flex; padding: 2px; border-radius: 13px; flex: none; }
+.vtoggle button { position: relative; z-index: 1; width: 32px; height: 26px; display: grid; place-items: center; border-radius: 10px; color: var(--muted); transition: color .3s ease; }
+.vtoggle button svg { width: 16px; height: 16px; }
+.vtoggle[data-view="list"] button[data-view="list"], .vtoggle[data-view="tiles"] button[data-view="tiles"] { color: var(--text); }
+.vthumb { position: absolute; z-index: 0; top: 2px; bottom: 2px; left: 2px; width: 32px; border-radius: 10px; background: var(--glass-hi); box-shadow: 0 2px 8px var(--shadow); transition: transform .4s var(--ease), background-color .45s ease; }
+.vtoggle[data-view="tiles"] .vthumb { transform: translateX(100%); }
+
+/* — вкладка «Страны» — */
+.cbar { display: flex; align-items: center; gap: 9px; height: 34px; padding: 0 10px 0 5px; border-radius: 13px; animation: rise .35s var(--ease); }
+.cback { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); transition: background-color .3s ease, color .3s ease, transform .25s var(--ease); }
+.cback:hover { background: var(--track); color: var(--text); transform: translateX(-1px); }
+.cback svg { width: 17px; height: 17px; }
+.cflag-lg { width: 26px; height: 19px; border-radius: 4px; object-fit: cover; box-shadow: 0 0 0 1px var(--stroke), 0 2px 6px var(--shadow); }
+.cname { font-weight: 650; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ccount { font-size: 12px; color: var(--muted); flex: none; }
+
+.crow { display: flex; align-items: center; gap: 12px; padding: 7px 12px 7px 10px; border-radius: 14px; cursor: pointer; flex: none; animation: rise .45s var(--ease) backwards; animation-delay: calc(var(--i) * 16ms);
+  transition: transform .25s var(--ease), background-color .3s ease, box-shadow .3s ease; }
+.crow:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--glass) 60%, var(--glass-hi)); }
+.crow:active { transform: scale(.985); }
+.cflag { width: 36px; height: 27px; flex: none; border-radius: 5px; object-fit: cover; box-shadow: 0 0 0 1px var(--stroke), 0 3px 8px var(--shadow); }
+.cinfo { flex: 1; min-width: 0; }
+.cn { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cs { font-size: 12px; color: var(--muted); }
+.chev { width: 16px; height: 16px; flex: none; color: var(--muted); transition: transform .3s var(--ease), color .3s ease; }
+.crow:hover .chev { transform: translateX(2px); color: var(--text); }
+
+.list.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; align-content: start; }
+.list.tiles .crow { flex-direction: column; justify-content: center; gap: 8px; padding: 13px 8px 11px; text-align: center; }
+.list.tiles .cflag { width: 66px; height: 49px; border-radius: 8px; }
+.list.tiles .cinfo { width: 100%; }
+.list.tiles .chev { display: none; }
+.list.tiles .row, .list.tiles .lhead, .list.tiles .empty { grid-column: 1 / -1; }
+.lhead { font-size: 11px; font-weight: 650; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 8px 4px 0; flex: none; }
+.cflag-s { width: 14px; height: 10px; vertical-align: -1px; border-radius: 2px; object-fit: cover; box-shadow: 0 0 0 1px var(--stroke); }

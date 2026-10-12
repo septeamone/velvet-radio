@@ -1,0 +1,17 @@
+{
+  "extName": {
+    "message": "Velvet Radio"
+  },
+  "extDescription": {
+    "message": "Velvet Radio: hundreds of radio stations from Russia and 28 countries in high quality (up to 320 kbps). Plays in the background."
+  },
+  "cmd_toggle": {
+    "message": "Pause / resume"
+  },
+  "cmd_next": {
+    "message": "Next station"
+  },
+  "cmd_prev": {
+    "message": "Previous station"
+  }
+}

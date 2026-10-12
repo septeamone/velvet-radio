@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Velvet Radio",
-  "version": "1.0.0",
-  "description": "Velvet Radio: каталог российских радиостанций в высоком качестве (до 320 kbps). Играет в фоне, пока открыт Chrome.",
+  "name": "__MSG_extName__",
+  "version": "1.5.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "ru",
   "minimum_chrome_version": "116",
   "permissions": [
     "offscreen",
@@ -26,7 +27,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "Velvet Radio",
+    "default_title": "__MSG_extName__",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/idle16.png",
@@ -46,19 +47,19 @@
       "suggested_key": {
         "default": "Alt+Shift+P"
       },
-      "description": "Пауза / продолжить"
+      "description": "__MSG_cmd_toggle__"
     },
     "next": {
       "suggested_key": {
         "default": "Alt+Shift+Right"
       },
-      "description": "Следующая станция"
+      "description": "__MSG_cmd_next__"
     },
     "prev": {
       "suggested_key": {
         "default": "Alt+Shift+Left"
       },
-      "description": "Предыдущая станция"
+      "description": "__MSG_cmd_prev__"
     }
   }
 }

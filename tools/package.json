@@ -1,0 +1,10 @@
+{
+  "name": "velvet-radio-tools",
+  "private": true,
+  "type": "module",
+  "description": "Инструменты разработки (в расширение не входят): проверка потоков и скрытые тесты воспроизведения",
+  "devDependencies": {
+    "flag-icons": "^7.5.0",
+    "playwright-core": "^1.55.0"
+  }
+}

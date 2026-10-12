@@ -39,15 +39,20 @@ const report = (patch) => chrome.runtime.sendMessage({ type: 'status', patch }).
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /* ---------- воспроизведение ---------- */
-function dispose() {
-  clearInterval(watchdog); clearInterval(trackTimer);
-  if (!current) return;
-  const { audio, hls } = current;
-  current = null;
+// Полностью отпускает поток: без этого брошенное соединение висит, пока его не соберёт сборщик мусора.
+function release({ audio, hls }) {
   if (hls) hls.destroy();
   audio.pause();
   audio.removeAttribute('src');
   audio.load();
+}
+
+function dispose() {
+  clearInterval(watchdog); clearInterval(trackTimer);
+  if (!current) return;
+  const old = current;
+  current = null;
+  release(old);
 }
 
 // Пробует один адрес. withCors — нужен для визуализатора; без него звук всё равно играет.
@@ -131,13 +136,13 @@ async function start(id, kbps) {
         if (my !== session) return;
         const u = tier.urls[m]; // строка или { url, hls } — внутри одного качества бывают и обычные потоки, и HLS
         const c = await connect(u.url ?? u, !!(u.hls ?? tier.hls), my);
-        if (my !== session) { c && (c.hls?.destroy(), c.audio.pause()); return; }
-        if (c) return onConnected(st, tier, c, my, kbps, t > 0 ? `Резервное качество · ${tier.kbps} kbps` : null);
-        if (m + 1 < tier.urls.length) report({ notice: 'Пробую резервный поток…' });
+        if (my !== session) { if (c) release(c); return; }
+        if (c) return onConnected(st, tier, c, my, kbps, t > 0 ? `backup:${tier.kbps}` : null);
+        if (m + 1 < tier.urls.length) report({ notice: 'mirror' });
       }
-      if (r + 1 < rounds) { report({ notice: 'Переподключение…' }); await sleep(1500); }
+      if (r + 1 < rounds) { report({ notice: 'reconnect' }); await sleep(1500); }
     }
-    if (t + 1 < tiers.length) report({ notice: `Снижаю качество до ${tiers[t + 1].kbps} kbps…`, kbps: tiers[t + 1].kbps });
+    if (t + 1 < tiers.length) report({ notice: `lower:${tiers[t + 1].kbps}`, kbps: tiers[t + 1].kbps });
   }
   if (my === session) report({ status: 'error', notice: null });
 }

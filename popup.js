@@ -1,12 +1,14 @@
-import { STATIONS, maxKbps, shown as visibleQ, sortByOrder, pickKbps } from './stations.js';
+import { STATIONS, COUNTRIES, maxKbps, shown as visibleQ, sortByOrder, pickKbps, stationsOf } from './stations.js';
+import { t, notice as noticeText, detectLang, setLang, getLang, genreName, countryName, countryMatches, stationMatches, stationsWord } from './i18n.js';
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
 const player = $('.player');
 const tabs = $('.tabs');
 
-const ui = { tab: 'all', query: '', favs: new Set(), quality: {}, order: [], last: null, state: { stationId: null, kbps: null, status: 'stopped', volume: 0.8, track: null, notice: null, viz: false } };
-const byId = (id) => STATIONS.find((s) => s.id === id);
+const ui = { tab: 'all', country: null, view: 'list', query: '', favs: new Set(), quality: {}, order: [], last: null, state: { stationId: null, kbps: null, status: 'stopped', volume: 0.8, track: null, notice: null, viz: false } };
+const index = new Map(STATIONS.map((s) => [s.id, s]));
+const byId = (id) => index.get(id);
 const send = (msg) => chrome.runtime.sendMessage(msg);
 const active = () => ui.state.status !== 'stopped';
 const chosen = (s) => pickKbps(s, ui.quality[s.id]);
@@ -67,7 +69,7 @@ function buildSeg(s) {
   const seg = document.createElement('div');
   seg.className = 'seg';
   seg.setAttribute('role', 'group');
-  seg.setAttribute('aria-label', 'Качество');
+  seg.setAttribute('aria-label', t('quality'));
   const qs = visibleQ(s);
   seg.style.setProperty('--n', qs.length);
   seg.classList.toggle('one', qs.length === 1);
@@ -82,43 +84,107 @@ function buildSeg(s) {
   return seg;
 }
 
+const isRu = (s) => s.country === 'RU';
+const flagSrc = (cc) => `flags/${cc.toLowerCase()}.svg`;
+const countriesTop = () => ui.tab === 'countries' && !ui.country;
+const countryList = () => COUNTRIES.filter((c) => stationsOf(c.cc).length);
+
 function visible() {
-  const q = ui.query.trim().toLowerCase();
-  return sortByOrder(ui.order).filter((s) => (ui.tab === 'all' || ui.favs.has(s.id)) && (!q || `${s.name} ${s.genre}`.toLowerCase().includes(q)));
+  const q = ui.query.trim();
+  const pool = ui.tab === 'all' ? STATIONS.filter(isRu)
+    : ui.tab === 'fav' ? STATIONS.filter((s) => ui.favs.has(s.id))
+    : ui.country ? stationsOf(ui.country)
+    : STATIONS.filter((s) => !isRu(s));        // вкладка «Страны» без выбранной страны: станции показываем только как результат поиска
+  return sortByOrder(ui.order, pool).filter((s) => !q || stationMatches(s, q));
+}
+
+function stationRow(s, i) {
+  const li = document.createElement('li');
+  li.className = 'row glass';
+  li.addEventListener('animationend', (e) => { if (e.animationName === 'rise') li.classList.add('ready'); });
+  li.dataset.id = s.id;
+  li.style.setProperty('--i', Math.min(i, 12));
+  li.innerHTML = `
+    <div class="logo"></div>
+    <div class="info">
+      <div class="name"></div>
+      <div class="meta"><span class="genre"></span><span class="trk"></span><span class="eq"><i></i><i></i><i></i></span></div>
+    </div>
+    <button class="heart" aria-label="${t('favAdd')}">${HEART}</button>`;
+  li.querySelector('.logo').style.setProperty('--h', s.hue);
+  setLogo(li.querySelector('.logo'), s);
+  setMq(li.querySelector('.name'), s.name);
+  const genre = li.querySelector('.genre');
+  if (!isRu(s) && !(ui.tab === 'countries' && ui.country)) {            // в избранном и поиске показываем, из какой страны станция
+    const f = Object.assign(new Image(), { className: 'cflag-s', alt: '', src: flagSrc(s.country) });
+    genre.append(f, ` ${countryName(s.country)} · `);
+  }
+  genre.append(genreName(s.genre));
+  li.querySelector('.heart').before(buildSeg(s));
+  return li;
+}
+
+function countryItem(cc, i) {
+  const li = document.createElement('li');
+  li.className = 'crow glass';
+  li.dataset.cc = cc;
+  li.style.setProperty('--i', Math.min(i, 14));
+  li.innerHTML = `<img class="cflag" alt="" src="${flagSrc(cc)}"><div class="cinfo"><div class="cn"></div><div class="cs"></div></div><svg class="chev" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></svg>`;
+  li.querySelector('.cn').textContent = countryName(cc);
+  li.querySelector('.cs').textContent = stationsWord(stationsOf(cc).length);
+  return li;
 }
 
 function renderList() {
-  const items = visible();
-  list.classList.toggle('locked', ui.tab !== 'all' || !!ui.query.trim());
+  const q = ui.query.trim(), top = countriesTop();
+  list.classList.toggle('locked', ui.tab !== 'all' || !!q);
+  list.classList.toggle('tiles', top && ui.view === 'tiles');
   list.replaceChildren();
-  if (!items.length) {
+  let n = 0;
+  if (top) {
+    const cs = countryList().filter((c) => !q || countryMatches(c.cc, q));
+    cs.forEach((c, i) => list.append(countryItem(c.cc, i)));
+    n += cs.length;
+  }
+  if (!top || q) {
+    const items = visible();
+    if (top && items.length) list.append(Object.assign(document.createElement('li'), { className: 'lhead', textContent: t('stationsFound') }));
+    items.forEach((s, i) => list.append(stationRow(s, i)));
+    n += items.length;
+  }
+  if (!n) {
     const li = document.createElement('li');
     li.className = 'empty';
-    li.textContent = ui.tab === 'fav' && !ui.query ? 'Пока пусто — нажмите на сердечко у станции' : 'Ничего не найдено';
+    li.textContent = ui.tab === 'fav' && !ui.query ? t('emptyFav') : t('nothing');
     list.append(li);
-    return;
   }
-  items.forEach((s, i) => {
-    const li = document.createElement('li');
-    li.className = 'row glass';
-    li.addEventListener('animationend', (e) => { if (e.animationName === 'rise') li.classList.add('ready'); });
-    li.dataset.id = s.id;
-    li.style.setProperty('--i', Math.min(i, 12));
-    li.innerHTML = `
-      <div class="logo"></div>
-      <div class="info">
-        <div class="name"></div>
-        <div class="meta"><span class="genre"></span><span class="trk"></span><span class="eq"><i></i><i></i><i></i></span></div>
-      </div>
-      <button class="heart" aria-label="В избранное">${HEART}</button>`;
-    li.querySelector('.logo').style.setProperty('--h', s.hue);
-    setLogo(li.querySelector('.logo'), s);
-    setMq(li.querySelector('.name'), s.name);
-    li.querySelector('.genre').textContent = s.genre;
-    li.querySelector('.heart').before(buildSeg(s));
-    list.append(li);
-  });
   syncRows();
+}
+
+/* ---------- верхняя панель вкладки «Страны»: переключатель вида, «назад», подписи, язык ---------- */
+function syncChrome() {
+  const top = countriesTop(), inside = ui.tab === 'countries' && !!ui.country;
+  $('#vtoggle').hidden = !top;
+  $('#vtoggle').dataset.view = ui.view;
+  $('#cbar').hidden = !inside;
+  if (inside) {
+    $('#cflag').src = flagSrc(ui.country);
+    $('#cname').textContent = countryName(ui.country);
+    $('#ccount').textContent = stationsWord(stationsOf(ui.country).length);
+  }
+  $('#q').placeholder = t(top ? 'searchCountries' : 'search');
+}
+
+function applyStatic() {
+  document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = t(el.dataset.t); });
+  document.querySelectorAll('[data-ta]').forEach((el) => el.setAttribute('aria-label', t(el.dataset.ta)));
+  document.querySelectorAll('[data-tt]').forEach((el) => { el.title = t(el.dataset.tt); });
+  $('#langLabel').textContent = getLang().toUpperCase();
+}
+
+function openCountry(cc) {
+  ui.country = cc; ui.query = ''; $('#q').value = '';
+  syncChrome(); renderList(); list.scrollTop = 0;
 }
 
 function syncRows() {
@@ -142,6 +208,8 @@ function syncRows() {
 }
 
 list.addEventListener('click', (e) => {
+  const crow = e.target.closest('.crow');
+  if (crow) return openCountry(crow.dataset.cc);
   const row = e.target.closest('.row');
   if (!row) return;
   const id = row.dataset.id, s = byId(id);
@@ -268,11 +336,30 @@ list.addEventListener('click', (e) => { if (suppressClick) { e.stopImmediateProp
 /* ---------- вкладки и поиск ---------- */
 tabs.addEventListener('click', (e) => {
   const b = e.target.closest('button');
-  if (!b || b.dataset.tab === ui.tab) return;
-  ui.tab = b.dataset.tab;
+  if (!b) return;
+  if (b.dataset.tab === ui.tab) {                                    // повторный клик по «Странам» возвращает к списку стран
+    if (ui.tab === 'countries' && ui.country) { ui.country = null; syncChrome(); renderList(); }
+    return;
+  }
+  ui.tab = b.dataset.tab; ui.country = null;
   tabs.dataset.tab = ui.tab;
   tabs.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+  syncChrome();
   renderList();
+});
+$('#cback').addEventListener('click', () => { ui.country = null; ui.query = ''; $('#q').value = ''; syncChrome(); renderList(); });
+$('#vtoggle').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-view]');
+  if (!b || b.dataset.view === ui.view) return;
+  ui.view = b.dataset.view;
+  chrome.storage.local.set({ view: ui.view });
+  syncChrome(); renderList();
+});
+$('#lang').addEventListener('click', () => {
+  const next = getLang() === 'ru' ? 'en' : 'ru';
+  setLang(next);
+  chrome.storage.local.set({ lang: next });
+  applyStatic(); syncChrome(); renderList(); renderPlayer();
 });
 $('#q').addEventListener('input', (e) => { ui.query = e.target.value; renderList(); });
 
@@ -290,15 +377,16 @@ function renderPlayer() {
     if (logo.dataset.id !== s.id) { logo.dataset.id = s.id; setLogo(logo, s); }
     setMq($('#nowTitle'), s.name);
     const q = kbps ?? chosen(s);
-    let sub = `${s.genre} · ${q} kbps`, note = false;
-    if (status === 'error') sub = 'Станция недоступна';
-    else if (status === 'loading') { sub = notice ?? 'Подключение…'; note = !!notice; }
-    else if (status === 'playing') { sub = track ?? `Играет · ${q} kbps`; if (notice && !track) { sub = notice; note = true; } }
+    let sub = `${genreName(s.genre)} · ${q} kbps`, note = false;
+    const nt = noticeText(notice);
+    if (status === 'error') sub = t('unavailable');
+    else if (status === 'loading') { sub = nt ?? t('connecting'); note = !!nt; }
+    else if (status === 'playing') { sub = track ?? t('playingAt', { k: q }); if (nt && !track) { sub = nt; note = true; } }
     setMq($('#nowSub'), sub);
     const link = status === 'playing' && !!track;
     const row = $('#subRow');
     row.classList.toggle('link', link);
-    row.title = link ? 'Найти эту песню в Google' : '';
+    row.title = link ? t('googleIt') : '';
     row.tabIndex = link ? 0 : -1;
     row.setAttribute('role', link ? 'link' : 'presentation');
     $('#nowSub').classList.toggle('err', status === 'error');
@@ -395,7 +483,10 @@ function draw() {
 /* ---------- старт ---------- */
 (async () => {
   await initTheme();
-  const saved = await chrome.storage.local.get(['favs', 'last', 'quality', 'order']);
+  const saved = await chrome.storage.local.get(['favs', 'last', 'quality', 'order', 'lang', 'view']);
+  setLang(saved.lang ?? detectLang());
+  ui.view = saved.view === 'tiles' ? 'tiles' : 'list';
+  applyStatic();
   ui.order = saved.order ?? [];
   ui.favs = new Set(saved.favs ?? []);
   ui.last = saved.last ?? null;
@@ -403,6 +494,7 @@ function draw() {
   ui.state = await send({ type: 'get-state' });
   vol.value = ui.state.volume;
   paintVol();
+  syncChrome();
   renderList();
   renderPlayer();
 })();
