@@ -7,6 +7,7 @@
 //   node tools/test-playback.mjs --scenario mirror|tier|all --ids nashe
 //        сломать первый адрес (должно переключиться на зеркало) / всё высшее качество (упасть на ниже) / всё (ошибка)
 //   --concurrency 3   сколько браузеров параллельно (по умолчанию 3)
+//   --fresh           новый браузер на каждую проверку (в долгих сериях обычный режим иногда «залипает» на подключении)
 //   --ext <папка>     какое расширение грузить (по умолчанию корень репозитория)
 //   --out <файл.json> сохранить результаты
 import { chromium } from 'playwright-core';
@@ -16,7 +17,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i >= 0 ? process.argv[i + 1] : d; };
-const mode = arg('--mode', 'quick'), scenario = arg('--scenario', null);
+const mode = arg('--mode', 'quick'), scenario = arg('--scenario', null), fresh = process.argv.includes('--fresh');   // --fresh: новый браузер на каждую проверку (надёжнее в длинных сериях)
 const only = arg('--ids', null)?.split(',');
 const conc = +arg('--concurrency', 3);
 const extSrc = path.resolve(arg('--ext', root));
@@ -110,7 +111,7 @@ async function main() {
     try {
       while (next < jobs.length) {
         const [st, kb] = jobs[next++];
-        if (scenario || !cur) { // сценарию нужна своя копия расширения под станцию
+        if (scenario || fresh || !cur) { // сценарию нужна своя копия расширения под станцию
           if (cur) await cur.ctx.close().catch(() => {});
           const ext = stage(scenario, st.id); cleanup.push(ext);
           cur = await launch(ext); cleanup.push(cur.prof);

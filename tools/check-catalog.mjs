@@ -68,6 +68,13 @@ if (live) {
     if (e.ok === 0) { errors++; console.log(`МЁРТВО ${e.s.id} ${e.q.kbps}k: не отвечает ни один из ${e.n} адресов`); }
     else if (e.ok < e.n) { warns++; console.log(`  часть адресов не отвечает ${e.s.id} ${e.q.kbps}k: ${e.ok}/${e.n}`); }
   }
+  // HLS читает hls.js через запросы, поэтому нужен CORS либо хост в host_permissions манифеста (иначе поток не заиграет)
+  const hosts = (JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8')).host_permissions ?? []).map((h) => new URL(h.replace('*', 'x')).hostname);
+  jobs.forEach((j, i) => {
+    if (!j.hls || !res[i].ok || res[i].cors) return;
+    if (hosts.includes(new URL(j.url).hostname)) return;
+    errors++; console.log(`HLS БЕЗ CORS ${j.s.id} ${j.q.kbps}k: ${j.url.slice(0, 80)} (в Chrome не заиграет)`);
+  });
   console.log(`адресов живых: ${res.length - dead.length}/${res.length}`);
 }
 console.log(`\nошибок: ${errors}, предупреждений: ${warns}`);

@@ -4,9 +4,9 @@
 
 # Velvet Radio
 
-**Радио России и мира для Chrome: 420+ станций из 28 стран, качество до 320 kbps, названия песен, мягкий «жидкий стеклянный» интерфейс на русском и английском.**
+**Радио России и мира для Chrome: 410+ станций из 28 стран, качество до 320 kbps, названия песен, мягкий «жидкий стеклянный» интерфейс на русском и английском.**
 
-*A refined Chrome extension for internet radio: 420+ stations from Russia and 28 countries, high-bitrate streams with automatic failover, live track titles, Russian and English UI, and a soft liquid-glass design.*
+*A refined Chrome extension for internet radio: 410+ stations from Russia and 28 countries, high-bitrate streams with automatic failover, live track titles, Russian and English UI, and a soft liquid-glass design.*
 
 ![License: MIT](https://img.shields.io/badge/license-MIT-ff5e78?style=flat-square)
 ![Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4a8cff?style=flat-square)
@@ -49,12 +49,12 @@
 | Турция | 10 |
 | Украина | 10 |
 | Беларусь | 10 |
-| Казахстан | 11 |
+| Казахстан | 9 |
 | Узбекистан | 5 |
 | Армения | 10 |
 | Азербайджан | 11 |
 | Грузия | 9 |
-| Китай | 10 |
+| Китай | 5 |
 | Япония | 10 |
 | Республика Корея | 10 |
 | Индия | 10 |

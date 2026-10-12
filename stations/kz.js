@@ -3,15 +3,9 @@ import { q, hid, hls } from './lib.js';
 // radiohub.kz — каталог казахстанских станций (BTF Media): отдаёт те же эфиры своими адресами, используем как последнее зеркало.
 const RH = 'https://radiohub.kz/s';
 export default [
-  { id: 'kz-europaplus', name: 'Europa Plus Kazakhstan', country: 'KZ', genre: 'pop', mark: 'E+', hue: 340,
-    alt: 'Европа Плюс Казахстан Алматы Астана',
-    qualities: [hls(112, `${RH}/europaplus/playlist.m3u8`)] },
   { id: 'kz-rusradio', name: 'Русское Радио Азия', country: 'KZ', genre: 'rushits', mark: 'РР', hue: 215,
     alt: 'Russkoe Radio Asia Kazakhstan Русское радио Казахстан',
     qualities: [q(128, `${RH}/rusradio/asia.rusradio128.mp3`)] },
-  { id: 'kz-retrofm', name: 'Ретро FM Казахстан', country: 'KZ', genre: 'retro', mark: 'Р', hue: 32,
-    alt: 'Retro FM Kazakhstan Ретро ФМ Алматы',
-    qualities: [hls(112, `${RH}/retrofm/playlist.m3u8`)] },
   { id: 'kz-zhanafm', name: 'Jana FM (Жана FM)', country: 'KZ', genre: 'hits', mark: 'Ж', hue: 18,
     alt: 'Жана ФМ Zhana FM Jana FM Астана хиты казахстанский поп',
     qualities: [q(192, 'https://live.zhanafm.kz:8443/zhanafm_onair', `${RH}/zhanafm/zhanafm_onair`)] },
