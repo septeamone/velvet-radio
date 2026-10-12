@@ -1,4 +1,4 @@
-import { STATIONS, COUNTRIES, maxKbps, shown as visibleQ, sortByOrder, pickKbps, stationsOf } from './stations.js';
+import { STATIONS, LOGOS, COUNTRIES, maxKbps, shown as visibleQ, sortByOrder, pickKbps, stationsOf } from './stations.js';
 import { getSettings, saveSettings, exportBackup, importBackup, pullSync, pushSync, checkStations, DEFAULTS } from './settings.js';
 import { LIVE, fetchTrack } from './nowplaying.js';
 import { t, notice as noticeText, detectLang, setLang, getLang, genreName, countryName, countryMatches, stationMatches, stationsWord } from './i18n.js';
@@ -61,6 +61,7 @@ const HEART = '<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 
 
 // Логотип станции; если файла нет — буквенная плитка на цветном стекле.
 function setLogo(el, s) {
+  if (!LOGOS.has(s.id)) { el.textContent = s.mark; return; }
   const img = new Image();
   img.alt = '';
   img.src = `logos/${s.id}.png`;

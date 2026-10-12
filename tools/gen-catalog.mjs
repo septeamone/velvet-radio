@@ -14,12 +14,16 @@ files.sort((a, b) => order.indexOf(ccOf(a)) - order.indexOf(ccOf(b)) || a.slice(
 for (const f of files) if (!order.includes(ccOf(f))) console.warn('! файл с неизвестной страной:', f);
 
 const names = files.map((f, i) => `S${i}`);
+const logos = fs.existsSync(path.join(root, 'logos')) ? fs.readdirSync(path.join(root, 'logos')).filter((f) => f.endsWith('.png')).map((f) => f.slice(0, -4)).sort() : [];
 const out = `// ГЕНЕРИРУЕТСЯ: node tools/gen-catalog.mjs — собирает станции из stations/*.js. Руками правь файлы в stations/, не этот.
 ${files.map((f, i) => `import ${names[i]} from './stations/${f}';`).join('\n')}
 export { GENRES } from './stations/genres.js';
 export { COUNTRIES } from './stations/countries.js';
 
 export const STATIONS = [${names.map((n) => '...' + n).join(', ')}];
+
+// У каких станций есть файл логотипа (остальным окно рисует букву, лишних запросов не делает).
+export const LOGOS = new Set(${JSON.stringify(logos)});
 
 export const shown = (s) => { const v = s.qualities.filter((x) => !x.hide); return v.length ? v : s.qualities.slice(-1); };
 export const maxKbps = (s) => shown(s).at(-1).kbps;

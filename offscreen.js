@@ -1,4 +1,4 @@
-import { STATIONS } from './stations.js';
+import { STATIONS, LOGOS } from './stations.js';
 import { fetchTrack } from './nowplaying.js';
 
 const CONNECT_MS = 15000;  // сколько ждём старта потока (включая набор буфера)
@@ -24,7 +24,7 @@ for (const [a, act] of [['play', 'play'], ['pause', 'pause'], ['nexttrack', 'nex
 }
 // MediaSession не принимает chrome-extension://, поэтому логотип из пакета отдаём как blob:
 const art = {};
-const artwork = (id) => (art[id] ??= fetch(chrome.runtime.getURL(`logos/${id}.png`)).then((r) => r.blob()).then(URL.createObjectURL));
+const artwork = (id) => (art[id] ??= !LOGOS.has(id) ? Promise.resolve(null) : fetch(chrome.runtime.getURL(`logos/${id}.png`)).then((r) => r.blob()).then(URL.createObjectURL));
 async function setMedia(st, tier, track) {
   const src = await artwork(st.id).catch(() => null);
   if (!current) return; // станцию успели остановить, пока грузился логотип

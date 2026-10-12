@@ -1,0 +1,36 @@
+import { q, hid, hls } from './lib.js';
+// Камерун: CM. Проверено 2026-10-12, из России.
+// Популярные FM (Radio Balafon, Magic FM, Sweet FM, Radio Reine, Equinoxe, RTM) открытого потока не имеют или он мёртв —
+// ниже то, что реально играет: официальные эфиры CRTV (с сайта crtv.cm) и работающие камерунские веб-радио.
+export default [
+  { id: 'cm-crtv-poste', name: 'CRTV Poste National', country: 'CM', genre: 'mix', mark: 'CR', hue: 140,
+    alt: 'СРТВ Национальный пост государственное радио Камеруна CRTV Radio Poste National Яунде',
+    qualities: [q(192, 'https://10gb1.acangroup.org:8000/postenational')] },
+  { id: 'cm-suellaba', name: 'CRTV Suellaba FM (Buea)', country: 'CM', genre: 'mix', mark: 'SU', hue: 120,
+    alt: 'Суэллаба ФМ Буэа CRTV Юго-Запад Камерун Suellaba',
+    qualities: [q(128, 'https://10gb1.acangroup.org:8000/suellaba-fm')] },
+  { id: 'cm-roots', name: 'Roots Radio', country: 'CM', genre: 'afro', mark: 'RR', hue: 20,
+    alt: 'Рутс радио афробит Камерун африканские хиты Roots Radio Afrobeat',
+    qualities: [q(192, 'https://ecmanager2.pro-fhi.net:1515/stream')] },
+  { id: 'cm-hero', name: 'Hero Radio', country: 'CM', genre: 'afro', mark: 'HR', hue: 5,
+    alt: 'Хиро радио Камерун африканская музыка Hero Radio Cameroon',
+    qualities: [q(192, 'https://a2.asurahosting.com:6790/cameroon.mp3')] },
+  { id: 'cm-brightstar', name: 'Brightstar Studios', country: 'CM', genre: 'afro', mark: 'BS', hue: 48,
+    alt: 'Брайтстар студиос африканская музыка Камерун Brightstar Studios',
+    qualities: [q(128, 'https://s17.ssl-stream.com/proxy/brightstar?mp=/stream')] },
+  { id: 'cm-volum3', name: "Volum'3", country: 'CM', genre: 'hits', mark: 'V3', hue: 290,
+    alt: 'Волюм 3 молодёжные хиты Африка Камерун Volum3 Youth Hits',
+    qualities: [q(128, 'https://listen.radioking.com/radio/651205/stream/714685')] },
+  { id: 'cm-rushfm', name: 'Rush FM Bamenda', country: 'CM', genre: 'hits', mark: 'RF', hue: 340,
+    alt: 'Раш ФМ Баменда Муянка-Бали Камерун Rush FM',
+    qualities: [q(128, 'https://stream.zeno.fm/8ggdk1wbtc9uv')] },
+  { id: 'cm-easykribi', name: 'Easy Radio Kribi', country: 'CM', genre: 'house', mark: 'EK', hue: 190,
+    alt: 'Изи радио Криби афро хаус дип хаус Камерун Easy Radio Kribi',
+    qualities: [q(320, 'https://ecmanager2.pro-fhi.net:1580/;')] },
+  { id: 'cm-lpa', name: 'LPA Webradio', country: 'CM', genre: 'talk', mark: 'LP', hue: 215,
+    alt: 'ЛПА вебрадио разговорное политика молодёжь Камерун LPA Webradio',
+    qualities: [q(128, 'https://listen.radioking.com/radio/820431/stream/889416')] },
+  { id: 'cm-gnradio', name: 'GN Radio Cameroon', country: 'CM', genre: 'religious', mark: 'GN', hue: 255,
+    alt: 'Джи-эн радио Камерун госпел духовная музыка GN Radio Gospel',
+    qualities: [q(192, 'https://a11.asurahosting.com:7360/cameroon.mp3')] },
+];

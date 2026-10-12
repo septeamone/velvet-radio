@@ -120,7 +120,7 @@ export async function radioBrowser(name, cc) {
 
 const fmt = (r) => `${r.ok ? 'OK  ' : 'FAIL'} ${r.codec ?? '-'} ${r.icyBr ? r.icyBr + 'k' : r.variants ? 'hls[' + r.variants.join('/') + ']' : '-'} cors:${r.cors ?? 'нет'} ${r.error ?? ''} ${r.url}`;
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const a = process.argv.slice(2); const json = a.includes('--json');
   const flag = (n) => { const i = a.indexOf(n); return i >= 0 ? a[i + 1] : null; };
   let urls = a.filter((x) => /^https?:/i.test(x));

@@ -1,0 +1,102 @@
+import { q, hid, hls } from './lib.js';
+// Россия, группа 2: шансон (ветки), новости, разговорное, культура, классика, джаз, детское, духовное. Проверено 2026-10-12, из России.
+const VG = 'icecast-vgtrk.cdnvideo.ru';
+// ВГТРК: тот же шаблон, что у Маяка (128 / 192 / без суффикса = 320)
+const vg = (name) => [
+  q(128, `https://${VG}/${name}_mp3_128kbps`, `http://icecast.vgtrk.cdnvideo.ru/${name}_mp3_128kbps`),
+  q(192, `https://${VG}/${name}_mp3_192kbps`, `http://icecast.vgtrk.cdnvideo.ru/${name}_mp3_192kbps`),
+  q(320, `https://${VG}/${name}`, `http://icecast.vgtrk.cdnvideo.ru/${name}`),
+];
+const FT = 'channels.fonotron.ru:8000';
+const CH = 'chanson.hostingradio.ru:8041';
+const JF = 'jfm1.hostingradio.ru:14536';
+export default [
+  { id: 'chansonuncensored', name: 'Шансон без цензуры', country: 'RU', genre: 'chanson', mark: 'Шц', hue: 12,
+    alt: 'Chanson Uncensored Shanson bez cenzury',
+    qualities: [
+      q(128, `https://${CH}/chanson-uncensored128.mp3`, `http://${CH}/chanson-uncensored128.mp3`),
+      q(256, `https://${CH}/chanson-uncensored256.mp3`, `http://${CH}/chanson-uncensored256.mp3`),
+    ] },
+  { id: 'chansonromantic', name: 'Романтический шансон', country: 'RU', genre: 'chanson', mark: 'Рш', hue: 345,
+    alt: 'Radio Chanson Romantic Romanticheskiy shanson',
+    qualities: [
+      q(128, `https://${CH}/chanson-romantic128.mp3`, `http://${CH}/chanson-romantic128.mp3`),
+      q(256, `https://${CH}/chanson-romantic256.mp3`, `http://${CH}/chanson-romantic256.mp3`),
+    ] },
+  { id: 'rossii', name: 'Радио России', country: 'RU', genre: 'talk', mark: 'РР', hue: 210,
+    alt: 'Radio Rossii Radio Russia ВГТРК', qualities: vg('rrzonam') },
+  { id: 'kultura', name: 'Радио Культура', country: 'RU', genre: { ru: 'Культура', en: 'Culture' }, mark: 'К', hue: 275,
+    alt: 'Radio Kultura ВГТРК', qualities: vg('kulturafm') },
+  { id: 'unost', name: 'Радио Юность', country: 'RU', genre: 'mix', mark: 'Ю', hue: 150,
+    alt: 'Radio Yunost Unost ВГТРК', qualities: vg('unost') },
+  { id: 'orfey', name: 'Радио Орфей', country: 'RU', genre: 'classical', mark: 'О', hue: 40,
+    alt: 'Radio Orpheus Orfey классическая музыка',
+    qualities: [
+      q(128, 'https://orfeyfm.hostingradio.ru:8034/orfeyfm128.mp3', 'http://orfeyfm.hostingradio.ru:8034/orfeyfm128.mp3'),
+      q(192, 'https://orfeyfm.hostingradio.ru:8034/orfeyfm192.mp3', 'http://orfeyfm.hostingradio.ru:8034/orfeyfm192.mp3'),
+    ] },
+  { id: 'orfeysymph', name: 'Радио Орфей: Симфоническая музыка', country: 'RU', genre: 'classical', mark: 'Си', hue: 55,
+    alt: 'Orpheus Symphonic Симфоническая музыка',
+    qualities: [q(256, `https://${FT}/Chan_74_256.mp3`)] },
+  { id: 'orfeyrus', name: 'Радио Орфей: Русская классика', country: 'RU', genre: 'classical', mark: 'Рк', hue: 25,
+    alt: 'Orpheus Russian classics Русская классика',
+    qualities: [q(256, `https://${FT}/Chan_73_256.mp3`)] },
+  { id: 'orfeypop', name: 'Радио Орфей: Популярная классика', country: 'RU', genre: 'classical', mark: 'Пк', hue: 65,
+    alt: 'Orpheus Popular classics Популярная классика',
+    qualities: [q(256, `https://${FT}/Chan_72_256.mp3`)] },
+  { id: 'orfeyjazz', name: 'Радио Орфей: Классика джаза', country: 'RU', genre: 'jazz', mark: 'Кд', hue: 35,
+    alt: 'Orpheus Classic Jazz Классика джаза',
+    qualities: [q(192, `https://${FT}/Chan_12_192.mp3`)] },
+  { id: 'hermitage', name: 'Радио Эрмитаж', country: 'RU', genre: 'classical', mark: 'Э', hue: 300,
+    alt: 'Radio Hermitage Ermitazh',
+    qualities: [q(256, 'https://hermitage.hostingradio.ru/hermitage128.mp3', 'http://hermitage.hostingradio.ru/hermitage128.mp3')] },
+  { id: 'jazz', name: 'Радио Джаз', country: 'RU', genre: 'jazz', mark: 'Дж', hue: 230,
+    alt: 'Radio Jazz 89.1 FM',
+    qualities: [
+      q(128, 'https://jazz.streamr.ru/jazz-128.mp3', 'http://jazz.streamr.ru/jazz-128.mp3'),
+    ] },
+  { id: 'jazzinstr', name: 'Радио Джаз: Instrumental Jazz', country: 'RU', genre: 'jazz', mark: 'IJ', hue: 215,
+    alt: 'Radio Jazz Instrumental',
+    qualities: [q(128, `https://${JF}/ijstream.mp3`, `http://${JF}/ijstream.mp3`)] },
+  { id: 'jazzvocals', name: 'Радио Джаз: Jazz Vocals', country: 'RU', genre: 'jazz', mark: 'JV', hue: 250,
+    alt: 'Radio Jazz Vocals вокальный джаз',
+    qualities: [q(128, `https://${JF}/jvstream.mp3`, `http://${JF}/jvstream.mp3`)] },
+  { id: 'jazzlegends', name: 'Радио Джаз: Jazz Legends', country: 'RU', genre: 'jazz', mark: 'JL', hue: 195,
+    alt: 'Radio Jazz Legends легенды джаза',
+    qualities: [q(128, `https://${JF}/jlstream.mp3`, `http://${JF}/jlstream.mp3`)] },
+  { id: 'kommersant', name: 'Коммерсантъ FM', country: 'RU', genre: 'news', mark: 'К', hue: 200,
+    alt: 'Kommersant FM Коммерсант',
+    qualities: [
+      q(128, 'https://kommersant77.hostingradio.ru:8085/kommersant128.mp3', 'http://kommersant77.hostingradio.ru:8085/kommersant128.mp3'),
+    ] },
+  { id: 'govoritmoskva', name: 'Говорит Москва', country: 'RU', genre: 'talk', mark: 'ГМ', hue: 15,
+    alt: 'Govorit Moskva',
+    qualities: [q(96, 'http://media.govoritmoskva.ru:8880/rufm.mp3', 'http://media.govoritmoskva.ru:8880/rufm_m.mp3', 'https://media.govoritmoskva.ru/radio/rufm.mp3')] },
+  { id: 'sputnik', name: 'Радио Sputnik', country: 'RU', genre: 'news', mark: 'Sp', hue: 5,
+    alt: 'Радио Спутник Sputnik',
+    qualities: [
+      q(128, 'https://icecast-rian.cdnvideo.ru/voicerus', 'http://icecast-rian.cdnvideo.ru/voicerus'),
+      q(256, 'https://icecast-rian.cdnvideo.ru/voicerushi', 'http://icecast-rian.cdnvideo.ru/voicerushi'),
+    ] },
+  { id: 'kpradio', name: 'Радио «Комсомольская правда»', country: 'RU', genre: 'news', mark: 'КП', hue: 0,
+    alt: 'Komsomolskaya Pravda KP radio',
+    qualities: [
+      q(128, 'https://kpradio.hostingradio.ru:8000/russia.radiokp128.mp3', 'http://kpradio.hostingradio.ru:8000/russia.radiokp128.mp3'),
+      q(256, 'https://kpradio.hostingradio.ru:8000/russia.radiokp256.mp3', 'http://kpradio.hostingradio.ru:8000/russia.radiokp256.mp3'),
+    ] },
+  { id: 'mir', name: 'Радио Мир', country: 'RU', genre: 'mix', mark: 'М', hue: 185,
+    alt: 'Radio Mir МИР',
+    qualities: [q(320, 'https://icecast-mirtv.cdnvideo.ru/radio_mir_256')] },
+  { id: 'detskoe', name: 'Детское радио', country: 'RU', genre: 'kids', mark: 'Д', hue: 90,
+    alt: 'Deti FM Детское радио Дети FM',
+    qualities: [
+      hid(96, 'http://rmg.hostingradio.ru/gpm-detifm495.aacp'),
+      hls(128, 'https://hls-01-gpm.hostingradio.ru/detifm495/128/playlist.m3u8'),
+    ] },
+  { id: 'radonezh', name: 'Радио Радонеж', country: 'RU', genre: 'religious', mark: 'Рд', hue: 48,
+    alt: 'Radonezh',
+    qualities: [q(128, 'http://icecast.radonezh.cdnvideo.ru:8000/rad128')] },
+  { id: 'kniga', name: 'Радио Книга', country: 'RU', genre: 'talk', mark: 'Кн', hue: 120,
+    alt: 'Radio Kniga аудиокниги',
+    qualities: [q(128, 'https://bookradio.hostingradio.ru:8069/fm', 'http://bookradio.hostingradio.ru:8069/fm')] },
+];

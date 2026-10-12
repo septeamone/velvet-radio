@@ -1,0 +1,211 @@
+import { q, hid, hls, HR } from './lib.js';
+// Россия, группа 3: каналы Radio Record + ветки Ретро FM и DFM. Проверено 2026-10-12, из России.
+// Record: у каналов только AAC 96 (radiorecord.hostingradio.ru) и HLS 112; потоков 128+ у каналов нет (320 только у основного эфира).
+// Поэтому HLS 112 — видимая кнопка (самое высокое), AAC 96 — скрытая страховка.
+export default [
+  { id: 'rec-rus', name: "Record Russian Mix", country: 'RU', genre: 'rushits', mark: 'RM', hue: 8,
+    alt: "Рекорд Раша Микс русский",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'rus96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-rus/playlist.m3u8'),
+    ] },
+  { id: 'rec-trap', name: "Record Trap", country: 'RU', genre: 'hiphop', mark: 'Tr', hue: 275,
+    alt: "Рекорд Трэп",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'trap96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-trap/playlist.m3u8'),
+    ] },
+  { id: 'rec-deep', name: "Record Deep", country: 'RU', genre: 'house', mark: 'De', hue: 210,
+    alt: "Рекорд Дип",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'deep96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-deep/playlist.m3u8'),
+    ] },
+  { id: 'rec-rock', name: "Record Rock", country: 'RU', genre: 'rock', mark: 'Ro', hue: 0,
+    alt: "Рекорд Рок",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'rock96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-rock/playlist.m3u8'),
+    ] },
+  { id: 'rec-mix', name: "Record Megamix", country: 'RU', genre: 'dance', mark: 'Mg', hue: 320,
+    alt: "Рекорд Мегамикс",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'mix96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-mix/playlist.m3u8'),
+    ] },
+  { id: 'rec-sd90', name: "Record Супердискотека 90-х", country: 'RU', genre: 'retro', mark: '90', hue: 45,
+    alt: "Рекорд Супердискотека девяностых",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'sd9096.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-sd90/playlist.m3u8'),
+    ] },
+  { id: 'rec-chil', name: "Record Chill-Out", country: 'RU', genre: 'chill', mark: 'Ch', hue: 190,
+    alt: "Рекорд Чилаут",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'chil96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-chil/playlist.m3u8'),
+    ] },
+  { id: 'rec-phonk', name: "Record Phonk", country: 'RU', genre: 'hiphop', mark: 'Ph', hue: 260,
+    alt: "Рекорд Фонк",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'phonk96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-phonk/playlist.m3u8'),
+    ] },
+  { id: 'retro70', name: "Ретро FM 70-х (Retro FM 70s)", country: 'RU', genre: 'retro', mark: '70', hue: 33,
+    alt: "Ретро ФМ 70е семидесятые",
+    qualities: [
+      q(128, ...HR('retro70.hostingradio.ru:8025','retro70-128.mp3')),
+    ] },
+  { id: 'rec-teo', name: "Record Hardstyle", country: 'RU', genre: 'electronic', mark: 'Hs', hue: 350,
+    alt: "Рекорд Хардстайл",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'teo96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-teo/playlist.m3u8'),
+    ] },
+  { id: 'rec-hype', name: "Record На Хайпе", country: 'RU', genre: 'pop', mark: 'Хп', hue: 300,
+    alt: "Рекорд Хайп",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'hype96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-hype/playlist.m3u8'),
+    ] },
+  { id: 'retro80', name: "Ретро FM 80-х (Retro FM 80s)", country: 'RU', genre: 'retro', mark: '80', hue: 38,
+    alt: "Ретро ФМ 80е восьмидесятые",
+    qualities: [
+      q(128, ...HR('retro80.hostingradio.ru:8025','retro80-128.mp3')),
+    ] },
+  { id: 'rec-club', name: "Record EDM", country: 'RU', genre: 'dance', mark: 'ED', hue: 220,
+    alt: "Рекорд ЭДМ клуб",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'club96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-club/playlist.m3u8'),
+    ] },
+  { id: 'rec-reggae', name: "Record Reggae", country: 'RU', genre: 'reggae', mark: 'Rg', hue: 120,
+    alt: "Рекорд Регги",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'reggae96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-reggae/playlist.m3u8'),
+    ] },
+  { id: 'rec-rv19', name: "Record Руки Вверх!", country: 'RU', genre: 'rushits', mark: 'РВ', hue: 15,
+    alt: "Рекорд Руки Вверх",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'rv96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-rv/playlist.m3u8'),
+    ] },
+  { id: 'rec-lofi', name: "Record Lo-Fi", country: 'RU', genre: 'chill', mark: 'Lo', hue: 170,
+    alt: "Рекорд Лофай",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'lofi96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-lofi/playlist.m3u8'),
+    ] },
+  { id: 'rec-dub', name: "Record Dubstep", country: 'RU', genre: 'electronic', mark: 'Du', hue: 290,
+    alt: "Рекорд Дабстеп",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'dub96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-dub/playlist.m3u8'),
+    ] },
+  { id: 'rec-rapclassics', name: "Record Rap Classics", country: 'RU', genre: 'oldschool', mark: 'RC', hue: 30,
+    alt: "Рекорд Рэп Классика",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'rapclassics96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-rapclassics/playlist.m3u8'),
+    ] },
+  { id: 'rec-eurodance', name: "Record Eurodance", country: 'RU', genre: 'dance', mark: 'Ed', hue: 200,
+    alt: "Рекорд Евродэнс",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'eurodance96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-eurodance/playlist.m3u8'),
+    ] },
+  { id: 'retro90', name: "Ретро FM 90-х (Retro FM 90s)", country: 'RU', genre: 'retro', mark: '90', hue: 28,
+    alt: "Ретро ФМ 90е девяностые",
+    qualities: [
+      q(128, ...HR('retro90.hostingradio.ru:8025','retro90-128.mp3')),
+    ] },
+  { id: 'rec-techouse', name: "Record Tech House", country: 'RU', genre: 'house', mark: 'TH', hue: 235,
+    alt: "Рекорд Тех Хаус",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'techouse96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-techouse/playlist.m3u8'),
+    ] },
+  { id: 'rec-bighits', name: "Record Big Hits", country: 'RU', genre: 'pop', mark: 'BH', hue: 335,
+    alt: "Рекорд Биг Хитс",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'bighits96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-bighits/playlist.m3u8'),
+    ] },
+  { id: 'rec-russiangold', name: "Record Russian Gold", country: 'RU', genre: 'rushits', mark: 'RG', hue: 50,
+    alt: "Рекорд Русское Золото",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'russiangold96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-russiangold/playlist.m3u8'),
+    ] },
+  { id: 'rec-drumhits', name: "Record D'n'B Classics", country: 'RU', genre: 'electronic', mark: 'DB', hue: 155,
+    alt: "Рекорд Драм энд бейс",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'drumhits96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-drumhits/playlist.m3u8'),
+    ] },
+  { id: 'rec-1980', name: "Record 80-х", country: 'RU', genre: 'retro', mark: '80', hue: 25,
+    alt: "Рекорд восьмидесятые",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', '198096.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-1980/playlist.m3u8'),
+    ] },
+  { id: 'dfm-russiandance', name: "DFM Russian Dance", country: 'RU', genre: 'dance', mark: 'RD', hue: 330,
+    alt: "ДФМ Раша Дэнс русский дэнс",
+    qualities: [
+      q(96, 'https://dfm-dfmrusdance.hostingradio.ru/dfmrusdance96.aacp', 'http://dfm-dfmrusdance.hostingradio.ru/dfmrusdance96.aacp'),
+    ] },
+  { id: 'rec-fut', name: "Record Future House", country: 'RU', genre: 'house', mark: 'FH', hue: 245,
+    alt: "Рекорд Фьючер Хаус",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'fut96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-fut/playlist.m3u8'),
+    ] },
+  { id: 'rec-rap', name: "Record Rap Hits", country: 'RU', genre: 'hiphop', mark: 'Rp', hue: 40,
+    alt: "Рекорд Рэп Хиты",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'rap96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-rap/playlist.m3u8'),
+    ] },
+  { id: 'rec-chillhouse', name: "Record Chill House", country: 'RU', genre: 'chill', mark: 'CH', hue: 180,
+    alt: "Рекорд Чилл Хаус",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'chillhouse96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-chillhouse/playlist.m3u8'),
+    ] },
+  { id: 'rec-pump', name: "Record Колбасный Цех (Pump'n'Club)", country: 'RU', genre: 'dance', mark: 'Кц', hue: 70,
+    alt: "Рекорд Памп Клаб",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'pump96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-pump/playlist.m3u8'),
+    ] },
+  { id: 'rec-trancehits', name: "Record Trance Classics", country: 'RU', genre: 'electronic', mark: 'TC', hue: 265,
+    alt: "Рекорд Транс Классика",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'trancehits96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-trancehits/playlist.m3u8'),
+    ] },
+  { id: 'dfm-disco90', name: "DFM Дискач 90-х (DFM Disco 90s)", country: 'RU', genre: 'retro', mark: 'Д9', hue: 310,
+    alt: "ДФМ Дискач девяностых дискотека 90",
+    qualities: [
+      q(96, 'https://dfm-disc90.hostingradio.ru/disc9096.aacp', 'http://dfm-disc90.hostingradio.ru/disc9096.aacp'),
+    ] },
+  { id: 'rec-record00', name: "Record 00-х", country: 'RU', genre: 'retro', mark: '00', hue: 90,
+    alt: "Рекорд нулевые",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', '200096.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-2000/playlist.m3u8'),
+    ] },
+  { id: 'rec-techno', name: "Record Techno", country: 'RU', genre: 'electronic', mark: 'Te', hue: 215,
+    alt: "Рекорд Техно",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'techno96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-techno/playlist.m3u8'),
+    ] },
+  { id: 'rec-gold', name: "Record Gold", country: 'RU', genre: 'dance', mark: 'Gd', hue: 55,
+    alt: "Рекорд Голд",
+    qualities: [
+      hid(96, ...HR('radiorecord.hostingradio.ru', 'gold96.aacp')),
+      hls(112, 'https://hls-01-radiorecord.hostingradio.ru/record-gold/playlist.m3u8'),
+    ] },
+];

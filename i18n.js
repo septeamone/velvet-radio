@@ -80,7 +80,8 @@ const dn = { ru: new Intl.DisplayNames(['ru'], { type: 'region' }), en: new Intl
 function build() {
   names = new Map();
   for (const c of COUNTRIES) {
-    names.set(c.cc, { ru: dn.ru.of(c.cc), en: dn.en.of(c.cc), hay: norm([dn.ru.of(c.cc), dn.en.of(c.cc), c.cc, ...c.aliases].join(' ')) });
+    const shortRu = { US: 'США', AE: 'ОАЭ' }[c.cc];
+    names.set(c.cc, { ru: shortRu ?? dn.ru.of(c.cc), en: dn.en.of(c.cc), hay: norm([dn.ru.of(c.cc), dn.en.of(c.cc), c.cc, ...c.aliases].join(' ')) });
   }
 }
 export const countryName = (cc) => { if (!names) build(); return names.get(cc)?.[lang] ?? cc; };

@@ -1,0 +1,36 @@
+import { q, hid, hls } from './lib.js';
+// Индия: IN. Проверено 2026-10-12, из России.
+// Официальные эфиры All India Radio (Vividh Bharati и региональные) идут по HLS ~95 kbps, выше у них нет.
+// Big Melodies и Luv 90s — каналы сети Fun Asia (320 kbps AAC).
+export default [
+  { id: 'in-mirchi-hindi', name: 'Radio Mirchi Hindi', country: 'IN', genre: 'bollywood', mark: 'RM', hue: 8,
+    alt: 'Радио Мирчи хинди болливуд Индия Mirchi Hindi Hits',
+    qualities: [q(128, 'https://eu8.fastcast4u.com/proxy/clyedupq/stream', 'https://eu8.fastcast4u.com/proxy/clyedupq?mp=/1')] },
+  { id: 'in-mirchi-love', name: 'Mirchi Love', country: 'IN', genre: 'bollywood', mark: 'ML', hue: 340,
+    alt: 'Мирчи Лав романтика болливуд песни о любви Mirchi Love Hindi',
+    qualities: [q(128, 'https://drive.uber.radio/uber/bollywoodlove/icecast.audio')] },
+  { id: 'in-mirchi-top20', name: 'Mirchi Top 20', country: 'IN', genre: 'hits', mark: 'T2', hue: 28,
+    alt: 'Мирчи Топ 20 хиты Болливуда новые песни Mirchi Top 20 Bollywood Now',
+    qualities: [q(128, 'https://drive.uber.radio/uber/bollywoodnow/icecast.audio')] },
+  { id: 'in-vividh', name: 'Vividh Bharati (विविध भारती, All India Radio)', country: 'IN', genre: 'bollywood', mark: 'VB', hue: 45,
+    alt: 'Вивидх Бхарати Вивид Бхарти Всеиндийское радио All India Radio AIR болливуд',
+    qualities: [hls(96, 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/playlist.m3u8')] },
+  { id: 'in-bigmelodies', name: 'Big Melodies (Fun Asia)', country: 'IN', genre: 'bollywood', mark: 'BM', hue: 300,
+    alt: 'Биг Мелодис мелодии болливуд хинди BIG FM Melodies',
+    qualities: [q(320, 'https://funasia.streamguys1.com/live9')] },
+  { id: 'in-luv90s', name: 'Luv 90s (Fun Asia)', country: 'IN', genre: 'retro', mark: 'L9', hue: 330,
+    alt: 'Лав 90-е хиты Болливуда девяностые Luv 90s Bollywood',
+    qualities: [q(320, 'https://funasia.streamguys1.com/live7')] },
+  { id: 'in-gaane-purane', name: 'Bollywood Gaane Purane', country: 'IN', genre: 'oldies', mark: 'GP', hue: 20,
+    alt: 'Болливуд Гане Пурана старые песни хинди ретро Bollywood Old Songs',
+    qualities: [q(128, 'https://stream.zeno.fm/6n6ewddtad0uv')] },
+  { id: 'in-air-malayalam', name: 'AIR Malayalam (आकाशवाणी मलयालम)', country: 'IN', genre: 'regional', mark: 'AM', hue: 160,
+    alt: 'Всеиндийское радио малаялам Керала AIR Malayalam Akashvani',
+    qualities: [hls(96, 'http://air.pc.cdn.bitgravity.com/air/live/pbaudio230/playlist.m3u8')] },
+  { id: 'in-air-punjabi', name: 'AIR Punjabi (आकाशवाणी पंजाबी)', country: 'IN', genre: 'regional', mark: 'AP', hue: 85,
+    alt: 'Всеиндийское радио панджаби пенджаби AIR Punjabi Akashvani',
+    qualities: [hls(96, 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio138/chunklist.m3u8')] },
+  { id: 'in-replaynews-hi', name: 'Replay News हिन्दी', country: 'IN', genre: 'news', mark: 'RN', hue: 205,
+    alt: 'Реплей Ньюс новости хинди каждые 5 минут Replay News Hindi',
+    qualities: [q(128, 'https://replaynewshi.ice.infomaniak.ch/replaynewshi-128.mp3')] },
+];
