@@ -12,11 +12,30 @@ UA = {'User-Agent': 'VelvetRadio-tools/1.5 (logo search; https://github.com/sept
 S = 128
 
 
+def safe_url(url):
+    """Только http(s) на публичные адреса: адреса приходят из чужих страниц и каталогов, им нельзя доверять (file://, localhost, локальная сеть, «-опция»)."""
+    import ipaddress
+    from urllib.parse import urlparse
+    if not isinstance(url, str) or url.startswith('-'): return False
+    u = urlparse(url)
+    if u.scheme not in ('http', 'https') or not u.hostname: return False
+    host = u.hostname.lower()
+    if host == 'localhost' or host.endswith(('.local', '.internal')): return False
+    try:
+        ip = ipaddress.ip_address(host)
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast: return False
+    except ValueError:
+        pass                                      # имя хоста, а не IP
+    return True
+
+
 def get(url, binary=False, timeout=10):
     """Загрузка через curl с жёстким общим лимитом времени и размера (медленные сайты иначе подвешивают чтение)."""
+    if not safe_url(url): return None
     for attempt in range(2):
         try:
-            r = subprocess.run(['curl', '-s', '-L', '-m', str(timeout), '--max-filesize', '3000000', '-A', UA['User-Agent'], '-w', '%{http_code}', url], capture_output=True)
+            r = subprocess.run(['curl', '-s', '-L', '--proto', '=http,https', '--proto-redir', '=http,https', '--max-redirs', '5', '-m', str(timeout),
+                                '--max-filesize', '3000000', '-A', UA['User-Agent'], '-w', '%{http_code}', '--', url], capture_output=True)
         except Exception:
             return None
         body, code = r.stdout[:-3], r.stdout[-3:].decode('ascii', 'ignore')
