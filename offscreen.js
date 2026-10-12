@@ -9,6 +9,7 @@ const BANDS = 32;
 let session = 0;           // номер текущего запуска: старые попытки сами отменяются
 let current = null;        // { audio, hls, analyser, data }
 let volume = 0.8;
+let prebuffer = PREBUFFER_S, fadeOn = true;   // из настроек окна; по умолчанию как раньше
 let vizPort = null;
 let ctx = null;
 let trackTimer = 0, watchdog = 0, vizTimer = 0;
@@ -60,14 +61,14 @@ function tryUrl(url, isHls, withCors, my) {
   return new Promise((resolve) => {
     const audio = new Audio();
     if (withCors) audio.crossOrigin = 'anonymous';
-    audio.volume = volume;
+    audio.volume = fadeOn ? 0 : volume;       // при плавном старте звук нарастает из тишины (rampIn)
     let hls = null, done = false;
     const finish = (ok) => {
       if (done) return;
       done = true; clearTimeout(timer);
       audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('error', onError);
-      if (ok && my === session) return resolve({ audio, hls, withCors });
+      if (ok && my === session) return resolve({ audio, hls, withCors, url, isHls });
       if (hls) hls.destroy();
       audio.pause(); audio.removeAttribute('src'); audio.load();
       resolve(null);
@@ -91,7 +92,7 @@ function tryUrl(url, isHls, withCors, my) {
       const wait = setInterval(() => {
         if (done) return clearInterval(wait);
         const b = audio.buffered, ahead = b.length ? b.end(b.length - 1) - audio.currentTime : 0;
-        if (ahead >= PREBUFFER_S || (ahead > 0.5 && Date.now() - t0 > 9000)) { clearInterval(wait); audio.play().catch(() => {}); }
+        if (ahead >= prebuffer || (ahead > 0.5 && Date.now() - t0 > 9000)) { clearInterval(wait); audio.play().catch(() => {}); }
       }, 150);
     }
   });
@@ -119,8 +120,34 @@ async function attachAnalyser(c) {
   } catch { return false; }
 }
 
+// Плавные переходы: старый звук затухает, новый нарастает (меняется только громкость элемента, не движок).
+const FADE_OUT_MS = 220, FADE_IN_MS = 450;
+async function fadeOutCurrent() {
+  const c = current;
+  if (!c || !fadeOn) return;
+  const v0 = c.audio.volume, t0 = performance.now();
+  while (performance.now() - t0 < FADE_OUT_MS) {
+    if (current !== c) return;
+    c.audio.volume = v0 * (1 - (performance.now() - t0) / FADE_OUT_MS);
+    await sleep(16);
+  }
+}
+async function rampIn(c) {
+  if (!fadeOn) return;
+  const t0 = performance.now();
+  while (performance.now() - t0 < FADE_IN_MS) {
+    if (current !== c) return;
+    c.audio.volume = volume * ((performance.now() - t0) / FADE_IN_MS);
+    await sleep(16);
+  }
+  if (current === c) c.audio.volume = volume;
+}
+const codecOf = (c) => (c.isHls ? 'HLS' : /aac/i.test(c.url) ? 'AAC' : /\.(ogg|opus)/i.test(c.url) ? 'OGG' : 'MP3');
+
 async function start(id, kbps) {
   const my = ++session;
+  await fadeOutCurrent();
+  if (my !== session) return;
   dispose();
   const st = byId(id);
   if (!st) return;
@@ -151,9 +178,10 @@ async function onConnected(st, tier, c, my, wanted, notice) {
   current = c;
   const viz = await attachAnalyser(c);
   if (my !== session) return;
+  rampIn(c);
   let stalls = 0;
   c.audio.addEventListener('waiting', () => report({ stalls: ++stalls })); // счётчик заиканий (для диагностики)
-  report({ status: 'playing', kbps: tier.kbps, notice, viz, stalls });
+  report({ status: 'playing', kbps: tier.kbps, notice, viz, stalls, codec: codecOf(c) });
   setMedia(st, tier, null);
   pollTrack(st, tier);
   trackTimer = setInterval(() => pollTrack(st, tier), 15000);
@@ -202,7 +230,11 @@ chrome.runtime.onConnect.addListener((port) => {
 /* ---------- команды от background ---------- */
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.target !== 'offscreen') return;
-  if (msg.cmd === 'play') { volume = msg.volume; start(msg.id, msg.kbps); }
-  else if (msg.cmd === 'stop') { session++; dispose(); ms.playbackState = 'none'; ms.metadata = null; }
+  if (msg.cmd === 'play') { volume = msg.volume; prebuffer = msg.prebuffer ?? PREBUFFER_S; fadeOn = msg.fade !== false; start(msg.id, msg.kbps); }
+  else if (msg.cmd === 'stop') {
+    session++; ms.playbackState = 'none'; ms.metadata = null;
+    const c = current;
+    fadeOutCurrent().then(() => { if (current === c) dispose(); });
+  }
   else if (msg.cmd === 'volume') { volume = msg.volume; if (current) current.audio.volume = volume; }
 });

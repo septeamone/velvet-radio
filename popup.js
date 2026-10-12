@@ -1,4 +1,6 @@
 import { STATIONS, COUNTRIES, maxKbps, shown as visibleQ, sortByOrder, pickKbps, stationsOf } from './stations.js';
+import { getSettings, saveSettings, exportBackup, importBackup, pullSync, pushSync, checkStations, DEFAULTS } from './settings.js';
+import { LIVE, fetchTrack } from './nowplaying.js';
 import { t, notice as noticeText, detectLang, setLang, getLang, genreName, countryName, countryMatches, stationMatches, stationsWord } from './i18n.js';
 
 const $ = (s) => document.querySelector(s);
@@ -6,12 +8,13 @@ const list = $('#list');
 const player = $('.player');
 const tabs = $('.tabs');
 
-const ui = { tab: 'all', country: null, view: 'list', query: '', favs: new Set(), quality: {}, order: [], last: null, state: { stationId: null, kbps: null, status: 'stopped', volume: 0.8, track: null, notice: null, viz: false } };
+const ui = { tab: 'all', country: null, genre: null, settings: { ...DEFAULTS }, health: { bad: [] }, view: 'list', query: '', favs: new Set(), quality: {}, order: [], last: null, state: { stationId: null, kbps: null, status: 'stopped', volume: 0.8, track: null, notice: null, viz: false } };
 const index = new Map(STATIONS.map((s) => [s.id, s]));
 const byId = (id) => index.get(id);
 const send = (msg) => chrome.runtime.sendMessage(msg);
+const persist = (o) => chrome.storage.local.set(o).then(() => { if (ui.settings.sync) pushSync().catch(() => {}); });
 const active = () => ui.state.status !== 'stopped';
-const chosen = (s) => pickKbps(s, ui.quality[s.id]);
+const chosen = (s) => pickKbps(s, ui.quality[s.id], ui.settings.saver);
 
 /* ---------- бегущая строка: длинный текст плавно ездит туда-обратно, короткий стоит ---------- */
 const PX_PER_S = 34;
@@ -50,7 +53,7 @@ async function initTheme() {
 $('#theme').addEventListener('click', () => {
   const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   applyTheme(next);
-  chrome.storage.local.set({ theme: next });
+  persist({ theme: next });
 });
 
 /* ---------- список ---------- */
@@ -89,13 +92,16 @@ const flagSrc = (cc) => `flags/${cc.toLowerCase()}.svg`;
 const countriesTop = () => ui.tab === 'countries' && !ui.country;
 const countryList = () => COUNTRIES.filter((c) => stationsOf(c.cc).length);
 
-function visible() {
-  const q = ui.query.trim();
-  const pool = ui.tab === 'all' ? STATIONS.filter(isRu)
+const genreKey = (g) => (typeof g === 'string' ? g : g.ru);
+function basePool() {
+  return ui.tab === 'all' ? STATIONS.filter(isRu)
     : ui.tab === 'fav' ? STATIONS.filter((s) => ui.favs.has(s.id))
     : ui.country ? stationsOf(ui.country)
     : STATIONS.filter((s) => !isRu(s));        // вкладка «Страны» без выбранной страны: станции показываем только как результат поиска
-  return sortByOrder(ui.order, pool).filter((s) => !q || stationMatches(s, q));
+}
+function visible() {
+  const q = ui.query.trim();
+  return sortByOrder(ui.order, basePool()).filter((s) => (!q || stationMatches(s, q)) && (!ui.genre || genreKey(s.genre) === ui.genre));
 }
 
 function stationRow(s, i) {
@@ -121,6 +127,7 @@ function stationRow(s, i) {
   }
   genre.append(genreName(s.genre));
   li.querySelector('.heart').before(buildSeg(s));
+  if (ui.health.bad.includes(s.id)) { li.classList.add('bad'); li.title = t('badStation'); }
   return li;
 }
 
@@ -158,7 +165,10 @@ function renderList() {
     li.textContent = ui.tab === 'fav' && !ui.query ? t('emptyFav') : t('nothing');
     list.append(li);
   }
+  kbd = -1;
   syncRows();
+  for (const id of liveCache.keys()) applyLive(id);
+  pollLive();
 }
 
 /* ---------- верхняя панель вкладки «Страны»: переключатель вида, «назад», подписи, язык ---------- */
@@ -167,6 +177,9 @@ function syncChrome() {
   $('#vtoggle').hidden = !top;
   $('#vtoggle').dataset.view = ui.view;
   $('#cbar').hidden = !inside;
+  $('#gbtn').hidden = top;
+  $('#gbtn').classList.toggle('on', !!ui.genre);
+  $('#gpanel').hidden = true;
   if (inside) {
     $('#cflag').src = flagSrc(ui.country);
     $('#cname').textContent = countryName(ui.country);
@@ -183,7 +196,7 @@ function applyStatic() {
 }
 
 function openCountry(cc) {
-  ui.country = cc; ui.query = ''; $('#q').value = '';
+  ui.country = cc; ui.genre = null; ui.query = ''; $('#q').value = '';
   syncChrome(); renderList(); list.scrollTop = 0;
 }
 
@@ -195,6 +208,7 @@ function syncRows() {
     row.classList.toggle('cur', cur);
     row.classList.toggle('playing', cur && status === 'playing');
     row.classList.toggle('loading', cur && status === 'loading');
+    row.classList.toggle('bad', ui.health.bad.includes(id));
     row.classList.toggle('has-track', cur && !!track);
     if (cur && track) setMq(row.querySelector('.trk'), track);
     row.querySelector('.heart').classList.toggle('on', ui.favs.has(id));
@@ -222,14 +236,14 @@ list.addEventListener('click', (e) => {
 
 function setQuality(s, kbps) {
   ui.quality[s.id] = kbps;
-  chrome.storage.local.set({ quality: ui.quality });
+  persist({ quality: ui.quality });
   if (ui.state.stationId === s.id && active()) playStation(s.id); // переключаем «на лету»
   else syncRows();
 }
 
 function toggleFav(id, row) {
   ui.favs.has(id) ? ui.favs.delete(id) : ui.favs.add(id);
-  chrome.storage.local.set({ favs: [...ui.favs] });
+  persist({ favs: [...ui.favs] });
   if (ui.tab === 'fav' && !ui.favs.has(id)) {
     row.classList.add('leaving');
     setTimeout(renderList, 280);
@@ -325,7 +339,7 @@ function dragEnd(cancel) {
     list.classList.remove('sorting');
     if (!cancel && to !== d.from) {
       ui.order = [...ids, ...STATIONS.map((s) => s.id).filter((id) => !ids.includes(id))];
-      chrome.storage.local.set({ order: ui.order });
+      persist({ order: ui.order });
     }
   }, 270);
 }
@@ -341,24 +355,24 @@ tabs.addEventListener('click', (e) => {
     if (ui.tab === 'countries' && ui.country) { ui.country = null; syncChrome(); renderList(); }
     return;
   }
-  ui.tab = b.dataset.tab; ui.country = null;
+  ui.tab = b.dataset.tab; ui.country = null; ui.genre = null;
   tabs.dataset.tab = ui.tab;
   tabs.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
   syncChrome();
   renderList();
 });
-$('#cback').addEventListener('click', () => { ui.country = null; ui.query = ''; $('#q').value = ''; syncChrome(); renderList(); });
+$('#cback').addEventListener('click', () => { ui.country = null; ui.genre = null; ui.query = ''; $('#q').value = ''; syncChrome(); renderList(); });
 $('#vtoggle').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-view]');
   if (!b || b.dataset.view === ui.view) return;
   ui.view = b.dataset.view;
-  chrome.storage.local.set({ view: ui.view });
+  persist({ view: ui.view });
   syncChrome(); renderList();
 });
 $('#lang').addEventListener('click', () => {
   const next = getLang() === 'ru' ? 'en' : 'ru';
   setLang(next);
-  chrome.storage.local.set({ lang: next });
+  persist({ lang: next });
   applyStatic(); syncChrome(); renderList(); renderPlayer();
 });
 $('#q').addEventListener('input', (e) => { ui.query = e.target.value; renderList(); });
@@ -392,6 +406,7 @@ function renderPlayer() {
     $('#nowSub').classList.toggle('err', status === 'error');
     $('#nowSub').classList.toggle('note', note);
   }
+  renderDot();
   syncRows();
   syncViz();
 }
@@ -480,10 +495,177 @@ function draw() {
   raf = (ui.state.viz && ui.state.status === 'playing') || energy > 0.02 ? requestAnimationFrame(draw) : 0;
 }
 
+/* ---------- индикатор потока: зелёный — играет, жёлтый — подключение/резерв, красный — недоступна; в подсказке кодек ---------- */
+function renderDot() {
+  const { status, notice, kbps, codec } = ui.state;
+  const st = status === 'playing' ? (notice ? 'warn' : 'ok') : status === 'loading' ? 'warn' : status === 'error' ? 'bad' : 'off';
+  $('#dot').dataset.st = st;
+  $('.logo-wrap').title = st === 'off' ? '' : [t({ ok: 'dotOk', warn: 'dotWarn', bad: 'dotBad' }[st]), codec, kbps && `${kbps} kbps`, noticeText(notice)].filter(Boolean).join(' · ');
+}
+
+$('#report').addEventListener('click', () => {
+  const s = byId(ui.state.stationId ?? ui.last);
+  if (!s) return;
+  const title = `${s.name} (${s.id}, ${ui.state.kbps ?? '?'} kbps): ${getLang() === 'ru' ? 'не играет' : 'not playing'}`;
+  chrome.tabs.create({ url: `https://github.com/septeamone/velvet-radio/issues/new?template=station-not-working.md&title=${encodeURIComponent(title)}` });
+});
+
+/* ---------- фильтр по жанрам ---------- */
+function renderGenres() {
+  const counts = new Map(), label = new Map();
+  for (const s of basePool()) { const k = genreKey(s.genre); counts.set(k, (counts.get(k) ?? 0) + 1); label.set(k, s.genre); }
+  const panel = $('#gpanel');
+  panel.replaceChildren();
+  const chip = (key, text, n) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + ((ui.genre ?? '') === key ? ' on' : '');
+    b.dataset.g = key;
+    b.textContent = n ? `${text} ${n}` : text;
+    panel.append(b);
+  };
+  chip('', t('genreAll'), 0);
+  [...counts.entries()].sort((a, b) => b[1] - a[1] || genreName(label.get(a[0])).localeCompare(genreName(label.get(b[0])))).forEach(([k, n]) => chip(k, genreName(label.get(k)), n));
+}
+$('#gbtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const panel = $('#gpanel');
+  if (panel.hidden) renderGenres();
+  panel.hidden = !panel.hidden;
+});
+$('#gpanel').addEventListener('click', (e) => {
+  const b = e.target.closest('.chip');
+  if (!b) return;
+  ui.genre = b.dataset.g || null;
+  $('#gpanel').hidden = true;
+  $('#gbtn').classList.toggle('on', !!ui.genre);
+  renderList();
+});
+document.addEventListener('click', (e) => { if (!e.target.closest('#gpanel, #gbtn')) $('#gpanel').hidden = true; });
+
+/* ---------- «что играет везде»: названия песен прямо в списке, пока окно открыто ---------- */
+const liveCache = new Map();
+async function pollLive() {
+  const ids = [...list.querySelectorAll('.row')].map((r) => r.dataset.id).filter((id) => LIVE.has(id));
+  const stale = ids.filter((id) => Date.now() - (liveCache.get(id)?.t ?? 0) > 40000);
+  let i = 0;
+  await Promise.all(Array.from({ length: 4 }, async () => {
+    while (i < stale.length) {
+      const id = stale[i++];
+      const title = await fetchTrack(id).catch(() => null);
+      liveCache.set(id, { t: Date.now(), title: title ?? liveCache.get(id)?.title ?? null });
+      applyLive(id);
+    }
+  }));
+}
+function applyLive(id) {
+  const row = list.querySelector(`.row[data-id="${id}"]`), title = liveCache.get(id)?.title;
+  if (!row || !title || row.classList.contains('cur')) return;      // у играющей станции название ведёт плеер
+  setMq(row.querySelector('.trk'), title);
+  row.classList.add('has-live');
+}
+setInterval(pollLive, 45000);
+
+/* ---------- клавиатура: / — поиск, стрелки и Enter — выбор станции, Esc — назад ---------- */
+let kbd = -1;
+const navItems = () => [...list.querySelectorAll('.row, .crow')];
+function setKbd(i) {
+  const its = navItems();
+  its.forEach((x) => x.classList.remove('kbd'));
+  if (!its.length) return;
+  kbd = (i + its.length) % its.length;
+  its[kbd].classList.add('kbd');
+  its[kbd].scrollIntoView({ block: 'nearest' });
+}
+document.addEventListener('keydown', (e) => {
+  if (!$('#settings').hidden) { if (e.key === 'Escape') openSettings(false); return; }
+  if (e.target.matches?.('input[type=range], button')  && e.key !== 'Escape' && e.key !== '/') return;
+  const typing = e.target.matches?.('input[type=search]');
+  if (e.key === '/' && !typing) { e.preventDefault(); $('#q').focus(); return; }
+  if (e.key === 'Escape') {
+    if (typing && $('#q').value) { $('#q').value = ''; ui.query = ''; renderList(); }
+    else if (ui.country) $('#cback').click();
+    else $('#q').blur();
+    return;
+  }
+  if (e.key === 'ArrowDown') { e.preventDefault(); setKbd(kbd < 0 ? 0 : kbd + 1); return; }
+  if (e.key === 'ArrowUp') { e.preventDefault(); setKbd(kbd < 0 ? -1 : kbd - 1); return; }
+  if (e.key === 'Enter') { const its = navItems(); (its[kbd] ?? (typing ? its[0] : null))?.click(); }
+});
+
+/* ---------- настройки ---------- */
+const settingsEl = $('#settings');
+function openSettings(on) {
+  settingsEl.hidden = !on;
+  $('#gear').classList.toggle('on', on);
+  if (on) syncSettingsUI();
+}
+$('#gear').addEventListener('click', () => openSettings(settingsEl.hidden));
+$('#setback').addEventListener('click', () => openSettings(false));
+
+function renderHealth() {
+  const h = ui.health, ul = $('#badlist');
+  ul.replaceChildren();
+  if (!h.t) { $('#checkInfo').textContent = t('sNeverChecked'); return; }
+  $('#checkInfo').textContent = h.bad.length ? t('sChecked', { n: h.n, p: h.bad.length }) : t('sAllOk', { n: h.n });
+  for (const id of h.bad) ul.append(Object.assign(document.createElement('li'), { textContent: byId(id)?.name ?? id }));
+}
+function syncSettingsUI() {
+  settingsEl.querySelectorAll('input[data-set]').forEach((el) => { el.checked = !!ui.settings[el.dataset.set]; });
+  const seg = $('#bufseg'), vals = [4, 8, 12];
+  seg.style.setProperty('--i', Math.max(0, vals.indexOf(ui.settings.buffer)));
+  seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', +b.dataset.k === ui.settings.buffer));
+  $('#ver').textContent = `Velvet Radio ${chrome.runtime.getManifest().version}`;
+  renderHealth();
+}
+settingsEl.addEventListener('change', async (e) => {
+  const k = e.target.dataset?.set;
+  if (!k) return;
+  if (k === 'sync' && e.target.checked) {        // при включении сначала забираем более свежие данные из облака, а не затираем их
+    const changed = await pullSync().catch(() => false);
+    if (changed) { await chrome.storage.local.set({ settings: { ...ui.settings, sync: true } }); location.reload(); return; }
+  }
+  ui.settings = await saveSettings({ [k]: e.target.checked });
+  if (k === 'saver') { renderList(); renderPlayer(); }
+});
+$('#bufseg').addEventListener('click', async (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  ui.settings = await saveSettings({ buffer: +b.dataset.k });
+  syncSettingsUI();
+});
+$('#bexp').addEventListener('click', async () => {
+  const blob = new Blob([JSON.stringify(await exportBackup(), null, 1)], { type: 'application/json' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `velvet-radio-backup-${new Date().toISOString().slice(0, 10)}.json` });
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+$('#bimp').addEventListener('click', () => $('#bfile').click());
+$('#bfile').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  try { await importBackup(JSON.parse(await f.text())); $('#checkInfo').textContent = t('sImported'); setTimeout(() => location.reload(), 600); }
+  catch { $('#checkInfo').textContent = t('sBadFile'); }
+});
+async function runCheck() {
+  const ids = new Set([...ui.favs, ui.last].filter(Boolean));
+  const list = [...ids].map(byId).filter(Boolean).slice(0, 40);
+  if (!list.length) return;
+  $('#bcheck').disabled = true;
+  ui.health = await checkStations(list, ui.quality, (a, b) => { $('#checkInfo').textContent = t('sChecking', { a, b }); });
+  $('#bcheck').disabled = false;
+  renderHealth(); renderList();
+}
+$('#bcheck').addEventListener('click', runCheck);
+$('#bkeys').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
+
 /* ---------- старт ---------- */
 (async () => {
+  ui.settings = await getSettings();
+  if (ui.settings.sync) await pullSync().catch(() => {});
   await initTheme();
-  const saved = await chrome.storage.local.get(['favs', 'last', 'quality', 'order', 'lang', 'view']);
+  const saved = await chrome.storage.local.get(['favs', 'last', 'quality', 'order', 'lang', 'view', 'health']);
+  ui.health = saved.health ?? { bad: [] };
   setLang(saved.lang ?? detectLang());
   ui.view = saved.view === 'tiles' ? 'tiles' : 'list';
   applyStatic();
@@ -497,4 +679,5 @@ function draw() {
   syncChrome();
   renderList();
   renderPlayer();
+  if (ui.favs.size && (!ui.health.t || Date.now() - ui.health.t > 864e5)) runCheck();   // раз в сутки, тихо, пока окно открыто
 })();

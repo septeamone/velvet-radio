@@ -56,6 +56,12 @@ try {
   await page.click('#lang'); await shot('09-countries-en-tiles');
   await page.click('#vtoggle [data-view=list]');
   await page.click('.tabs [data-tab=all]'); await shot('10-russia-en');
+  await page.click('#gbtn'); await shot('11-genre-panel');
+  await page.click('#gpanel .chip:nth-child(3)'); await shot('12-genre-filtered'); await page.click('#gbtn'); await page.click('#gpanel .chip:first-child');
+  await page.click('#gear'); await shot('13-settings');
+  await page.click('#setback');
+  await page.keyboard.press('/'); await page.keyboard.type('retro'); await page.keyboard.press('ArrowDown'); await shot('14-keyboard-search');
+  console.log('после поиска «retro» строк:', await rows(), '; выбрана с клавиатуры:', await page.evaluate(() => document.querySelector('.kbd')?.dataset.id));
   const info = await page.evaluate(() => ({ w: document.documentElement.clientWidth, h: document.documentElement.clientHeight, lang: document.documentElement.lang,
     listH: document.querySelector('#list').getBoundingClientRect().height, rowH: document.querySelector('.row')?.getBoundingClientRect().height,
     horizScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth }));

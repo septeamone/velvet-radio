@@ -97,6 +97,9 @@ const SOURCES = {
   bbc1xtra: bbc,
 };
 
+// Для списка «что играет везде» берём только лёгкие источники (запрос JSON); ICY открывает сам поток, это тяжело.
+export const LIVE = new Set(Object.keys(SOURCES).filter((id) => !['relax', 'love'].includes(id)));
+
 const nice = (s) => s.toLowerCase().replace(/(^|[\s/(-])(\p{L})/gu, (_m, p, c) => p + c.toUpperCase());
 
 export async function fetchTrack(stationId) {

@@ -54,9 +54,10 @@ async function play(id, kbps) {
   if (!station) return;
   await ensureOffscreen();
   const { volume } = await getState();
+  const { settings = {} } = await chrome.storage.local.get('settings');
   const want = kbps ?? maxKbps(station);
-  await setState({ stationId: id, kbps: want, status: 'loading', track: null, notice: null, viz: false });
-  chrome.runtime.sendMessage({ target: 'offscreen', cmd: 'play', id, kbps: want, volume }).catch(() => {});
+  await setState({ stationId: id, kbps: want, status: 'loading', track: null, notice: null, viz: false, codec: null });
+  chrome.runtime.sendMessage({ target: 'offscreen', cmd: 'play', id, kbps: want, volume, prebuffer: [4, 8, 12].includes(settings.buffer) ? settings.buffer : 4, fade: settings.fade !== false }).catch(() => {});
 }
 
 async function stop() {
@@ -66,8 +67,8 @@ async function stop() {
 
 /* ---------- горячие клавиши и медиа-кнопки (клавиатура, наушники, оверлей Windows) ---------- */
 async function playSaved(id) {
-  const { quality } = await chrome.storage.local.get('quality');
-  await play(id, pickKbps(byId(id), quality?.[id]));
+  const { quality, settings } = await chrome.storage.local.get(['quality', 'settings']);
+  await play(id, pickKbps(byId(id), quality?.[id], !!settings?.saver));
 }
 
 async function toggle() {
@@ -114,5 +115,9 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 });
 
 // После перезапуска браузера звука уже нет — сбрасываем состояние.
-chrome.runtime.onStartup.addListener(() => setState({ status: 'stopped', track: null, notice: null, viz: false }));
+chrome.runtime.onStartup.addListener(async () => {
+  await setState({ status: 'stopped', track: null, notice: null, viz: false });
+  const { settings, last } = await chrome.storage.local.get(['settings', 'last']);
+  if (settings?.resume && byId(last)) await playSaved(last);   // «играть при запуске Chrome» (по настройке)
+});
 chrome.runtime.onInstalled.addListener(() => renderAction(DEFAULT));

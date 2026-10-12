@@ -13,6 +13,7 @@
     <header>
       <h1 class="brand">Velvet Radio</h1>
       <div class="tools">
+        <button id="gear" class="icon-btn glass" data-ta="settings" data-tt="settings"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
         <button id="lang" class="icon-btn glass lang-btn" data-ta="language" data-tt="language"><span id="langLabel">RU</span></button>
         <a id="tg" class="icon-btn glass tg" href="https://t.me/sushtrsx" target="_blank" rel="noopener" data-ta="telegram" data-tt="telegram">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 3.2 10.2 14.1M21.5 3.2l-6.9 17.6-4.4-6.7-6.7-4.4z"/></svg>
@@ -29,12 +30,15 @@
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
         <input id="q" type="search" data-tp="search" autocomplete="off">
       </label>
+      <button id="gbtn" class="icon-btn glass gbtn" data-ta="genre" data-tt="genre"><svg viewBox="0 0 24 24"><path d="M4.5 5.5h15l-5.8 7v5.6l-3.4-1.8v-3.8z"/></svg></button>
       <div id="vtoggle" class="vtoggle glass" role="group" hidden>
         <i class="vthumb"></i>
         <button data-view="list" data-ta="viewList" data-tt="viewList"><svg viewBox="0 0 24 24"><path d="M8 6.5h11M8 12h11M8 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/></svg></button>
         <button data-view="tiles" data-ta="viewTiles" data-tt="viewTiles"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg></button>
       </div>
     </div>
+
+    <div id="gpanel" class="gpanel glass" hidden></div>
 
     <nav class="tabs glass" role="tablist">
       <span class="thumb"></span>
@@ -54,7 +58,7 @@
 
     <footer class="player glass">
       <div class="now">
-        <div id="nowLogo" class="logo idle">♪</div>
+        <div class="logo-wrap"><div id="nowLogo" class="logo idle">♪</div><i id="dot" class="dot" data-st="off"></i></div>
         <div class="now-text">
           <div id="nowTitle" class="now-title" data-t="pick">Выберите станцию</div>
           <div id="subRow" class="sub-row">
@@ -62,6 +66,7 @@
             <svg class="hint" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
           </div>
           <button id="retry" class="retry" data-t="retry"></button>
+          <button id="report" class="retry report" data-t="report"></button>
         </div>
         <button id="toggle" class="play" data-ta="playPause">
           <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>
@@ -74,6 +79,23 @@
       </div>
       <canvas id="viz" class="off" aria-hidden="true"></canvas>
     </footer>
+
+    <section id="settings" class="settings glass" hidden>
+      <div class="sethead"><button id="setback" class="cback" data-ta="back"><svg viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></svg></button><h2 data-t="settings"></h2></div>
+      <div class="setbody">
+        <label class="set"><span class="st"><b data-t="sSaver"></b><small data-t="sSaverD"></small></span><input type="checkbox" class="sw" data-set="saver"></label>
+        <label class="set"><span class="st"><b data-t="sFade"></b><small data-t="sFadeD"></small></span><input type="checkbox" class="sw" data-set="fade"></label>
+        <label class="set"><span class="st"><b data-t="sResume"></b><small data-t="sResumeD"></small></span><input type="checkbox" class="sw" data-set="resume"></label>
+        <label class="set"><span class="st"><b data-t="sSync"></b><small data-t="sSyncD"></small></span><input type="checkbox" class="sw" data-set="sync"></label>
+        <div class="set"><span class="st"><b data-t="sBuffer"></b><small data-t="sBufferD"></small></span>
+          <div id="bufseg" class="seg" style="--n:3"><i class="seg-thumb"></i><button data-k="4">4</button><button data-k="8">8</button><button data-k="12">12</button></div></div>
+        <div class="set"><span class="st"><b data-t="sBackup"></b><small data-t="sBackupD"></small></span>
+          <div class="btns"><button id="bexp" class="pill" data-t="sExport"></button><button id="bimp" class="pill" data-t="sImport"></button><input type="file" id="bfile" accept="application/json,.json" hidden></div></div>
+        <div class="set col"><div class="setrow"><span class="st"><b data-t="sCheck"></b><small id="checkInfo"></small></span><button id="bcheck" class="pill" data-t="sCheckBtn"></button></div><ul id="badlist" class="badlist"></ul></div>
+        <div class="set"><span class="st"><b data-t="sKeys"></b><small data-t="sKeysD"></small></span><button id="bkeys" class="pill" data-t="sKeysBtn"></button></div>
+        <div class="about"><span id="ver"></span> · <a href="https://github.com/septeamone/velvet-radio" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/septeamone/velvet-radio/blob/main/PRIVACY.md" target="_blank" rel="noopener" data-t="sPrivacy"></a></div>
+      </div>
+    </section>
   </main>
 
   <script type="module" src="popup.js"></script>

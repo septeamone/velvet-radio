@@ -10,7 +10,7 @@ const files = fs.readdirSync(dir).filter((f) => f.endsWith('.js') && !skip.has(f
 const { COUNTRIES } = await import(pathToFileURL(path.join(dir, 'countries.js')).href);
 const order = ['RU', ...COUNTRIES.map((c) => c.cc)];
 const ccOf = (f) => (f.startsWith('ru') ? 'RU' : f.slice(0, 2).toUpperCase());
-files.sort((a, b) => order.indexOf(ccOf(a)) - order.indexOf(ccOf(b)) || a.localeCompare(b));
+files.sort((a, b) => order.indexOf(ccOf(a)) - order.indexOf(ccOf(b)) || a.slice(0, -3).localeCompare(b.slice(0, -3)));
 for (const f of files) if (!order.includes(ccOf(f))) console.warn('! файл с неизвестной страной:', f);
 
 const names = files.map((f, i) => `S${i}`);
@@ -31,7 +31,7 @@ export const sortByOrder = (ids = [], list = STATIONS) => {
   return [...list].sort((a, b) => rank(a) - rank(b));
 };
 // Сохранённое качество могло устареть — тогда берём лучшее из доступных.
-export const pickKbps = (s, wanted) => (shown(s).some((q) => q.kbps === wanted) ? wanted : maxKbps(s));
+export const pickKbps = (s, wanted, saver = false) => (shown(s).some((q) => q.kbps === wanted) ? wanted : saver ? shown(s)[0].kbps : maxKbps(s));
 export const stationsOf = (cc) => STATIONS.filter((s) => s.country === cc);
 `;
 fs.writeFileSync(path.join(root, 'stations.js'), out);
