@@ -49,6 +49,13 @@ async function ensureOffscreen() {
   });
 }
 
+// Chrome закрывает аудио-документ, если 30 секунд нет слышимого звука (например, громкость на нуле). Тогда статус «играет» был бы ложью.
+async function dropStaleState() {
+  if ((await getState()).status === 'stopped') return;
+  const docs = await chrome.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'] });
+  if (!docs.length) await setState({ status: 'stopped', track: null, notice: null, viz: false });
+}
+
 async function play(id, kbps) {
   const station = byId(id);
   if (!station) return;
@@ -109,6 +116,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         await setState(msg.patch, { onlyIfActive: true });
         break;
     }
+    if (msg.type === 'get-state') await dropStaleState();
     sendResponse(await getState());
   })();
   return true;

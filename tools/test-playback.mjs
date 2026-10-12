@@ -1,4 +1,6 @@
-// Скрытый тест воспроизведения: Chromium в режиме --headless=new --mute-audio, расширение через --load-extension.
+// Скрытый тест воспроизведения: Chromium в режиме --headless=new --disable-audio-output (нулевой звуковой выход: звука нет вообще),
+// расширение через --load-extension. НЕ используй --mute-audio в длинных тестах: Chrome считает такой звук неслышимым и через 30 с
+// закрывает аудио-документ расширения (offscreen), после чего тест «зависает» на подключении.
 // Никаких видимых окон, фокуса и звука (пользователь может играть). Правила: ADDING-STATIONS.md, шаг 9.
 //
 //   node tools/test-playback.mjs                       быстрый режим: все станции, все видимые качества, ~12 с на каждое
@@ -60,7 +62,7 @@ async function launch(ext) {
   const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'vr-test-prof-'));
   const ctx = await chromium.launchPersistentContext(prof, {
     executablePath: chromeExe(), headless: false,
-    args: ['--headless=new', '--mute-audio', `--disable-extensions-except=${ext}`, `--load-extension=${ext}`, '--no-first-run', '--no-default-browser-check'],
+    args: ['--headless=new', '--disable-audio-output', `--disable-extensions-except=${ext}`, `--load-extension=${ext}`, '--no-first-run', '--no-default-browser-check'],
   });
   const sw = ctx.serviceWorkers()[0] ?? await ctx.waitForEvent('serviceworker');
   const page = await ctx.newPage();

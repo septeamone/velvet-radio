@@ -37,7 +37,7 @@ function chromeExe() {
 }
 const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'vr-test-prof-'));
 const ctx = await chromium.launchPersistentContext(prof, { executablePath: chromeExe(), headless: false, viewport: { width: 480, height: 600 },
-  args: ['--headless=new', '--mute-audio', `--disable-extensions-except=${root}`, `--load-extension=${root}`, '--no-first-run'] });
+  args: ['--headless=new', '--disable-audio-output', `--disable-extensions-except=${root}`, `--load-extension=${root}`, '--no-first-run'] });
 const errors = [];
 try {
   const sw = ctx.serviceWorkers()[0] ?? await ctx.waitForEvent('serviceworker');
