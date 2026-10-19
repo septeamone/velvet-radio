@@ -411,7 +411,7 @@ function renderPlayer() {
     else if (status === 'loading') { sub = nt ?? t('connecting'); note = !!nt; }
     else if (status === 'playing') { sub = track ?? t('playingAt', { k: q }); if (nt && !track) { sub = nt; note = true; } }
     setMq($('#nowSub'), sub);
-    fx?.flap.update(sub, status === 'playing' && !!track);
+    fx?.flap?.update(sub, status === 'playing' && !!track);
     const link = status === 'playing' && !!track;
     const row = $('#subRow');
     row.classList.toggle('link', link);

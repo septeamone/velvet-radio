@@ -4,7 +4,8 @@ import fs from 'node:fs'; import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const dir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'ui');
 // порядок важен: border-glow и другие переопределяют правила предыдущих
-const ORDER = ['jelly', 'rubber', 'squish', 'pulse-heart', 'elastic-slider', 'number-flow', 'status-mark', 'shiny-text', 'echo-text', 'split-flap', 'spotlight', 'border-glow', 'warm-tooltip', 'glide-select', 'animated-list'];
+const ORDER = ['jelly', 'rubber', 'squish', 'pulse-heart', 'elastic-slider', 'number-flow', 'status-mark', 'shiny-text', 'echo-text', 'split-flap', 'spotlight', 'border-glow', 'warm-tooltip', 'glide-select', 'animated-list',
+  'chroma-grid', 'star-border', 'glare-hover', 'blur-text', 'pixel-swap', 'call-chip', 'text-type', 'decrypted-text', 'animated-content', 'check-mark', 'bg-gradient'];
 const extra = fs.readdirSync(dir).filter((f) => f.endsWith('.css') && f !== 'ui.css' && !ORDER.includes(f.slice(0, -4)));
 if (extra.length) throw new Error('Нет в списке ORDER: ' + extra.join(', '));
 const out = ['/* СГЕНЕРИРОВАНО tools/gen-ui.mjs из ui/*.css. Руками не править. */'];

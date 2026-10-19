@@ -442,3 +442,36 @@
 }
 :root[data-ui="new"] #list[data-rb-al][data-rb-al-live]::after { opacity: 1; }
 :root[data-ui="new"] #list[data-rb-al][data-rb-al-snap]::after { transition: opacity .18s ease; }
+
+/* ===== chroma-grid.css ===== */
+/* заглушка chroma-grid */
+
+/* ===== star-border.css ===== */
+/* заглушка star-border */
+
+/* ===== glare-hover.css ===== */
+/* заглушка glare-hover */
+
+/* ===== blur-text.css ===== */
+/* заглушка blur-text */
+
+/* ===== pixel-swap.css ===== */
+/* заглушка pixel-swap */
+
+/* ===== call-chip.css ===== */
+/* заглушка call-chip */
+
+/* ===== text-type.css ===== */
+/* заглушка text-type */
+
+/* ===== decrypted-text.css ===== */
+/* заглушка decrypted-text */
+
+/* ===== animated-content.css ===== */
+/* заглушка animated-content */
+
+/* ===== check-mark.css ===== */
+/* заглушка check-mark */
+
+/* ===== bg-gradient.css ===== */
+/* заглушка bg-gradient */
