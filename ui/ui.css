@@ -576,29 +576,3 @@
   :root[data-ui="new"] .rb-cm[data-rb="run"] .rb-cm-spin { animation: rb-cm-breathe 1.4s ease-in-out infinite; }
 }
 @keyframes rb-cm-breathe { 50% { opacity: .4; } }
-
-/* ===== bg-gradient.css ===== */
-/* Inspired by React Bits Grainient / Silk (MIT + Commons Clause, © David Haz), ported to plain JS/CSS without WebGL. */
-
-/* k — общая сила (0 выключает); a — оттенок шампанского из --accent, n — нейтральный свет/тень темы */
-:root[data-ui="new"] { --rb-bg-k: 1; --rb-bg-a: 15%; --rb-bg-n: 7%; --rb-bg-n2: 6%; --rb-bg-nc: var(--text); }
-:root[data-ui="new"][data-theme="dark"] { --rb-bg-a: 14%; --rb-bg-n: 9%; --rb-bg-n2: 7%; }
-
-:root[data-ui="new"] .rb-bg { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
-:root[data-ui="new"] .rb-bg-layer {
-  position: absolute; left: -12%; top: -12%; width: 124%; height: 124%; display: block;
-  background:
-    radial-gradient(42% 38% at 24% 28%, color-mix(in srgb, var(--accent) calc(var(--rb-bg-a) * var(--rb-bg-k)), transparent), transparent 100%),
-    radial-gradient(46% 42% at 76% 66%, color-mix(in srgb, var(--rb-bg-nc) calc(var(--rb-bg-n) * var(--rb-bg-k)), transparent), transparent 100%),
-    radial-gradient(34% 30% at 62% 20%, color-mix(in srgb, var(--accent) calc(var(--rb-bg-a) * .55 * var(--rb-bg-k)), transparent), transparent 100%),
-    radial-gradient(40% 36% at 30% 80%, color-mix(in srgb, var(--rb-bg-nc) calc(var(--rb-bg-n2) * var(--rb-bg-k)), transparent), transparent 100%);
-  animation: rb-bg-drift 48s ease-in-out infinite alternate; animation-play-state: paused;
-}
-:root[data-ui="new"] .rb-bg-run .rb-bg-layer { animation-play-state: running; will-change: transform; }
-@keyframes rb-bg-drift {
-  0%   { transform: translate3d(0, 0, 0); }
-  50%  { transform: translate3d(-7%, 6%, 0); }
-  100% { transform: translate3d(6%, -7%, 0); }
-}
-:root[data-ui="new"].no-anim .rb-bg-layer { animation: none; }
-@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .rb-bg-layer { animation: none; } }

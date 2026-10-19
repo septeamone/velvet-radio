@@ -24,7 +24,6 @@ import { initTextType } from './text-type.js';
 import { initDecryptedText } from './decrypted-text.js';
 import { initAnimatedContent } from './animated-content.js';
 import { initCheckMark } from './check-mark.js';
-import { initBgGradient } from './bg-gradient.js';
 
 export function mountNewUi($, list) {
   const mount = (f, ...args) => { try { return f(...args); } catch (e) { console.error('ui:', f.name, e); } };
@@ -50,6 +49,5 @@ export function mountNewUi($, list) {
   mount(initDecryptedText, list);                           // пустые состояния: .empty
   mount(initAnimatedContent, list, $('.tabs'));             // смена вкладок
   mount(initCheckMark, $('#settings'));                     // проверка станций в настройках
-  mount(initBgGradient, $('.bg'), $('.player'));            // подложка-градиент
   return { flap: mount(initSplitFlap, $('#nowSub')) };
 }
