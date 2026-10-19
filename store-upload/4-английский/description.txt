@@ -1,0 +1,42 @@
+TEXTS FOR THE ENGLISH VERSION
+Copy each block into the field with the same name in the developer dashboard (language: English).
+
+=== NAME ===
+Taken from the package (manifest, _locales/en). No change needed: Velvet Radio
+
+=== SHORT DESCRIPTION (up to 132 characters) ===
+Taken from the package, field "Summary from the package" (_locales/en): 129 characters. If it does not refresh after uploading the new package, paste it manually:
+Velvet Radio: 400+ radio stations from Russia and 28 countries, up to 320 kbps. A refined interface that plays in the background.
+
+=== DESCRIPTION ===
+Velvet Radio is a radio player for Chrome with every detail considered.
+
+400+ stations from Russia and 28 countries. Sound up to 320 kbps. A refined matte interface in two themes: graphite and ivory. Tap a station and the music plays, even when the window is closed.
+
+FEATURES
+• Plays in the background: close the window and the music keeps going
+• Countries with flags and genres for every country, search in English or Russian
+• Song titles right in the list, a sound visualizer and a stream status indicator
+• Quality choice for every station, up to 320 kbps
+• If a stream drops, the extension switches to a backup and lowers the quality when needed
+• Favorites, drag-and-drop ordering, keyboard shortcuts and media keys
+• Russian and English interface
+
+SETTINGS
+• Data saver, wait before playback and resume on Chrome start
+• Favorites sync through your Chrome account and backup
+• The visualizer can be turned off: the player gets shorter and more stations fit on screen
+• The classic interface stays available
+
+PRIVACY
+No analytics, ads or tracking. The extension sends nothing to the developer. All code is inside the extension.
+
+Unofficial project. Station names and logos belong to their owners. Some stations broadcast from Russia and may be unavailable abroad.
+
+=== SINGLE PURPOSE (Privacy section) ===
+Playing internet radio: stations from Russia and other countries.
+
+=== PERMISSION JUSTIFICATION (Privacy section) ===
+offscreen: plays the radio in the background while the popup is closed (hidden audio document).
+storage: favorites, station order, quality, theme, language and settings; optional sync through the Chrome account if the user turns it on.
+Access to the stations' websites (host_permissions): only to show the current song title and to open HLS streams of those stations. The list is unchanged since version 1.0.0.
