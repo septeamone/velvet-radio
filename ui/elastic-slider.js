@@ -41,20 +41,27 @@ export function elasticSlider(input, { icon = null, maxStretch = 36 } = {}) {
   mo.observe(input, { attributes: true, attributeFilter: ['style', 'value'] });
   input.addEventListener('input', sync);
 
-  let width = 1, pressed = false;
+  let width = 1, pressed = false, leftMax = maxStretch;
   const setSide = (side) => { track.style.transformOrigin = side > 0 ? '0% 50%' : '100% 50%'; };
   const pulse = (side) => (side < 0 ? icon : loud)?.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.3)' }, { transform: 'scale(1)' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' });
   let overSide = 0;
   // сторона растяжения: соответствующая иконка уезжает наружу и чуть растёт
+  // смещение считается из растяжения дорожки: её край уезжает ровно на s, иконка и число — на s + зазор.
+  // Используются свойства translate/scale (а не transform), чтобы пульс WAAPI по transform не перебивал слежение за курсором.
   const shift = (side, s) => {
-    if (icon) icon.style.transform = side < 0 ? `translateX(${-s}px) scale(1.12)` : '';
-    loud.style.transform = side > 0 ? `translateX(${s}px) scale(1.12)` : '';
+    const num = host?.querySelector('.rb-num');
+    const d = s + 1.5;
+    if (icon) { icon.style.translate = side < 0 ? `${-d}px 0` : ''; icon.style.scale = side < 0 ? '1.12' : ''; }
+    loud.style.translate = side > 0 ? `${d}px 0` : ''; loud.style.scale = side > 0 ? '1.12' : '';
+    if (num) num.style.transform = side > 0 ? `translateX(${d}px) scale(1.1)` : '';
   };
 
   const down = (e) => {
     if (e.button !== 0) return;
     pressed = true; overSide = 0;
     width = input.getBoundingClientRect().width || 1;
+    // слева места мало: иконка не должна выйти за окно (минимум 6px до края), зазор до дорожки сохраняется
+    leftMax = icon ? Math.max(0, Math.min(maxStretch, icon.getBoundingClientRect().left - 6 - 1.5)) : maxStretch;
     wrap.dataset.drag = '';
     wrap.classList.remove('rb-elastic-snap'); host?.classList.remove('rb-elastic-snap');
   };
@@ -65,7 +72,8 @@ export function elasticSlider(input, { icon = null, maxStretch = 36 } = {}) {
     if (!over) { if (overSide) { overSide = 0; track.style.transform = ''; shift(0, 0); } return; }
     const side = e.clientX < r.left ? -1 : 1;
     if (side !== overSide) { overSide = side; shift(0, 0); pulse(side); }
-    const s = rubber(over, maxStretch);
+    const lim = side < 0 ? leftMax : maxStretch;
+    const s = lim > 0 ? rubber(over, lim) : 0;
     setSide(side);
     track.style.transform = `scale(${1 + s / width}, ${1 - 0.22 * Math.min(1, s / maxStretch)})`;
     shift(side, s);
@@ -74,7 +82,7 @@ export function elasticSlider(input, { icon = null, maxStretch = 36 } = {}) {
     if (!pressed) return;
     pressed = false; overSide = 0;
     delete wrap.dataset.drag;
-    if (track.style.transform || icon?.style.transform || loud.style.transform) {
+    if (track.style.transform || icon?.style.translate || loud.style.translate) {
       wrap.classList.add('rb-elastic-snap'); host?.classList.add('rb-elastic-snap');
       track.style.transform = ''; shift(0, 0);
       setTimeout(() => { wrap.classList.remove('rb-elastic-snap'); host?.classList.remove('rb-elastic-snap'); }, 700);

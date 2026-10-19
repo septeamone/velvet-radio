@@ -115,7 +115,9 @@
 :root[data-ui="new"] .rb-elastic-loud .w1 { opacity: clamp(0, calc(var(--rb-v, .8) * 4), 1); transition: opacity .2s ease; }
 :root[data-ui="new"] .rb-elastic-loud .w2 { opacity: clamp(0, calc((var(--rb-v, .8) - .4) * 4), 1); transition: opacity .2s ease; }
 :root[data-ui="new"] .rb-elastic-host:hover svg, :root[data-ui="new"] .rb-elastic-host:focus-within svg { color: var(--text); }
-:root[data-ui="new"] .rb-elastic-snap svg { transition: color .2s ease, opacity .25s ease, transform .55s cubic-bezier(.3, 1.7, .45, 1); }
+:root[data-ui="new"] .rb-elastic-snap svg { transition: color .2s ease, opacity .25s ease, translate .55s cubic-bezier(.3, 1.7, .45, 1), scale .55s cubic-bezier(.3, 1.7, .45, 1); }
+:root[data-ui="new"] .rb-elastic-snap .rb-num { transition: color .25s ease, transform .55s cubic-bezier(.3, 1.7, .45, 1); }
+:root[data-ui="new"] .rb-num { transform-origin: 100% 50%; }
 
 :root[data-ui="new"].no-anim .rb-elastic-host svg, :root[data-ui="new"].no-anim .rb-elastic-track, :root[data-ui="new"].no-anim .rb-elastic-wrap { transition: none; }
 @media (prefers-reduced-motion: reduce) {
