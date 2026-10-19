@@ -1,1 +1,2 @@
-/* заглушка blur-text */
+/* Based on React Bits BlurText (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] .rb-blur-p { display: inline-block; white-space: pre; will-change: filter, opacity, transform; }

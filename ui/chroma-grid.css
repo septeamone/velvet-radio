@@ -1,1 +1,12 @@
-/* заглушка chroma-grid */
+/* Based on React Bits ChromaGrid (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Только вид «плитки»: флаг приглушён, у курсора (--rb-cg-k от 0 до 1, пишет JS на плитку) цвет возвращается. Вид списка не затронут. */
+:root[data-ui="new"] .list.tiles .crow .cflag {
+  filter: saturate(calc(.12 + .88 * var(--rb-cg-k, 0))) contrast(.94);
+  opacity: calc(.72 + .28 * var(--rb-cg-k, 0));
+  transition: filter .25s var(--ease), opacity .25s var(--ease);
+}
+:root[data-ui="new"] .list.tiles .crow:hover .cflag,
+:root[data-ui="new"] .list.tiles .crow:focus-visible .cflag,
+:root[data-ui="new"] .list.tiles .crow.kbd .cflag { filter: none; opacity: 1; }
+:root.no-anim[data-ui="new"] .list.tiles .crow .cflag { transition: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .list.tiles .crow .cflag { transition: none; } }

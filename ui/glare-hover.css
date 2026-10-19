@@ -1,1 +1,12 @@
-/* заглушка glare-hover */
+/* Based on React Bits GlareHover (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Блик: узкая наклонная полоса цвета надписи кнопки (--pill-ink), один проход слева направо при наведении. */
+:root[data-ui="new"] .play.rb-gh-host { position: relative; }
+:root[data-ui="new"] .rb-gh { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; }
+:root[data-ui="new"] .rb-gh i {
+  position: absolute; top: -20%; bottom: -20%; left: 0; width: 46%; opacity: 0; transform: translateX(-130%) skewX(-22deg);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--pill-ink) 24%, transparent) 50%, transparent);
+}
+:root[data-ui="new"] .rb-gh-run .rb-gh i { animation: rb-gh-sweep .7s var(--ease) forwards; }
+@keyframes rb-gh-sweep { 0% { opacity: 1; transform: translateX(-130%) skewX(-22deg); } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(300%) skewX(-22deg); } }
+:root.no-anim[data-ui="new"] .rb-gh { display: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .rb-gh { display: none; } }

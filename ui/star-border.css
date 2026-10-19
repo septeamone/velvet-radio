@@ -1,1 +1,20 @@
-/* заглушка star-border */
+/* Based on React Bits StarBorder (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Кольцо вокруг кнопки; внутри крутится квадрат с конусным градиентом (одна «звезда»). Бежит только при .player.loading. */
+:root[data-ui="new"] .play.rb-sb { position: relative; }
+:root[data-ui="new"] .player.loading .play { animation: none; }               /* вместо «дыхания» кнопки */
+:root[data-ui="new"] .rb-sb-ring {
+  position: absolute; inset: -4px; border-radius: 16px; padding: 1.5px; pointer-events: none; overflow: hidden;
+  opacity: 0; transition: opacity .3s ease;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+:root[data-ui="new"] .rb-sb-ring i {
+  position: absolute; left: 50%; top: 50%; width: 140%; aspect-ratio: 1; margin: -70% 0 0 -70%;
+  background: conic-gradient(from 0deg, transparent 0deg, transparent 300deg, color-mix(in srgb, var(--accent) 35%, transparent) 335deg, var(--accent) 358deg, transparent 360deg);
+  animation: rb-sb-spin 1.6s linear infinite; animation-play-state: paused;
+}
+:root[data-ui="new"] .player.loading .rb-sb-ring { opacity: 1; }
+:root[data-ui="new"] .player.loading .rb-sb-ring i { animation-play-state: running; }
+@keyframes rb-sb-spin { to { transform: rotate(360deg); } }
+:root.no-anim[data-ui="new"] .rb-sb-ring i { animation: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .rb-sb-ring i { animation: none; } }

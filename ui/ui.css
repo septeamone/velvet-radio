@@ -444,34 +444,161 @@
 :root[data-ui="new"] #list[data-rb-al][data-rb-al-snap]::after { transition: opacity .18s ease; }
 
 /* ===== chroma-grid.css ===== */
-/* заглушка chroma-grid */
+/* Based on React Bits ChromaGrid (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Только вид «плитки»: флаг приглушён, у курсора (--rb-cg-k от 0 до 1, пишет JS на плитку) цвет возвращается. Вид списка не затронут. */
+:root[data-ui="new"] .list.tiles .crow .cflag {
+  filter: saturate(calc(.12 + .88 * var(--rb-cg-k, 0))) contrast(.94);
+  opacity: calc(.72 + .28 * var(--rb-cg-k, 0));
+  transition: filter .25s var(--ease), opacity .25s var(--ease);
+}
+:root[data-ui="new"] .list.tiles .crow:hover .cflag,
+:root[data-ui="new"] .list.tiles .crow:focus-visible .cflag,
+:root[data-ui="new"] .list.tiles .crow.kbd .cflag { filter: none; opacity: 1; }
+:root.no-anim[data-ui="new"] .list.tiles .crow .cflag { transition: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .list.tiles .crow .cflag { transition: none; } }
 
 /* ===== star-border.css ===== */
-/* заглушка star-border */
+/* Based on React Bits StarBorder (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Кольцо вокруг кнопки; внутри крутится квадрат с конусным градиентом (одна «звезда»). Бежит только при .player.loading. */
+:root[data-ui="new"] .play.rb-sb { position: relative; }
+:root[data-ui="new"] .player.loading .play { animation: none; }               /* вместо «дыхания» кнопки */
+:root[data-ui="new"] .rb-sb-ring {
+  position: absolute; inset: -4px; border-radius: 16px; padding: 1.5px; pointer-events: none; overflow: hidden;
+  opacity: 0; transition: opacity .3s ease;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+:root[data-ui="new"] .rb-sb-ring i {
+  position: absolute; left: 50%; top: 50%; width: 140%; aspect-ratio: 1; margin: -70% 0 0 -70%;
+  background: conic-gradient(from 0deg, transparent 0deg, transparent 300deg, color-mix(in srgb, var(--accent) 35%, transparent) 335deg, var(--accent) 358deg, transparent 360deg);
+  animation: rb-sb-spin 1.6s linear infinite; animation-play-state: paused;
+}
+:root[data-ui="new"] .player.loading .rb-sb-ring { opacity: 1; }
+:root[data-ui="new"] .player.loading .rb-sb-ring i { animation-play-state: running; }
+@keyframes rb-sb-spin { to { transform: rotate(360deg); } }
+:root.no-anim[data-ui="new"] .rb-sb-ring i { animation: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .rb-sb-ring i { animation: none; } }
 
 /* ===== glare-hover.css ===== */
-/* заглушка glare-hover */
+/* Based on React Bits GlareHover (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Блик: узкая наклонная полоса цвета надписи кнопки (--pill-ink), один проход слева направо при наведении. */
+:root[data-ui="new"] .play.rb-gh-host { position: relative; }
+:root[data-ui="new"] .rb-gh { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; }
+:root[data-ui="new"] .rb-gh i {
+  position: absolute; top: -20%; bottom: -20%; left: 0; width: 46%; opacity: 0; transform: translateX(-130%) skewX(-22deg);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--pill-ink) 24%, transparent) 50%, transparent);
+}
+:root[data-ui="new"] .rb-gh-run .rb-gh i { animation: rb-gh-sweep .7s var(--ease) forwards; }
+@keyframes rb-gh-sweep { 0% { opacity: 1; transform: translateX(-130%) skewX(-22deg); } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(300%) skewX(-22deg); } }
+:root.no-anim[data-ui="new"] .rb-gh { display: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .rb-gh { display: none; } }
 
 /* ===== blur-text.css ===== */
-/* заглушка blur-text */
+/* Based on React Bits BlurText (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] .rb-blur-p { display: inline-block; white-space: pre; will-change: filter, opacity, transform; }
 
 /* ===== pixel-swap.css ===== */
-/* заглушка pixel-swap */
+/* Based on React Bits PixelSwap (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] .rb-px-host { position: relative; }
+:root[data-ui="new"] .rb-px { position: absolute; inset: 0; display: grid; grid-template: repeat(var(--n), 1fr) / repeat(var(--n), 1fr); pointer-events: none; }
+:root[data-ui="new"] .rb-px b { background: var(--seg); box-shadow: inset 0 0 0 .5px var(--stroke); will-change: transform; }
 
 /* ===== call-chip.css ===== */
-/* заглушка call-chip */
+/* Based on React Bits CallChip (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] .rb-cc { position: relative; isolation: isolate; }
+:root[data-ui="new"] .rb-cc::before {
+  content: ''; position: absolute; z-index: -1; inset: -5px -8px; border-radius: 9px; pointer-events: none;
+  background: color-mix(in srgb, #cf6a68 9%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #cf6a68 32%, transparent);
+  opacity: 0; transition: opacity .35s var(--ease, ease);
+}
+:root[data-ui="new"] .player.err .rb-cc::before { opacity: 1; }
+:root[data-ui="new"] .rb-cc-in { animation: rb-cc-shake .5s cubic-bezier(.36, .07, .19, .97) 1; }
+@keyframes rb-cc-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60% { transform: translateX(3px); }
+}
+:root[data-ui="new"].no-anim .rb-cc-in { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] .rb-cc-in { animation: none; }
+  :root[data-ui="new"] .rb-cc::before { transition: none; }
+}
 
 /* ===== text-type.css ===== */
-/* заглушка text-type */
+/* TextType: стили не нужны, печать идёт через сам placeholder (ui/text-type.js). */
 
 /* ===== decrypted-text.css ===== */
-/* заглушка decrypted-text */
+/* DecryptedText: ещё не собранные символы тише основного текста. */
+:root[data-ui="new"] .empty .rb-dt-enc { opacity: .45; }
 
 /* ===== animated-content.css ===== */
-/* заглушка animated-content */
+/* AnimatedContent: стили не нужны, анимация идёт через WAAPI (ui/animated-content.js). */
 
 /* ===== check-mark.css ===== */
-/* заглушка check-mark */
+/* Based on React Bits CheckMark (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+:root[data-ui="new"] { --rb-cm-ok: #3f8f6b; --rb-cm-bad: #bf4f4c; }
+:root[data-ui="new"][data-theme="dark"] { --rb-cm-ok: #6fc29a; --rb-cm-bad: #d9726f; }
+
+:root[data-ui="new"] .rb-cm-head { display: flex; align-items: center; gap: 9px; min-width: 0; }
+:root[data-ui="new"] .rb-cm { flex: none; width: 18px; height: 18px; color: var(--muted); transition: color .25s ease; }
+:root[data-ui="new"] .rb-cm[data-rb="run"] { color: var(--text); }
+:root[data-ui="new"] .rb-cm[data-rb="ok"] { color: var(--rb-cm-ok); }
+:root[data-ui="new"] .rb-cm[data-rb="bad"] { color: var(--rb-cm-bad); }
+
+:root[data-ui="new"] .rb-cm-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+:root[data-ui="new"] .rb-cm-track, :root[data-ui="new"] .rb-cm-ring { fill: none; stroke: currentColor; stroke-width: 2.2; }
+:root[data-ui="new"] .rb-cm-track { stroke-opacity: 0; transition: stroke-opacity .25s ease, fill-opacity .25s ease; }
+:root[data-ui="new"] .rb-cm-ring { stroke-linecap: round; stroke-dasharray: 3 9.5; stroke-opacity: .7; transition: stroke-dasharray .35s cubic-bezier(.77, 0, .175, 1); }
+:root[data-ui="new"] .rb-cm[data-rb="run"] .rb-cm-track { stroke-opacity: .2; }
+:root[data-ui="new"] .rb-cm[data-rb="run"] .rb-cm-ring { stroke-dasharray: 68 32; stroke-opacity: 1; }
+:root[data-ui="new"] .rb-cm[data-rb="ok"] .rb-cm-ring, :root[data-ui="new"] .rb-cm[data-rb="bad"] .rb-cm-ring { stroke-dasharray: 100 0; stroke-opacity: 1; }
+:root[data-ui="new"] .rb-cm[data-rb="ok"] .rb-cm-track, :root[data-ui="new"] .rb-cm[data-rb="bad"] .rb-cm-track { fill: currentColor; fill-opacity: .1; }
+
+:root[data-ui="new"] .rb-cm-spin { transform-origin: 12px 12px; }
+:root[data-ui="new"] .rb-cm[data-rb="run"] .rb-cm-spin { animation: rb-cm-spin 1.1s linear infinite; }
+:root[data-ui="new"] .rb-cm-paused .rb-cm-spin { animation-play-state: paused; }
+@keyframes rb-cm-spin { to { transform: rotate(360deg); } }
+
+:root[data-ui="new"] .rb-cm-check, :root[data-ui="new"] .rb-cm-bang {
+  fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1 2; stroke-dashoffset: 1.05; opacity: 0; transition: stroke-dashoffset .16s cubic-bezier(.23, 1, .32, 1), opacity 0s linear .16s;
+}
+:root[data-ui="new"] .rb-cm[data-rb="ok"] .rb-cm-check, :root[data-ui="new"] .rb-cm[data-rb="bad"] .rb-cm-bang {
+  stroke-dashoffset: 0; opacity: 1; transition: stroke-dashoffset .24s cubic-bezier(.23, 1, .32, 1) .12s, opacity 0s linear .12s;
+}
+
+:root[data-ui="new"].no-anim .rb-cm *, :root[data-ui="new"].no-anim .rb-cm { transition: none !important; animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] .rb-cm *, :root[data-ui="new"] .rb-cm { transition: none !important; }
+  :root[data-ui="new"] .rb-cm[data-rb="run"] .rb-cm-spin { animation: rb-cm-breathe 1.4s ease-in-out infinite; }
+}
+@keyframes rb-cm-breathe { 50% { opacity: .4; } }
 
 /* ===== bg-gradient.css ===== */
-/* заглушка bg-gradient */
+/* Inspired by React Bits Grainient / Silk (MIT + Commons Clause, © David Haz), ported to plain JS/CSS without WebGL. */
+
+/* k — общая сила (0 выключает); a — оттенок шампанского из --accent, n — нейтральный свет/тень темы */
+:root[data-ui="new"] { --rb-bg-k: 1; --rb-bg-a: 15%; --rb-bg-n: 7%; --rb-bg-n2: 6%; --rb-bg-nc: var(--text); }
+:root[data-ui="new"][data-theme="dark"] { --rb-bg-a: 14%; --rb-bg-n: 9%; --rb-bg-n2: 7%; }
+
+:root[data-ui="new"] .rb-bg { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
+:root[data-ui="new"] .rb-bg-layer {
+  position: absolute; left: -12%; top: -12%; width: 124%; height: 124%; display: block;
+  background:
+    radial-gradient(42% 38% at 24% 28%, color-mix(in srgb, var(--accent) calc(var(--rb-bg-a) * var(--rb-bg-k)), transparent), transparent 100%),
+    radial-gradient(46% 42% at 76% 66%, color-mix(in srgb, var(--rb-bg-nc) calc(var(--rb-bg-n) * var(--rb-bg-k)), transparent), transparent 100%),
+    radial-gradient(34% 30% at 62% 20%, color-mix(in srgb, var(--accent) calc(var(--rb-bg-a) * .55 * var(--rb-bg-k)), transparent), transparent 100%),
+    radial-gradient(40% 36% at 30% 80%, color-mix(in srgb, var(--rb-bg-nc) calc(var(--rb-bg-n2) * var(--rb-bg-k)), transparent), transparent 100%);
+  animation: rb-bg-drift 48s ease-in-out infinite alternate; animation-play-state: paused;
+}
+:root[data-ui="new"] .rb-bg-run .rb-bg-layer { animation-play-state: running; will-change: transform; }
+@keyframes rb-bg-drift {
+  0%   { transform: translate3d(0, 0, 0); }
+  50%  { transform: translate3d(-7%, 6%, 0); }
+  100% { transform: translate3d(6%, -7%, 0); }
+}
+:root[data-ui="new"].no-anim .rb-bg-layer { animation: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .rb-bg-layer { animation: none; } }

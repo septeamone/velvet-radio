@@ -1,1 +1,2 @@
-/* заглушка decrypted-text */
+/* DecryptedText: ещё не собранные символы тише основного текста. */
+:root[data-ui="new"] .empty .rb-dt-enc { opacity: .45; }
