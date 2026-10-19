@@ -466,7 +466,7 @@ const target = new Float32Array(BANDS), shown = new Float32Array(BANDS), slow = 
 let port = null, raf = 0, vizColor = '';
 
 function syncViz() {
-  const on = ui.state.status === 'playing' && ui.state.viz;
+  const on = ui.settings.showViz && ui.state.status === 'playing' && ui.state.viz;
   canvas.classList.toggle('off', !on);
   canvas.classList.toggle('on', on);
   if (on && !port) {
@@ -648,6 +648,7 @@ settingsEl.addEventListener('change', async (e) => {
   }
   ui.settings = await saveSettings({ [k]: e.target.checked });
   if (k === 'saver') { renderList(); renderPlayer(); }
+  if (k === 'showViz') syncViz();
   if (k === 'classic') { applyUi(); location.reload(); }       // чистая смена вида: старые элементы снимаются перезагрузкой окна
 });
 $('#bufseg').addEventListener('click', async (e) => {
