@@ -1,0 +1,13 @@
+/* Based on React Bits EchoText (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] .rb-echo-root {
+  position: relative; display: inline-block; white-space: nowrap; text-indent: 0; user-select: none;
+  /* копии обрезаются: по бокам до соседних кнопок, сверху до края окна (значения ставит JS), снизу почти вплотную */
+  clip-path: inset(calc(var(--rb-clip-t, 8px) * -1) calc(var(--rb-clip-x, 16px) * -1) -4px calc(var(--rb-clip-x, 16px) * -1));
+}
+:root[data-ui="new"] .rb-echo-front { position: relative; z-index: 2; display: block; }
+:root[data-ui="new"] .rb-echo-ghost, :root[data-ui="new"] .rb-echo-bursts { position: absolute; inset: 0; display: block; pointer-events: none; }
+:root[data-ui="new"] .rb-echo-ghost { opacity: 0; visibility: hidden; transform-origin: 50% 50%; backface-visibility: hidden; }
+:root[data-ui="new"] .rb-echo-root.is-on .rb-echo-ghost { visibility: visible; will-change: transform, opacity; }
+:root[data-ui="new"] .rb-echo-bursts .rb-echo-ghost { visibility: visible; will-change: transform, opacity; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .rb-echo-ghost, :root[data-ui="new"] .rb-echo-bursts { display: none; } }
+:root[data-ui="new"].no-anim .rb-echo-ghost, :root[data-ui="new"].no-anim .rb-echo-bursts { display: none; }

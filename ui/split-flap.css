@@ -1,0 +1,34 @@
+/* Based on React Bits SplitFlapText (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] .rb-flap-host { position: relative; }
+/* пока играет табло: настоящий текст невидим и стоит, бегущая строка ждёт на нуле, после табло продолжит с начала */
+:root[data-ui="new"] .rb-flap-busy > .mq { visibility: hidden; }
+:root[data-ui="new"] .rb-flap-busy, :root[data-ui="new"] .rb-flap-busy > .mq { animation-play-state: paused !important; }
+
+:root[data-ui="new"] .rb-flap-board { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+:root[data-ui="new"] .rb-flap-tile {
+  position: absolute; top: 0; height: var(--rb-flap-h); perspective: 60px; contain: layout style;
+  font: inherit; letter-spacing: inherit; font-style: normal;
+}
+:root[data-ui="new"] .rb-flap-half, :root[data-ui="new"] .rb-flap-flap {
+  position: absolute; left: 0; width: 100%; height: 50%; overflow: hidden; display: block; font-style: normal;
+  background: var(--glass-deep); backface-visibility: hidden;
+}
+:root[data-ui="new"] .rb-flap-top, :root[data-ui="new"] .rb-flap-front { top: 0; }
+:root[data-ui="new"] .rb-flap-bot, :root[data-ui="new"] .rb-flap-back { bottom: 0; }
+/* буква: высота всей плитки, по центру; верхняя половина показывает верх, нижняя низ */
+:root[data-ui="new"] .rb-flap-half b, :root[data-ui="new"] .rb-flap-flap b {
+  position: absolute; left: 0; width: 100%; height: var(--rb-flap-h); display: flex; align-items: center; justify-content: center;
+  font: inherit; font-weight: inherit; line-height: 1; white-space: pre; color: inherit; letter-spacing: 0;
+}
+:root[data-ui="new"] .rb-flap-top b, :root[data-ui="new"] .rb-flap-front b { top: 0; }
+:root[data-ui="new"] .rb-flap-bot b, :root[data-ui="new"] .rb-flap-back b { bottom: 0; }
+/* створки видны только во время щелчка */
+:root[data-ui="new"] .rb-flap-flap { visibility: hidden; will-change: transform; }
+:root[data-ui="new"] .rb-flap-front { transform-origin: 50% 100%; }
+:root[data-ui="new"] .rb-flap-back { transform-origin: 50% 0; transform: rotateX(90deg); }
+:root[data-ui="new"] .rb-flap-tile.is-flip .rb-flap-flap { visibility: visible; }
+/* шарнир: тонкая линия посередине, еле заметная */
+:root[data-ui="new"] .rb-flap-tile.is-flip::after {
+  content: ''; position: absolute; left: 0; right: 0; top: calc(50% - .5px); height: 1px; z-index: 5;
+  background: color-mix(in srgb, var(--text) 13%, transparent);
+}

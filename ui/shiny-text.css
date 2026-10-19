@@ -1,0 +1,18 @@
+/* Based on React Bits ShinyText (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+/* градиент кладётся на вложенный .mq (так устроен текст плеера), а без него — на сам элемент; базовый цвет — текущий цвет текста */
+:root[data-ui="new"] .rb-shiny .mq {
+  --rb-shine: var(--text);
+  background: linear-gradient(105deg, currentColor 38%, var(--rb-shine) 50%, currentColor 62%) 0 0 / 260% 100% no-repeat;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: rb-shiny 2.2s cubic-bezier(.45, .05, .3, 1) infinite;
+}
+@keyframes rb-shiny {
+  0% { background-position: 0 0; }
+  65%, 100% { background-position: 100% 0; }   /* проход, затем пауза */
+}
+:root[data-ui="new"] .rb-shiny-paused .mq { animation-play-state: paused; }
+:root[data-ui="new"].no-anim .rb-shiny .mq { animation: none; background: none; -webkit-text-fill-color: currentColor; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] .rb-shiny .mq { animation: none; background: none; -webkit-text-fill-color: currentColor; }
+}

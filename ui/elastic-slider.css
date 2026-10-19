@@ -1,0 +1,32 @@
+/* Based on React Bits ElasticSlider (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+:root[data-ui="new"] .rb-elastic-wrap { position: relative; flex: 1; min-width: 0; height: 26px; display: flex; align-items: center; opacity: .78; transition: opacity .25s ease; }
+:root[data-ui="new"] .rb-elastic-wrap:is(:hover, :focus-within, [data-drag]) { opacity: 1; }
+
+/* настоящий input: невидимый, но ловит мышь, клавиши и фокус; ползунок нулевой ширины, чтобы значение считалось от края до края */
+:root[data-ui="new"] input.rb-elastic-input[type=range] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; flex: none; opacity: 0; cursor: grab; touch-action: none; }
+:root[data-ui="new"] input.rb-elastic-input[type=range]:active { cursor: grabbing; }
+:root[data-ui="new"] input.rb-elastic-input[type=range]::-webkit-slider-runnable-track { height: 100%; background: none; }
+:root[data-ui="new"] input.rb-elastic-input[type=range]::-webkit-slider-thumb { width: 0; height: 0; margin: 0; background: none; box-shadow: none; transform: none; }
+
+:root[data-ui="new"] .rb-elastic-track {
+  position: absolute; left: 0; right: 0; top: 0; bottom: 0; margin: auto 0; pointer-events: none;
+  height: 4px; border-radius: 999px; background: var(--track); overflow: hidden; will-change: transform;
+  transition: height .32s cubic-bezier(.3, 1.35, .5, 1);
+}
+:root[data-ui="new"] .rb-elastic-wrap:is(:hover, [data-drag]) .rb-elastic-track,
+:root[data-ui="new"] .rb-elastic-wrap:has(input:focus-visible) .rb-elastic-track { height: 10px; }
+:root[data-ui="new"] .rb-elastic-wrap:has(input:focus-visible) .rb-elastic-track { outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset: 3px; }
+:root[data-ui="new"] .rb-elastic-snap .rb-elastic-track { transition: height .32s cubic-bezier(.3, 1.35, .5, 1), transform .55s cubic-bezier(.3, 1.7, .45, 1); }
+:root[data-ui="new"] .rb-elastic-wrap[data-drag] .rb-elastic-track { transition: height .2s ease; }
+
+:root[data-ui="new"] .rb-elastic-fill { position: absolute; inset: 0; background: var(--accent); clip-path: inset(0 calc(100% - var(--rb-p, 0%)) 0 0); }
+
+/* значок динамика рядом: пружинит вместе с растяжением */
+:root[data-ui="new"] .vol svg { will-change: transform; transition: color .2s ease; }
+:root[data-ui="new"] .vol:hover svg, :root[data-ui="new"] .vol:focus-within svg { color: var(--text); }
+
+:root[data-ui="new"].no-anim .rb-elastic-track, :root[data-ui="new"].no-anim .rb-elastic-wrap { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] .rb-elastic-track, :root[data-ui="new"] .rb-elastic-wrap { transition: none; }
+}

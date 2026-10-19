@@ -1,0 +1,31 @@
+/* Based on React Bits BorderGlow (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] {
+  --rb-bg-rim: 100%;     /* сила света на кромке */
+  --rb-bg-inner: 12%;    /* лёгкое свечение внутри у края */
+}
+:root[data-ui="new"][data-theme="dark"] { --rb-bg-rim: 90%; --rb-bg-inner: 9%; }
+
+/* играющая станция: спокойная кромка; яркий клин появляется только под курсором */
+:root[data-ui="new"] .row.cur:not(.kbd):not(.dragging) { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
+
+:root[data-ui="new"] .rb-bg-edge {
+  --rb-bg-angle: 0deg; --rb-bg-k: 0;
+  position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; z-index: 2; opacity: 0; transition: opacity .3s ease;
+  padding: 1.5px;
+  background: conic-gradient(from calc(var(--rb-bg-angle) - 55deg) at 50% 50%,
+    transparent 0deg,
+    color-mix(in srgb, var(--accent) var(--rb-bg-rim), transparent) 55deg,
+    transparent 110deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+/* лёгкий свет внутри тем же клином, без blur и теней */
+:root[data-ui="new"] .rb-bg-edge::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: conic-gradient(from calc(var(--rb-bg-angle) - 70deg) at 50% 50%, transparent 0deg,
+    color-mix(in srgb, var(--accent) var(--rb-bg-inner), transparent) 70deg, transparent 140deg, transparent 360deg);
+  -webkit-mask: radial-gradient(ellipse closest-side, transparent 60%, #000); mask: radial-gradient(ellipse closest-side, transparent 60%, #000);
+}
+:root[data-ui="new"] .rb-bg-edge.rb-bg-on { opacity: calc(.3 + .7 * var(--rb-bg-k)); }
+:root[data-ui="new"] .row.dragging > .rb-bg-edge { display: none; }
+:root.no-anim .rb-bg-edge { transition: none; }

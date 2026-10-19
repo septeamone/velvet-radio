@@ -1,0 +1,56 @@
+/* Based on React Bits StatusMark (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+:root[data-ui="new"] {
+  --rb-sm-ok: #3f8f6b; --rb-sm-warn: #b8862d; --rb-sm-bad: #bf4f4c; --rb-sm-idle-o: 0;
+}
+:root[data-ui="new"][data-theme="dark"] { --rb-sm-ok: #6fc29a; --rb-sm-warn: #d9ad5c; --rb-sm-bad: #d9726f; }
+
+/* перекрываем классический .dot (цветная точка): здесь плашка с кольцом */
+:root[data-ui="new"] .dot.rb-sm {
+  width: 17px; height: 17px; right: -6px; bottom: -6px; border: 0; background: var(--glass-deep);
+  box-shadow: 0 0 0 1.5px var(--glass-deep); animation: none; opacity: 1; color: var(--muted);
+  transition: color .25s ease;
+}
+:root[data-ui="new"] .dot.rb-sm[data-rb="off"] { opacity: var(--rb-sm-idle-o); }
+:root[data-ui="new"] .dot.rb-sm[data-rb="run"] { color: var(--text); }
+:root[data-ui="new"] .dot.rb-sm[data-rb="ok"] { color: var(--rb-sm-ok); }
+:root[data-ui="new"] .dot.rb-sm[data-rb="warn"] { color: var(--rb-sm-warn); }
+:root[data-ui="new"] .dot.rb-sm[data-rb="bad"] { color: var(--rb-sm-bad); }
+
+:root[data-ui="new"] .rb-sm-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+:root[data-ui="new"] .rb-sm-track,
+:root[data-ui="new"] .rb-sm-ring { fill: none; stroke: currentColor; stroke-width: 2.4; }
+:root[data-ui="new"] .rb-sm-track { stroke-opacity: 0; transition: stroke-opacity .25s ease, fill-opacity .25s ease; }
+:root[data-ui="new"] .rb-sm-ring { stroke-linecap: round; stroke-dasharray: 3 9.5; transition: stroke-dasharray .35s cubic-bezier(.77, 0, .175, 1); }
+:root[data-ui="new"] .rb-sm[data-rb="run"] .rb-sm-track { stroke-opacity: .2; }
+:root[data-ui="new"] .rb-sm[data-rb="run"] .rb-sm-ring { stroke-dasharray: 68 32; }
+:root[data-ui="new"] .rb-sm[data-rb="ok"] .rb-sm-ring,
+:root[data-ui="new"] .rb-sm[data-rb="warn"] .rb-sm-ring,
+:root[data-ui="new"] .rb-sm[data-rb="bad"] .rb-sm-ring { stroke-dasharray: 100 0; }
+:root[data-ui="new"] .rb-sm[data-rb="ok"] .rb-sm-track,
+:root[data-ui="new"] .rb-sm[data-rb="warn"] .rb-sm-track,
+:root[data-ui="new"] .rb-sm[data-rb="bad"] .rb-sm-track { fill: currentColor; fill-opacity: .1; }
+
+:root[data-ui="new"] .rb-sm-spin { transform-origin: 12px 12px; }
+:root[data-ui="new"] .rb-sm[data-rb="run"] .rb-sm-spin { animation: rb-sm-spin 1.1s linear infinite; }
+:root[data-ui="new"] .rb-sm-paused .rb-sm-spin { animation-play-state: paused; }
+@keyframes rb-sm-spin { to { transform: rotate(360deg); } }
+
+:root[data-ui="new"] .rb-sm-check,
+:root[data-ui="new"] .rb-sm-cross,
+:root[data-ui="new"] .rb-sm-bang {
+  fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1 2; stroke-dashoffset: 1.05; opacity: 0; transition: stroke-dashoffset .16s cubic-bezier(.23, 1, .32, 1), opacity 0s linear .16s;
+}
+:root[data-ui="new"] .rb-sm[data-rb="ok"] .rb-sm-check,
+:root[data-ui="new"] .rb-sm[data-rb="bad"] .rb-sm-cross,
+:root[data-ui="new"] .rb-sm[data-rb="warn"] .rb-sm-bang {
+  stroke-dashoffset: 0; opacity: 1; transition: stroke-dashoffset .24s cubic-bezier(.23, 1, .32, 1) .12s, opacity 0s linear .12s;
+}
+
+:root[data-ui="new"].no-anim .rb-sm *, :root[data-ui="new"].no-anim .dot.rb-sm { transition: none !important; animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] .rb-sm *, :root[data-ui="new"] .dot.rb-sm { transition: none !important; }
+  :root[data-ui="new"] .rb-sm[data-rb="run"] .rb-sm-spin { animation: rb-sm-breathe 1.4s ease-in-out infinite; }
+}
+@keyframes rb-sm-breathe { 50% { opacity: .4; } }

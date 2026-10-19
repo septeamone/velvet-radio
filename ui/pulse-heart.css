@@ -1,0 +1,15 @@
+/* Based on React Bits PulseHeart (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Сердечко `.heart`: сжимается в точку, на самом дне меняет цвет и заливку, потом пружинит обратно.
+   Масштабом занимается ui/pulse-heart.js (WAAPI на svg), здесь: заливка через fill-opacity (её можно задержать) и задержка смены цвета. */
+
+:root[data-ui="new"] .heart svg { fill: currentColor; fill-opacity: 0; transform-origin: 50% 50%; }
+:root[data-ui="new"] .heart.on svg { fill-opacity: 1; animation: none; }   /* старый «pop» заменён пружиной из JS */
+:root[data-ui="new"] .heart:active svg { scale: .9; }
+:root[data-ui="new"] .heart svg { transition: scale .16s var(--ease); }
+
+/* на время пульса цвет и заливка меняются ровно в момент, когда сердце стало точкой (40% от 560 мс) */
+:root[data-ui="new"] .heart[data-rb-run] { transition: color 0s linear .224s, background-color .3s ease; }
+:root[data-ui="new"] .heart[data-rb-run] svg { transition: fill-opacity 0s linear .224s, scale .16s var(--ease); }
+
+:root[data-ui="new"] .heart:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .heart svg { transition: none; } }

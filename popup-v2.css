@@ -128,3 +128,5 @@
 :root[data-ui="new"] .st b { font-weight: 600; }
 :root[data-ui="new"] .about a:hover { color: var(--text); }
 :root[data-ui="new"] .name, :root[data-ui="new"] .cn, :root[data-ui="new"] .cname, :root[data-ui="new"] .now-title, :root[data-ui="new"] .st b { font-weight: 560; }
+/* громкость подменяется «резиновой» дорожкой после первого показа окна; до этого прячем обычную, чтобы не было мигания */
+:root[data-ui="new"]:not(.rb-ready) #vol { visibility: hidden; }

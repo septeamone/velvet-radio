@@ -1,0 +1,12 @@
+/* Based on React Bits RubberSegment (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Ползунок вкладок, переключателя вида и #bufseg: положение задаёт ui/rubber.js через left/right (только при data-rb на контейнере). */
+
+:root[data-ui="new"] [data-rb] .thumb,
+:root[data-ui="new"] [data-rb] .vthumb,
+:root[data-ui="new"] [data-rb] .seg-thumb {
+  width: auto; transform: none; transition: background-color .3s ease;
+}
+/* нажатая кнопка чуть приседает, как в оригинале */
+:root[data-ui="new"] [data-rb] > button { transition: color .3s ease, transform .16s var(--ease); }
+:root[data-ui="new"] [data-rb] > button:active { transform: scale(.96); }
+:root[data-ui="new"] [data-rb] > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }

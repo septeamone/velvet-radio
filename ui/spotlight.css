@@ -1,0 +1,26 @@
+/* Based on React Bits SpotlightCard (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] {
+  --rb-sp-fill: 9%;      /* сила света внутри карточки */
+  --rb-sp-rim: 55%;      /* сила света на кромке */
+}
+:root[data-ui="new"][data-theme="dark"] { --rb-sp-fill: 8%; --rb-sp-rim: 50%; }
+
+:root[data-ui="new"] .rb-spotlight-light,
+:root[data-ui="new"] .rb-spotlight-edge { position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .35s ease; }
+:root[data-ui="new"] .rb-spotlight-light {
+  z-index: -1;      /* под содержимым, над фоном карточки (у .player свой контекст наложения) */
+  background: radial-gradient(circle 190px at var(--rb-sp-x, 50%) var(--rb-sp-y, 50%),
+    color-mix(in srgb, var(--accent) var(--rb-sp-fill), transparent) 0%,
+    color-mix(in srgb, var(--accent) calc(var(--rb-sp-fill) * .45), transparent) 45%,
+    transparent 100%);
+}
+:root[data-ui="new"] .rb-spotlight-edge {
+  z-index: 1; padding: 1px;
+  background: radial-gradient(circle 110px at var(--rb-sp-x, 50%) var(--rb-sp-y, 50%),
+    color-mix(in srgb, var(--accent) var(--rb-sp-rim), transparent) 0%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+:root[data-ui="new"] .rb-sp-on > .rb-spotlight-light,
+:root[data-ui="new"] .rb-sp-on > .rb-spotlight-edge { opacity: 1; }
+:root.no-anim .rb-spotlight-light, :root.no-anim .rb-spotlight-edge { transition: none; }

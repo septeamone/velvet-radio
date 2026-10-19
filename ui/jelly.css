@@ -1,0 +1,38 @@
+/* Based on React Bits JellyRadio (MIT + Commons Clause, © David Haz), ported to plain JS/CSS.
+   Переключатель качества `.seg` в строке станции: выбранная «таблетка» набухает и раздвигает соседей.
+   Только CSS (JS не нужен): состояние уже есть в разметке (`--i` на .seg, класс `on` на кнопке), пружина задана через linear().
+   Работает только внутри `.row`, поэтому настройка `#bufseg` не затронута. Расходов в покое нет, идут только transition по `translate`/`scale`. */
+
+:root[data-ui="new"] .row .seg:not(.one) {
+  --jr-push: 3px;                       /* на сколько соседи отъезжают от набухшей таблетки */
+  --jr-sx: 1.13; --jr-sy: 1.08;         /* набухание таблетки */
+  --jr-spring: linear(0, 0.101, 0.319, 0.561, 0.771, 0.926, 1.023, 1.071, 1.084, 1.075, 1.057, 1.037, 1.019, 1.006, 0.998, 0.994, 0.993, 0.994, 0.995, 0.997, 0.998, 0.999, 1, 1, 1.001, 1.001, 1, 1, 1);
+  --jr-jelly: linear(0, 0.106, 0.35, 0.634, 0.887, 1.07, 1.174, 1.205, 1.185, 1.136, 1.077, 1.025, 0.987, 0.965, 0.958, 0.962, 0.972, 0.984, 0.995, 1.003, 1.007, 1.009, 1.008, 1.006, 1.003, 1.001, 1, 0.999, 1);
+  padding: 2px 4px;                     /* запас по краям, чтобы раздвинутые кнопки не вылезали из дорожки */
+}
+:root[data-ui="new"] .row .seg:not(.one) .seg-thumb {
+  left: 4px; width: calc((100% - 8px) / var(--n));
+  transform: none;
+  translate: calc(var(--i) * 100%) 0;
+  scale: var(--jr-sx) var(--jr-sy);
+  transition: translate .62s var(--jr-spring), scale .72s var(--jr-jelly), background-color .3s ease;
+}
+:root[data-ui="new"] .row .seg:not(.one) button {
+  scale: .96;
+  transition: color .3s ease, transform .2s var(--ease), translate .62s var(--jr-spring), scale .62s var(--jr-jelly);
+}
+:root[data-ui="new"] .row .seg:not(.one) button.on { scale: 1.05; }
+:root[data-ui="new"] .row .seg:not(.one) button.on ~ button { translate: var(--jr-push) 0; }
+:root[data-ui="new"] .row .seg:not(.one) button:has(~ button.on) { translate: calc(var(--jr-push) * -1) 0; }
+/* волна: дальние соседи трогаются чуть позже ближних */
+:root[data-ui="new"] .row .seg:not(.one) button.on + button + button,
+:root[data-ui="new"] .row .seg:not(.one) button:has(+ button + button.on) { transition-delay: 0s, 0s, 24ms, 24ms; }
+
+/* пока строка въезжает (и появляется первое значение --i), без пружины: иначе таблетка «доезжала» бы с нуля */
+:root[data-ui="new"] .row:not(.ready) .seg .seg-thumb,
+:root[data-ui="new"] .row:not(.ready) .seg button { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] .row .seg:not(.one) .seg-thumb,
+  :root[data-ui="new"] .row .seg:not(.one) button { transition: color .2s ease, background-color .2s ease; }
+}

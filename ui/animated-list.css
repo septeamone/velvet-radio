@@ -1,0 +1,28 @@
+/* Based on React Bits AnimatedList (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+/* список — контейнер для скользящей рамки выбора (offsetTop/Left строк считаются от него) */
+:root[data-ui="new"] #list { position: relative; --rb-al-spring: linear(0, .1 6%, .42 15%, .74 26%, .93 38%, 1.02 50%, 1.03 60%, 1.01 74%, 1 100%); }
+
+/* появление: мягкий подъём с едва заметной пружиной; рамка выбора и ready остаются как были.
+   Анимируются только строки в первом экране, остальные ниже линии прокрутки и так не видны. */
+:root[data-ui="new"] #list .row, :root[data-ui="new"] #list .crow {
+  animation: rb-al-pop .5s var(--rb-al-spring) backwards; animation-delay: calc(var(--i) * 26ms);
+}
+:root[data-ui="new"] #list .row:nth-child(n+14), :root[data-ui="new"] #list .crow:nth-child(n+16),
+:root[data-ui="new"] #list .row.ready { animation: none; }
+@keyframes rb-al-pop { from { opacity: 0; transform: translate3d(0, 10px, 0) scale(.94); } }
+
+/* выбор клавиатурой: вместо статичной рамки на строке — общая рамка, скользящая между строками */
+:root[data-ui="new"] #list[data-rb-al] .row.kbd, :root[data-ui="new"] #list[data-rb-al] .crow.kbd { box-shadow: none; }
+:root[data-ui="new"] #list[data-rb-al] .row.cur.kbd { box-shadow: inset 0 0 0 1px var(--accent); }
+:root[data-ui="new"] #list[data-rb-al]::after {
+  content: ''; position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none;
+  width: var(--rb-al-w, 0px); height: var(--rb-al-h, 0px);
+  transform: translate(var(--rb-al-x, 0px), var(--rb-al-y, 0px));
+  border-radius: 12px; opacity: 0;
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  transition: transform .3s var(--ease), width .3s var(--ease), height .3s var(--ease), opacity .18s ease;
+}
+:root[data-ui="new"] #list[data-rb-al][data-rb-al-live]::after { opacity: 1; }
+:root[data-ui="new"] #list[data-rb-al][data-rb-al-snap]::after { transition: opacity .18s ease; }

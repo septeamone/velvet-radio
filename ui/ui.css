@@ -1,0 +1,403 @@
+/* СГЕНЕРИРОВАНО tools/gen-ui.mjs из ui/*.css. Руками не править. */
+
+/* ===== jelly.css ===== */
+/* Based on React Bits JellyRadio (MIT + Commons Clause, © David Haz), ported to plain JS/CSS.
+   Переключатель качества `.seg` в строке станции: выбранная «таблетка» набухает и раздвигает соседей.
+   Только CSS (JS не нужен): состояние уже есть в разметке (`--i` на .seg, класс `on` на кнопке), пружина задана через linear().
+   Работает только внутри `.row`, поэтому настройка `#bufseg` не затронута. Расходов в покое нет, идут только transition по `translate`/`scale`. */
+
+:root[data-ui="new"] .row .seg:not(.one) {
+  --jr-push: 3px;                       /* на сколько соседи отъезжают от набухшей таблетки */
+  --jr-sx: 1.13; --jr-sy: 1.08;         /* набухание таблетки */
+  --jr-spring: linear(0, 0.101, 0.319, 0.561, 0.771, 0.926, 1.023, 1.071, 1.084, 1.075, 1.057, 1.037, 1.019, 1.006, 0.998, 0.994, 0.993, 0.994, 0.995, 0.997, 0.998, 0.999, 1, 1, 1.001, 1.001, 1, 1, 1);
+  --jr-jelly: linear(0, 0.106, 0.35, 0.634, 0.887, 1.07, 1.174, 1.205, 1.185, 1.136, 1.077, 1.025, 0.987, 0.965, 0.958, 0.962, 0.972, 0.984, 0.995, 1.003, 1.007, 1.009, 1.008, 1.006, 1.003, 1.001, 1, 0.999, 1);
+  padding: 2px 4px;                     /* запас по краям, чтобы раздвинутые кнопки не вылезали из дорожки */
+}
+:root[data-ui="new"] .row .seg:not(.one) .seg-thumb {
+  left: 4px; width: calc((100% - 8px) / var(--n));
+  transform: none;
+  translate: calc(var(--i) * 100%) 0;
+  scale: var(--jr-sx) var(--jr-sy);
+  transition: translate .62s var(--jr-spring), scale .72s var(--jr-jelly), background-color .3s ease;
+}
+:root[data-ui="new"] .row .seg:not(.one) button {
+  scale: .96;
+  transition: color .3s ease, transform .2s var(--ease), translate .62s var(--jr-spring), scale .62s var(--jr-jelly);
+}
+:root[data-ui="new"] .row .seg:not(.one) button.on { scale: 1.05; }
+:root[data-ui="new"] .row .seg:not(.one) button.on ~ button { translate: var(--jr-push) 0; }
+:root[data-ui="new"] .row .seg:not(.one) button:has(~ button.on) { translate: calc(var(--jr-push) * -1) 0; }
+/* волна: дальние соседи трогаются чуть позже ближних */
+:root[data-ui="new"] .row .seg:not(.one) button.on + button + button,
+:root[data-ui="new"] .row .seg:not(.one) button:has(+ button + button.on) { transition-delay: 0s, 0s, 24ms, 24ms; }
+
+/* пока строка въезжает (и появляется первое значение --i), без пружины: иначе таблетка «доезжала» бы с нуля */
+:root[data-ui="new"] .row:not(.ready) .seg .seg-thumb,
+:root[data-ui="new"] .row:not(.ready) .seg button { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] .row .seg:not(.one) .seg-thumb,
+  :root[data-ui="new"] .row .seg:not(.one) button { transition: color .2s ease, background-color .2s ease; }
+}
+
+/* ===== rubber.css ===== */
+/* Based on React Bits RubberSegment (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Ползунок вкладок, переключателя вида и #bufseg: положение задаёт ui/rubber.js через left/right (только при data-rb на контейнере). */
+
+:root[data-ui="new"] [data-rb] .thumb,
+:root[data-ui="new"] [data-rb] .vthumb,
+:root[data-ui="new"] [data-rb] .seg-thumb {
+  width: auto; transform: none; transition: background-color .3s ease;
+}
+/* нажатая кнопка чуть приседает, как в оригинале */
+:root[data-ui="new"] [data-rb] > button { transition: color .3s ease, transform .16s var(--ease); }
+:root[data-ui="new"] [data-rb] > button:active { transform: scale(.96); }
+:root[data-ui="new"] [data-rb] > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* ===== squish.css ===== */
+/* Based on React Bits SquishSwitch (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Переключатель input.sw: ползунок это ::after. Его перемещением и сплющиванием занимается ui/squish.js (WAAPI на псевдоэлементе),
+   поэтому у ::after отключён обычный transition. Без JS (нет data-sq) остаётся прежнее поведение. */
+
+:root[data-ui="new"] .sw[data-sq]::after { transition: none; transform-origin: 50% 50%; }
+:root[data-ui="new"] .sw[data-sq] { transition: background-color .32s ease; }
+:root[data-ui="new"] .sw[data-sq]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ===== pulse-heart.css ===== */
+/* Based on React Bits PulseHeart (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+/* Сердечко `.heart`: сжимается в точку, на самом дне меняет цвет и заливку, потом пружинит обратно.
+   Масштабом занимается ui/pulse-heart.js (WAAPI на svg), здесь: заливка через fill-opacity (её можно задержать) и задержка смены цвета. */
+
+:root[data-ui="new"] .heart svg { fill: currentColor; fill-opacity: 0; transform-origin: 50% 50%; }
+:root[data-ui="new"] .heart.on svg { fill-opacity: 1; animation: none; }   /* старый «pop» заменён пружиной из JS */
+:root[data-ui="new"] .heart:active svg { scale: .9; }
+:root[data-ui="new"] .heart svg { transition: scale .16s var(--ease); }
+
+/* на время пульса цвет и заливка меняются ровно в момент, когда сердце стало точкой (40% от 560 мс) */
+:root[data-ui="new"] .heart[data-rb-run] { transition: color 0s linear .224s, background-color .3s ease; }
+:root[data-ui="new"] .heart[data-rb-run] svg { transition: fill-opacity 0s linear .224s, scale .16s var(--ease); }
+
+:root[data-ui="new"] .heart:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .heart svg { transition: none; } }
+
+/* ===== elastic-slider.css ===== */
+/* Based on React Bits ElasticSlider (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+:root[data-ui="new"] .rb-elastic-wrap { position: relative; flex: 1; min-width: 0; height: 26px; display: flex; align-items: center; opacity: .78; transition: opacity .25s ease; }
+:root[data-ui="new"] .rb-elastic-wrap:is(:hover, :focus-within, [data-drag]) { opacity: 1; }
+
+/* настоящий input: невидимый, но ловит мышь, клавиши и фокус; ползунок нулевой ширины, чтобы значение считалось от края до края */
+:root[data-ui="new"] input.rb-elastic-input[type=range] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; flex: none; opacity: 0; cursor: grab; touch-action: none; }
+:root[data-ui="new"] input.rb-elastic-input[type=range]:active { cursor: grabbing; }
+:root[data-ui="new"] input.rb-elastic-input[type=range]::-webkit-slider-runnable-track { height: 100%; background: none; }
+:root[data-ui="new"] input.rb-elastic-input[type=range]::-webkit-slider-thumb { width: 0; height: 0; margin: 0; background: none; box-shadow: none; transform: none; }
+
+:root[data-ui="new"] .rb-elastic-track {
+  position: absolute; left: 0; right: 0; top: 0; bottom: 0; margin: auto 0; pointer-events: none;
+  height: 4px; border-radius: 999px; background: var(--track); overflow: hidden; will-change: transform;
+  transition: height .32s cubic-bezier(.3, 1.35, .5, 1);
+}
+:root[data-ui="new"] .rb-elastic-wrap:is(:hover, [data-drag]) .rb-elastic-track,
+:root[data-ui="new"] .rb-elastic-wrap:has(input:focus-visible) .rb-elastic-track { height: 10px; }
+:root[data-ui="new"] .rb-elastic-wrap:has(input:focus-visible) .rb-elastic-track { outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset: 3px; }
+:root[data-ui="new"] .rb-elastic-snap .rb-elastic-track { transition: height .32s cubic-bezier(.3, 1.35, .5, 1), transform .55s cubic-bezier(.3, 1.7, .45, 1); }
+:root[data-ui="new"] .rb-elastic-wrap[data-drag] .rb-elastic-track { transition: height .2s ease; }
+
+:root[data-ui="new"] .rb-elastic-fill { position: absolute; inset: 0; background: var(--accent); clip-path: inset(0 calc(100% - var(--rb-p, 0%)) 0 0); }
+
+/* значок динамика рядом: пружинит вместе с растяжением */
+:root[data-ui="new"] .vol svg { will-change: transform; transition: color .2s ease; }
+:root[data-ui="new"] .vol:hover svg, :root[data-ui="new"] .vol:focus-within svg { color: var(--text); }
+
+:root[data-ui="new"].no-anim .rb-elastic-track, :root[data-ui="new"].no-anim .rb-elastic-wrap { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] .rb-elastic-track, :root[data-ui="new"] .rb-elastic-wrap { transition: none; }
+}
+
+/* ===== status-mark.css ===== */
+/* Based on React Bits StatusMark (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+:root[data-ui="new"] {
+  --rb-sm-ok: #3f8f6b; --rb-sm-warn: #b8862d; --rb-sm-bad: #bf4f4c; --rb-sm-idle-o: 0;
+}
+:root[data-ui="new"][data-theme="dark"] { --rb-sm-ok: #6fc29a; --rb-sm-warn: #d9ad5c; --rb-sm-bad: #d9726f; }
+
+/* перекрываем классический .dot (цветная точка): здесь плашка с кольцом */
+:root[data-ui="new"] .dot.rb-sm {
+  width: 17px; height: 17px; right: -6px; bottom: -6px; border: 0; background: var(--glass-deep);
+  box-shadow: 0 0 0 1.5px var(--glass-deep); animation: none; opacity: 1; color: var(--muted);
+  transition: color .25s ease;
+}
+:root[data-ui="new"] .dot.rb-sm[data-rb="off"] { opacity: var(--rb-sm-idle-o); }
+:root[data-ui="new"] .dot.rb-sm[data-rb="run"] { color: var(--text); }
+:root[data-ui="new"] .dot.rb-sm[data-rb="ok"] { color: var(--rb-sm-ok); }
+:root[data-ui="new"] .dot.rb-sm[data-rb="warn"] { color: var(--rb-sm-warn); }
+:root[data-ui="new"] .dot.rb-sm[data-rb="bad"] { color: var(--rb-sm-bad); }
+
+:root[data-ui="new"] .rb-sm-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+:root[data-ui="new"] .rb-sm-track,
+:root[data-ui="new"] .rb-sm-ring { fill: none; stroke: currentColor; stroke-width: 2.4; }
+:root[data-ui="new"] .rb-sm-track { stroke-opacity: 0; transition: stroke-opacity .25s ease, fill-opacity .25s ease; }
+:root[data-ui="new"] .rb-sm-ring { stroke-linecap: round; stroke-dasharray: 3 9.5; transition: stroke-dasharray .35s cubic-bezier(.77, 0, .175, 1); }
+:root[data-ui="new"] .rb-sm[data-rb="run"] .rb-sm-track { stroke-opacity: .2; }
+:root[data-ui="new"] .rb-sm[data-rb="run"] .rb-sm-ring { stroke-dasharray: 68 32; }
+:root[data-ui="new"] .rb-sm[data-rb="ok"] .rb-sm-ring,
+:root[data-ui="new"] .rb-sm[data-rb="warn"] .rb-sm-ring,
+:root[data-ui="new"] .rb-sm[data-rb="bad"] .rb-sm-ring { stroke-dasharray: 100 0; }
+:root[data-ui="new"] .rb-sm[data-rb="ok"] .rb-sm-track,
+:root[data-ui="new"] .rb-sm[data-rb="warn"] .rb-sm-track,
+:root[data-ui="new"] .rb-sm[data-rb="bad"] .rb-sm-track { fill: currentColor; fill-opacity: .1; }
+
+:root[data-ui="new"] .rb-sm-spin { transform-origin: 12px 12px; }
+:root[data-ui="new"] .rb-sm[data-rb="run"] .rb-sm-spin { animation: rb-sm-spin 1.1s linear infinite; }
+:root[data-ui="new"] .rb-sm-paused .rb-sm-spin { animation-play-state: paused; }
+@keyframes rb-sm-spin { to { transform: rotate(360deg); } }
+
+:root[data-ui="new"] .rb-sm-check,
+:root[data-ui="new"] .rb-sm-cross,
+:root[data-ui="new"] .rb-sm-bang {
+  fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1 2; stroke-dashoffset: 1.05; opacity: 0; transition: stroke-dashoffset .16s cubic-bezier(.23, 1, .32, 1), opacity 0s linear .16s;
+}
+:root[data-ui="new"] .rb-sm[data-rb="ok"] .rb-sm-check,
+:root[data-ui="new"] .rb-sm[data-rb="bad"] .rb-sm-cross,
+:root[data-ui="new"] .rb-sm[data-rb="warn"] .rb-sm-bang {
+  stroke-dashoffset: 0; opacity: 1; transition: stroke-dashoffset .24s cubic-bezier(.23, 1, .32, 1) .12s, opacity 0s linear .12s;
+}
+
+:root[data-ui="new"].no-anim .rb-sm *, :root[data-ui="new"].no-anim .dot.rb-sm { transition: none !important; animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] .rb-sm *, :root[data-ui="new"] .dot.rb-sm { transition: none !important; }
+  :root[data-ui="new"] .rb-sm[data-rb="run"] .rb-sm-spin { animation: rb-sm-breathe 1.4s ease-in-out infinite; }
+}
+@keyframes rb-sm-breathe { 50% { opacity: .4; } }
+
+/* ===== shiny-text.css ===== */
+/* Based on React Bits ShinyText (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+/* градиент кладётся на вложенный .mq (так устроен текст плеера), а без него — на сам элемент; базовый цвет — текущий цвет текста */
+:root[data-ui="new"] .rb-shiny .mq {
+  --rb-shine: var(--text);
+  background: linear-gradient(105deg, currentColor 38%, var(--rb-shine) 50%, currentColor 62%) 0 0 / 260% 100% no-repeat;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: rb-shiny 2.2s cubic-bezier(.45, .05, .3, 1) infinite;
+}
+@keyframes rb-shiny {
+  0% { background-position: 0 0; }
+  65%, 100% { background-position: 100% 0; }   /* проход, затем пауза */
+}
+:root[data-ui="new"] .rb-shiny-paused .mq { animation-play-state: paused; }
+:root[data-ui="new"].no-anim .rb-shiny .mq { animation: none; background: none; -webkit-text-fill-color: currentColor; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] .rb-shiny .mq { animation: none; background: none; -webkit-text-fill-color: currentColor; }
+}
+
+/* ===== echo-text.css ===== */
+/* Based on React Bits EchoText (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] .rb-echo-root {
+  position: relative; display: inline-block; white-space: nowrap; text-indent: 0; user-select: none;
+  /* копии обрезаются: по бокам до соседних кнопок, сверху до края окна (значения ставит JS), снизу почти вплотную */
+  clip-path: inset(calc(var(--rb-clip-t, 8px) * -1) calc(var(--rb-clip-x, 16px) * -1) -4px calc(var(--rb-clip-x, 16px) * -1));
+}
+:root[data-ui="new"] .rb-echo-front { position: relative; z-index: 2; display: block; }
+:root[data-ui="new"] .rb-echo-ghost, :root[data-ui="new"] .rb-echo-bursts { position: absolute; inset: 0; display: block; pointer-events: none; }
+:root[data-ui="new"] .rb-echo-ghost { opacity: 0; visibility: hidden; transform-origin: 50% 50%; backface-visibility: hidden; }
+:root[data-ui="new"] .rb-echo-root.is-on .rb-echo-ghost { visibility: visible; will-change: transform, opacity; }
+:root[data-ui="new"] .rb-echo-bursts .rb-echo-ghost { visibility: visible; will-change: transform, opacity; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="new"] .rb-echo-ghost, :root[data-ui="new"] .rb-echo-bursts { display: none; } }
+:root[data-ui="new"].no-anim .rb-echo-ghost, :root[data-ui="new"].no-anim .rb-echo-bursts { display: none; }
+
+/* ===== split-flap.css ===== */
+/* Based on React Bits SplitFlapText (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] .rb-flap-host { position: relative; }
+/* пока играет табло: настоящий текст невидим и стоит, бегущая строка ждёт на нуле, после табло продолжит с начала */
+:root[data-ui="new"] .rb-flap-busy > .mq { visibility: hidden; }
+:root[data-ui="new"] .rb-flap-busy, :root[data-ui="new"] .rb-flap-busy > .mq { animation-play-state: paused !important; }
+
+:root[data-ui="new"] .rb-flap-board { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+:root[data-ui="new"] .rb-flap-tile {
+  position: absolute; top: 0; height: var(--rb-flap-h); perspective: 60px; contain: layout style;
+  font: inherit; letter-spacing: inherit; font-style: normal;
+}
+:root[data-ui="new"] .rb-flap-half, :root[data-ui="new"] .rb-flap-flap {
+  position: absolute; left: 0; width: 100%; height: 50%; overflow: hidden; display: block; font-style: normal;
+  background: var(--glass-deep); backface-visibility: hidden;
+}
+:root[data-ui="new"] .rb-flap-top, :root[data-ui="new"] .rb-flap-front { top: 0; }
+:root[data-ui="new"] .rb-flap-bot, :root[data-ui="new"] .rb-flap-back { bottom: 0; }
+/* буква: высота всей плитки, по центру; верхняя половина показывает верх, нижняя низ */
+:root[data-ui="new"] .rb-flap-half b, :root[data-ui="new"] .rb-flap-flap b {
+  position: absolute; left: 0; width: 100%; height: var(--rb-flap-h); display: flex; align-items: center; justify-content: center;
+  font: inherit; font-weight: inherit; line-height: 1; white-space: pre; color: inherit; letter-spacing: 0;
+}
+:root[data-ui="new"] .rb-flap-top b, :root[data-ui="new"] .rb-flap-front b { top: 0; }
+:root[data-ui="new"] .rb-flap-bot b, :root[data-ui="new"] .rb-flap-back b { bottom: 0; }
+/* створки видны только во время щелчка */
+:root[data-ui="new"] .rb-flap-flap { visibility: hidden; will-change: transform; }
+:root[data-ui="new"] .rb-flap-front { transform-origin: 50% 100%; }
+:root[data-ui="new"] .rb-flap-back { transform-origin: 50% 0; transform: rotateX(90deg); }
+:root[data-ui="new"] .rb-flap-tile.is-flip .rb-flap-flap { visibility: visible; }
+/* шарнир: тонкая линия посередине, еле заметная */
+:root[data-ui="new"] .rb-flap-tile.is-flip::after {
+  content: ''; position: absolute; left: 0; right: 0; top: calc(50% - .5px); height: 1px; z-index: 5;
+  background: color-mix(in srgb, var(--text) 13%, transparent);
+}
+
+/* ===== spotlight.css ===== */
+/* Based on React Bits SpotlightCard (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] {
+  --rb-sp-fill: 9%;      /* сила света внутри карточки */
+  --rb-sp-rim: 55%;      /* сила света на кромке */
+}
+:root[data-ui="new"][data-theme="dark"] { --rb-sp-fill: 8%; --rb-sp-rim: 50%; }
+
+:root[data-ui="new"] .rb-spotlight-light,
+:root[data-ui="new"] .rb-spotlight-edge { position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .35s ease; }
+:root[data-ui="new"] .rb-spotlight-light {
+  z-index: -1;      /* под содержимым, над фоном карточки (у .player свой контекст наложения) */
+  background: radial-gradient(circle 190px at var(--rb-sp-x, 50%) var(--rb-sp-y, 50%),
+    color-mix(in srgb, var(--accent) var(--rb-sp-fill), transparent) 0%,
+    color-mix(in srgb, var(--accent) calc(var(--rb-sp-fill) * .45), transparent) 45%,
+    transparent 100%);
+}
+:root[data-ui="new"] .rb-spotlight-edge {
+  z-index: 1; padding: 1px;
+  background: radial-gradient(circle 110px at var(--rb-sp-x, 50%) var(--rb-sp-y, 50%),
+    color-mix(in srgb, var(--accent) var(--rb-sp-rim), transparent) 0%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+:root[data-ui="new"] .rb-sp-on > .rb-spotlight-light,
+:root[data-ui="new"] .rb-sp-on > .rb-spotlight-edge { opacity: 1; }
+:root.no-anim .rb-spotlight-light, :root.no-anim .rb-spotlight-edge { transition: none; }
+
+/* ===== border-glow.css ===== */
+/* Based on React Bits BorderGlow (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+:root[data-ui="new"] {
+  --rb-bg-rim: 100%;     /* сила света на кромке */
+  --rb-bg-inner: 12%;    /* лёгкое свечение внутри у края */
+}
+:root[data-ui="new"][data-theme="dark"] { --rb-bg-rim: 90%; --rb-bg-inner: 9%; }
+
+/* играющая станция: спокойная кромка; яркий клин появляется только под курсором */
+:root[data-ui="new"] .row.cur:not(.kbd):not(.dragging) { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
+
+:root[data-ui="new"] .rb-bg-edge {
+  --rb-bg-angle: 0deg; --rb-bg-k: 0;
+  position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; z-index: 2; opacity: 0; transition: opacity .3s ease;
+  padding: 1.5px;
+  background: conic-gradient(from calc(var(--rb-bg-angle) - 55deg) at 50% 50%,
+    transparent 0deg,
+    color-mix(in srgb, var(--accent) var(--rb-bg-rim), transparent) 55deg,
+    transparent 110deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+/* лёгкий свет внутри тем же клином, без blur и теней */
+:root[data-ui="new"] .rb-bg-edge::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: conic-gradient(from calc(var(--rb-bg-angle) - 70deg) at 50% 50%, transparent 0deg,
+    color-mix(in srgb, var(--accent) var(--rb-bg-inner), transparent) 70deg, transparent 140deg, transparent 360deg);
+  -webkit-mask: radial-gradient(ellipse closest-side, transparent 60%, #000); mask: radial-gradient(ellipse closest-side, transparent 60%, #000);
+}
+:root[data-ui="new"] .rb-bg-edge.rb-bg-on { opacity: calc(.3 + .7 * var(--rb-bg-k)); }
+:root[data-ui="new"] .row.dragging > .rb-bg-edge { display: none; }
+:root.no-anim .rb-bg-edge { transition: none; }
+
+/* ===== warm-tooltip.css ===== */
+/* Based on React Bits WarmTooltip (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+:root[data-ui="new"] .rb-wt-tip {
+  position: fixed; top: 0; left: 0; z-index: 60; pointer-events: none;
+  width: max-content; max-width: min(260px, calc(100vw - 16px));
+  padding: 6px 10px; border-radius: 8px;
+  background: var(--pill-bg); color: var(--pill-ink);
+  box-shadow: 0 6px 16px var(--shadow);
+  font: 500 12px/1.3 'Geist V', 'Segoe UI', system-ui, sans-serif; letter-spacing: -.005em;
+  overflow-wrap: anywhere;
+  transition: transform .22s var(--ease);
+  transform-origin: var(--rb-wt-ox, 50%) 100%;
+}
+:root[data-ui="new"] .rb-wt-tip[hidden] { display: none; }
+:root[data-ui="new"] .rb-wt-tip[data-side="bottom"] { transform-origin: var(--rb-wt-ox, 50%) 0; }
+:root[data-ui="new"] .rb-wt-tip.rb-wt-snap { transition: none; }
+
+/* появление: лёгкий подъём и проявление; тёплое (рядом с только что закрытой) — только проявление */
+:root[data-ui="new"] .rb-wt-tip.rb-wt-in { animation: rb-wt-pop .16s var(--ease) both; }
+:root[data-ui="new"] .rb-wt-tip.rb-wt-in.rb-wt-warm { animation-name: rb-wt-fade; }
+:root[data-ui="new"] .rb-wt-tip.rb-wt-out { animation: rb-wt-out .13s ease both; }
+@keyframes rb-wt-pop { from { opacity: 0; scale: .92; } to { opacity: 1; scale: 1; } }
+@keyframes rb-wt-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rb-wt-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* смена текста при переезде на соседний элемент */
+:root[data-ui="new"] .rb-wt-text { display: block; }
+:root[data-ui="new"] .rb-wt-text.rb-wt-swap { animation: rb-wt-swap .14s var(--ease); }
+@keyframes rb-wt-swap { from { opacity: .35; } }
+
+@media (prefers-contrast: more) {
+  :root[data-ui="new"] .rb-wt-tip { box-shadow: 0 0 0 1px var(--text); }
+}
+
+/* ===== glide-select.css ===== */
+/* Based on React Bits GlideSelect (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+/* меню «выпрыгивает» из угла кнопки; закрытие тоже плавное (display переходит последним) */
+:root[data-ui="new"] .gpanel {
+  animation: none;
+  transform-origin: var(--rb-gs-ox, 88%) 0;
+  transition: opacity .16s var(--ease), transform .22s var(--ease), display .22s allow-discrete;
+}
+:root[data-ui="new"] .gpanel[hidden] {
+  opacity: 0; transform: translateY(-6px) scale(.94); pointer-events: none;
+  transition: opacity .1s ease, transform .12s ease, display .12s allow-discrete;
+}
+@starting-style {
+  :root[data-ui="new"] .gpanel:not([hidden]) { opacity: 0; transform: translateY(-6px) scale(.94); }
+}
+
+/* скользящая подсветка: рамка поверх чипов, позиция в CSS-переменных (их ставит ui/glide-select.js) */
+:root[data-ui="new"] .gpanel::after {
+  content: ''; position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none;
+  width: var(--rb-gs-w, 0px); height: var(--rb-gs-h, 0px);
+  transform: translate(var(--rb-gs-x, 0px), var(--rb-gs-y, 0px));
+  border-radius: 8px; opacity: 0;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  transition: transform .26s var(--ease), width .26s var(--ease), height .26s var(--ease), opacity .15s ease;
+}
+:root[data-ui="new"] .gpanel[data-rb-gs-live]::after { opacity: 1; }
+:root[data-ui="new"] .gpanel[data-rb-gs-snap]::after { transition: opacity .15s ease; }
+
+:root[data-ui="new"] .gpanel .chip:hover { transform: none; }
+:root[data-ui="new"] .gpanel .chip:focus-visible { outline: none; }
+
+/* ===== animated-list.css ===== */
+/* Based on React Bits AnimatedList (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+/* список — контейнер для скользящей рамки выбора (offsetTop/Left строк считаются от него) */
+:root[data-ui="new"] #list { position: relative; --rb-al-spring: linear(0, .1 6%, .42 15%, .74 26%, .93 38%, 1.02 50%, 1.03 60%, 1.01 74%, 1 100%); }
+
+/* появление: мягкий подъём с едва заметной пружиной; рамка выбора и ready остаются как были.
+   Анимируются только строки в первом экране, остальные ниже линии прокрутки и так не видны. */
+:root[data-ui="new"] #list .row, :root[data-ui="new"] #list .crow {
+  animation: rb-al-pop .5s var(--rb-al-spring) backwards; animation-delay: calc(var(--i) * 26ms);
+}
+:root[data-ui="new"] #list .row:nth-child(n+14), :root[data-ui="new"] #list .crow:nth-child(n+16),
+:root[data-ui="new"] #list .row.ready { animation: none; }
+@keyframes rb-al-pop { from { opacity: 0; transform: translate3d(0, 10px, 0) scale(.94); } }
+
+/* выбор клавиатурой: вместо статичной рамки на строке — общая рамка, скользящая между строками */
+:root[data-ui="new"] #list[data-rb-al] .row.kbd, :root[data-ui="new"] #list[data-rb-al] .crow.kbd { box-shadow: none; }
+:root[data-ui="new"] #list[data-rb-al] .row.cur.kbd { box-shadow: inset 0 0 0 1px var(--accent); }
+:root[data-ui="new"] #list[data-rb-al]::after {
+  content: ''; position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none;
+  width: var(--rb-al-w, 0px); height: var(--rb-al-h, 0px);
+  transform: translate(var(--rb-al-x, 0px), var(--rb-al-y, 0px));
+  border-radius: 12px; opacity: 0;
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  transition: transform .3s var(--ease), width .3s var(--ease), height .3s var(--ease), opacity .18s ease;
+}
+:root[data-ui="new"] #list[data-rb-al][data-rb-al-live]::after { opacity: 1; }
+:root[data-ui="new"] #list[data-rb-al][data-rb-al-snap]::after { transition: opacity .18s ease; }

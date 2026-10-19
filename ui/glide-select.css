@@ -1,0 +1,31 @@
+/* Based on React Bits GlideSelect (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+/* меню «выпрыгивает» из угла кнопки; закрытие тоже плавное (display переходит последним) */
+:root[data-ui="new"] .gpanel {
+  animation: none;
+  transform-origin: var(--rb-gs-ox, 88%) 0;
+  transition: opacity .16s var(--ease), transform .22s var(--ease), display .22s allow-discrete;
+}
+:root[data-ui="new"] .gpanel[hidden] {
+  opacity: 0; transform: translateY(-6px) scale(.94); pointer-events: none;
+  transition: opacity .1s ease, transform .12s ease, display .12s allow-discrete;
+}
+@starting-style {
+  :root[data-ui="new"] .gpanel:not([hidden]) { opacity: 0; transform: translateY(-6px) scale(.94); }
+}
+
+/* скользящая подсветка: рамка поверх чипов, позиция в CSS-переменных (их ставит ui/glide-select.js) */
+:root[data-ui="new"] .gpanel::after {
+  content: ''; position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none;
+  width: var(--rb-gs-w, 0px); height: var(--rb-gs-h, 0px);
+  transform: translate(var(--rb-gs-x, 0px), var(--rb-gs-y, 0px));
+  border-radius: 8px; opacity: 0;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  transition: transform .26s var(--ease), width .26s var(--ease), height .26s var(--ease), opacity .15s ease;
+}
+:root[data-ui="new"] .gpanel[data-rb-gs-live]::after { opacity: 1; }
+:root[data-ui="new"] .gpanel[data-rb-gs-snap]::after { transition: opacity .15s ease; }
+
+:root[data-ui="new"] .gpanel .chip:hover { transform: none; }
+:root[data-ui="new"] .gpanel .chip:focus-visible { outline: none; }

@@ -8,6 +8,7 @@ const list = $('#list');
 const player = $('.player');
 const tabs = $('.tabs');
 
+let fx = null;                                   // элементы нового вида (табло названия песни и др.); null в классическом виде
 const ui = { tab: 'all', country: null, genre: null, settings: { ...DEFAULTS }, health: { bad: [] }, view: 'list', query: '', favs: new Set(), quality: {}, order: [], last: null, state: { stationId: null, kbps: null, status: 'stopped', volume: 0.8, track: null, notice: null, viz: false } };
 const index = new Map(STATIONS.map((s) => [s.id, s]));
 const byId = (id) => index.get(id);
@@ -410,6 +411,7 @@ function renderPlayer() {
     else if (status === 'loading') { sub = nt ?? t('connecting'); note = !!nt; }
     else if (status === 'playing') { sub = track ?? t('playingAt', { k: q }); if (nt && !track) { sub = nt; note = true; } }
     setMq($('#nowSub'), sub);
+    fx?.flap.update(sub, status === 'playing' && !!track);
     const link = status === 'playing' && !!track;
     const row = $('#subRow');
     row.classList.toggle('link', link);
@@ -646,7 +648,7 @@ settingsEl.addEventListener('change', async (e) => {
   }
   ui.settings = await saveSettings({ [k]: e.target.checked });
   if (k === 'saver') { renderList(); renderPlayer(); }
-  if (k === 'classic') applyUi();
+  if (k === 'classic') { applyUi(); location.reload(); }       // чистая смена вида: старые элементы снимаются перезагрузкой окна
 });
 $('#bufseg').addEventListener('click', async (e) => {
   const b = e.target.closest('button');
@@ -701,5 +703,7 @@ $('#bkeys').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://
   syncChrome();
   renderList();
   renderPlayer();
+  // Элементы нового вида подгружаем и подключаем сразу после первого показа окна, чтобы их файлы не задерживали открытие (замер: окно открывается как прежде).
+  if (!ui.settings.classic) requestAnimationFrame(() => setTimeout(async () => { fx = (await import('./ui/index.js')).mountNewUi($, list); document.documentElement.classList.add('rb-ready'); }, 0));
   if (ui.favs.size && (!ui.health.t || Date.now() - ui.health.t > 864e5)) runCheck();   // раз в сутки, тихо, пока окно открыто
 })();

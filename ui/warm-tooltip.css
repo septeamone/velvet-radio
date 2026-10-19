@@ -1,0 +1,33 @@
+/* Based on React Bits WarmTooltip (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
+
+:root[data-ui="new"] .rb-wt-tip {
+  position: fixed; top: 0; left: 0; z-index: 60; pointer-events: none;
+  width: max-content; max-width: min(260px, calc(100vw - 16px));
+  padding: 6px 10px; border-radius: 8px;
+  background: var(--pill-bg); color: var(--pill-ink);
+  box-shadow: 0 6px 16px var(--shadow);
+  font: 500 12px/1.3 'Geist V', 'Segoe UI', system-ui, sans-serif; letter-spacing: -.005em;
+  overflow-wrap: anywhere;
+  transition: transform .22s var(--ease);
+  transform-origin: var(--rb-wt-ox, 50%) 100%;
+}
+:root[data-ui="new"] .rb-wt-tip[hidden] { display: none; }
+:root[data-ui="new"] .rb-wt-tip[data-side="bottom"] { transform-origin: var(--rb-wt-ox, 50%) 0; }
+:root[data-ui="new"] .rb-wt-tip.rb-wt-snap { transition: none; }
+
+/* появление: лёгкий подъём и проявление; тёплое (рядом с только что закрытой) — только проявление */
+:root[data-ui="new"] .rb-wt-tip.rb-wt-in { animation: rb-wt-pop .16s var(--ease) both; }
+:root[data-ui="new"] .rb-wt-tip.rb-wt-in.rb-wt-warm { animation-name: rb-wt-fade; }
+:root[data-ui="new"] .rb-wt-tip.rb-wt-out { animation: rb-wt-out .13s ease both; }
+@keyframes rb-wt-pop { from { opacity: 0; scale: .92; } to { opacity: 1; scale: 1; } }
+@keyframes rb-wt-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rb-wt-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* смена текста при переезде на соседний элемент */
+:root[data-ui="new"] .rb-wt-text { display: block; }
+:root[data-ui="new"] .rb-wt-text.rb-wt-swap { animation: rb-wt-swap .14s var(--ease); }
+@keyframes rb-wt-swap { from { opacity: .35; } }
+
+@media (prefers-contrast: more) {
+  :root[data-ui="new"] .rb-wt-tip { box-shadow: 0 0 0 1px var(--text); }
+}
