@@ -44,7 +44,13 @@ function setMq(el, text) {
 }
 
 /* ---------- тема ---------- */
-function applyTheme(theme) { document.documentElement.dataset.theme = theme; }
+function applyTheme(theme) { document.documentElement.dataset.theme = theme; try { localStorage.setItem('vr-theme', theme); } catch {} }
+// Новый вид по умолчанию; «классический» включается в настройках. Значение дублируется в localStorage, чтобы boot.js применил его до первой отрисовки.
+function applyUi() {
+  const ui_ = ui.settings.classic ? 'classic' : 'new';
+  document.documentElement.dataset.ui = ui_;
+  try { localStorage.setItem('vr-ui', ui_); } catch {}
+}
 async function initTheme() {
   const { theme } = await chrome.storage.local.get('theme');
   applyTheme(theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
@@ -640,6 +646,7 @@ settingsEl.addEventListener('change', async (e) => {
   }
   ui.settings = await saveSettings({ [k]: e.target.checked });
   if (k === 'saver') { renderList(); renderPlayer(); }
+  if (k === 'classic') applyUi();
 });
 $('#bufseg').addEventListener('click', async (e) => {
   const b = e.target.closest('button');
@@ -677,6 +684,7 @@ $('#bkeys').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://
 (async () => {
   ui.settings = await getSettings();
   if (ui.settings.sync) await pullSync().catch(() => {});
+  applyUi();
   await initTheme();
   const saved = await chrome.storage.local.get(['favs', 'last', 'quality', 'order', 'lang', 'view', 'health']);
   ui.health = saved.health ?? { bad: [] };

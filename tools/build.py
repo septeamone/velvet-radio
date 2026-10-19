@@ -6,10 +6,11 @@ from pathlib import Path
 root = Path(__file__).resolve().parent.parent
 version = json.loads((root / 'manifest.json').read_text('utf-8'))['version']
 files = ['manifest.json', 'background.js', 'offscreen.html', 'offscreen.js', 'nowplaying.js',
-         'stations.js', 'i18n.js', 'settings.js', 'popup.html', 'popup.js', 'popup.css', 'vendor/hls.min.js', 'flags/LICENSE']
+         'stations.js', 'i18n.js', 'settings.js', 'popup.html', 'popup.js', 'popup.css', 'popup-v2.css', 'boot.js', 'vendor/hls.min.js', 'flags/LICENSE']
 files += sorted(p.relative_to(root).as_posix() for d in ('icons', 'logos') for p in (root / d).glob('*.png'))
 files += sorted(p.relative_to(root).as_posix() for p in (root / 'stations').glob('*.js'))
 files += sorted(p.relative_to(root).as_posix() for p in (root / 'flags').glob('*.svg'))
+files += sorted(p.relative_to(root).as_posix() for p in (root / 'vendor' / 'fonts').glob('*') if p.is_file())
 files += sorted(p.relative_to(root).as_posix() for p in (root / '_locales').glob('*/messages.json'))
 
 # Каждый подключаемый модуль (import ... from './x.js') обязан попасть в сборку, иначе окно расширения откроется пустым.
