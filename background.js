@@ -26,16 +26,39 @@ function setState(patch, { onlyIfActive = false } = {}) {
   return (queue = queue.then(job, job));
 }
 
+// Значок в панели Chrome. Анимация только в моменты, которые что-то сообщают: «дыхание» пока станция подключается и короткая вспышка,
+// когда пошёл звук. Потом значок статичный: постоянная анимация часами будила бы расширение без пользы.
+const iconPath = (name) => ({ 16: `icons/${name}16.png`, 32: `icons/${name}32.png`, 48: `icons/${name}48.png`, 128: `icons/${name}128.png` });
+const framePath = (kind, i) => ({ 16: `icons/anim/${kind}${i}-16.png`, 32: `icons/anim/${kind}${i}-32.png` });
+const LOAD_FRAMES = 8, START_FRAMES = 5;
+let anim = null, lastStatus = null;        // anim: { kind, timer }
+const stopAnim = () => { if (anim) clearInterval(anim.timer); anim = null; };
+function playFrames(kind, count, ms, loop, done) {
+  stopAnim();
+  let i = 0;
+  const step = () => {
+    if (i >= count) { if (!loop) { stopAnim(); done?.(); return; } i = 0; }
+    chrome.action.setIcon({ path: framePath(kind, i++) }).catch(() => {});
+  };
+  anim = { kind, timer: setInterval(step, ms) };
+  step();
+}
+
 async function renderAction(state) {
   const station = byId(state.stationId);
-  const on = state.status === 'playing' || state.status === 'loading';
-  const name = on ? 'on' : 'idle';
-  const path = { 16: `icons/${name}16.png`, 32: `icons/${name}32.png`, 48: `icons/${name}48.png`, 128: `icons/${name}128.png` };
-  const text = { playing: 'ON', loading: '…', error: '!' }[state.status] ?? '';
-  const title = on && station ? `${station.name}${state.track ? ` — ${state.track}` : ''}` : 'Velvet Radio';
-  await chrome.action.setIcon({ path });
-  await chrome.action.setBadgeBackgroundColor({ color: state.status === 'error' ? '#d64545' : '#ff5e78' });
-  await chrome.action.setBadgeText({ text });
+  const title = (state.status === 'playing' || state.status === 'loading') && station ? `${station.name}${state.track ? ` — ${state.track}` : ''}` : 'Velvet Radio';
+  const prev = lastStatus;
+  lastStatus = state.status;
+  if (state.status === 'loading') {
+    if (anim?.kind !== 'load') playFrames('load', LOAD_FRAMES, 140, true);
+  } else if (state.status === 'playing' && prev === 'loading') {
+    playFrames('start', START_FRAMES, 90, false, () => chrome.action.setIcon({ path: iconPath('on') }).catch(() => {}));
+  } else if (anim?.kind !== 'start' || state.status !== 'playing') {
+    stopAnim();
+    await chrome.action.setIcon({ path: iconPath(state.status === 'playing' ? 'on' : 'idle') });
+  }
+  await chrome.action.setBadgeBackgroundColor({ color: '#cf6a68' });
+  await chrome.action.setBadgeText({ text: state.status === 'error' ? '!' : '' });
   await chrome.action.setTitle({ title });
 }
 
