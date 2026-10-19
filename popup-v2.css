@@ -1,10 +1,10 @@
 /* Новый вид окна (по умолчанию). Работает только при <html data-ui="new">; классический вид (popup.css) остаётся как был.
    Две темы: «асфальт» (data-theme="dark") и «слоновая кость» (светлая). Матовые поверхности, без стекла, размытия и цветных пятен. */
 
-@font-face { font-family: 'Inter V'; font-weight: 100 900; font-display: block; src: url('vendor/fonts/inter-cyrillic-wght-normal.woff2') format('woff2-variations');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
-@font-face { font-family: 'Inter V'; font-weight: 100 900; font-display: block; src: url('vendor/fonts/inter-latin-wght-normal.woff2') format('woff2-variations');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Geist V'; font-weight: 100 900; font-display: block; src: url('vendor/fonts/geist-cyrillic-wght-normal.woff2') format('woff2-variations'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: 'Geist V'; font-weight: 100 900; font-display: block; src: url('vendor/fonts/geist-cyrillic-ext-wght-normal.woff2') format('woff2-variations'); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+@font-face { font-family: 'Geist V'; font-weight: 100 900; font-display: block; src: url('vendor/fonts/geist-latin-ext-wght-normal.woff2') format('woff2-variations'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Geist V'; font-weight: 100 900; font-display: block; src: url('vendor/fonts/geist-latin-wght-normal.woff2') format('woff2-variations'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 /* — слоновая кость (светлая) — */
 :root[data-ui="new"] {
@@ -34,8 +34,8 @@
 }
 
 :root[data-ui="new"] body {
-  font: 13.5px/1.35 'Inter V', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
-  letter-spacing: -.003em; font-feature-settings: 'cv11', 'ss03'; -webkit-font-smoothing: antialiased;
+  font: 13.5px/1.35 'Geist V', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: -.005em; -webkit-font-smoothing: antialiased;
   border-radius: 18px; background: var(--base);
 }
 :root[data-ui="new"] body::after { border-radius: inherit; box-shadow: inset 0 0 0 1px var(--stroke); }
@@ -48,7 +48,7 @@
 :root[data-ui="new"] .glass { background: var(--glass); backdrop-filter: none; -webkit-backdrop-filter: none; border: 1px solid var(--stroke); box-shadow: none; }
 
 /* шапка */
-:root[data-ui="new"] .brand { font: 600 13px/1 'Inter V', 'Segoe UI', system-ui, sans-serif; letter-spacing: .3em; text-indent: .3em; color: var(--text); }
+:root[data-ui="new"] .brand { font: 600 13px/1 'Geist V', 'Segoe UI', system-ui, sans-serif; letter-spacing: .3em; text-indent: .3em; color: var(--text); }
 :root[data-ui="new"] .icon-btn { border-radius: 9px; }
 :root[data-ui="new"] .icon-btn:hover { transform: none; background: var(--glass-hi); }
 :root[data-ui="new"] .icon-btn:active { transform: scale(.95); }
