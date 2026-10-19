@@ -1,0 +1,12 @@
+/* Smooth number for the volume level (see number-flow.js). */
+:root[data-ui="new"] .vol { position: relative; }
+:root[data-ui="new"] .rb-num {
+  position: absolute; left: calc(100% + 10px); top: 50%; translate: 0 -50%; width: 46px; display: inline-flex; justify-content: flex-end; align-items: baseline;
+  font-size: 13px; font-weight: 560; line-height: 1; letter-spacing: -.01em; font-variant-numeric: tabular-nums; color: var(--muted); pointer-events: none; user-select: none;
+  transition: color .25s ease;
+}
+:root[data-ui="new"] .vol:is(:hover, :focus-within) .rb-num, :root[data-ui="new"] .vol:has([data-drag]) .rb-num { color: var(--text); }
+:root[data-ui="new"] .rb-num-d { display: inline-flex; }
+:root[data-ui="new"] .rb-num-c { position: relative; display: inline-block; }
+:root[data-ui="new"] .rb-num-out { position: absolute; left: 0; top: 0; }
+:root[data-ui="new"] .rb-num-pc { font-size: .8em; margin-left: 1px; opacity: .75; }

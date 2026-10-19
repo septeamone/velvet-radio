@@ -22,11 +22,19 @@
 
 :root[data-ui="new"] .rb-elastic-fill { position: absolute; inset: 0; background: var(--accent); clip-path: inset(0 calc(100% - var(--rb-p, 0%)) 0 0); }
 
-/* значок динамика рядом: пружинит вместе с растяжением */
-:root[data-ui="new"] .vol svg { will-change: transform; transition: color .2s ease; }
-:root[data-ui="new"] .vol:hover svg, :root[data-ui="new"] .vol:focus-within svg { color: var(--text); }
+/* иконки: слева «тише» (динамик), справа «громче» (динамик с волнами); пружинят вместе с растяжением */
+:root[data-ui="new"] .rb-elastic-host { gap: 8px; width: 74%; }
+:root[data-ui="new"] .rb-elastic-host svg { width: 16px; height: 16px; flex: none; will-change: transform; transition: color .2s ease, opacity .25s ease; }
+:root[data-ui="new"] .rb-elastic-quiet { opacity: .6; }
+:root[data-ui="new"] .rb-elastic-min .rb-elastic-quiet { opacity: 1; color: var(--text); }
+:root[data-ui="new"] .rb-elastic-loud { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: calc(.45 + .55 * var(--rb-v, .8)); }
+:root[data-ui="new"] .rb-elastic-loud path:first-child { fill: currentColor; stroke-width: 1; }
+:root[data-ui="new"] .rb-elastic-loud .w1 { opacity: clamp(0, calc(var(--rb-v, .8) * 4), 1); transition: opacity .2s ease; }
+:root[data-ui="new"] .rb-elastic-loud .w2 { opacity: clamp(0, calc((var(--rb-v, .8) - .4) * 4), 1); transition: opacity .2s ease; }
+:root[data-ui="new"] .rb-elastic-host:hover svg, :root[data-ui="new"] .rb-elastic-host:focus-within svg { color: var(--text); }
+:root[data-ui="new"] .rb-elastic-snap svg { transition: color .2s ease, opacity .25s ease, transform .55s cubic-bezier(.3, 1.7, .45, 1); }
 
-:root[data-ui="new"].no-anim .rb-elastic-track, :root[data-ui="new"].no-anim .rb-elastic-wrap { transition: none; }
+:root[data-ui="new"].no-anim .rb-elastic-host svg, :root[data-ui="new"].no-anim .rb-elastic-track, :root[data-ui="new"].no-anim .rb-elastic-wrap { transition: none; }
 @media (prefers-reduced-motion: reduce) {
   :root[data-ui="new"] .rb-elastic-track, :root[data-ui="new"] .rb-elastic-wrap { transition: none; }
 }

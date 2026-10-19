@@ -6,6 +6,7 @@ import { initRubberAll } from './rubber.js';
 import { initSquish } from './squish.js';
 import { initPulseHeart } from './pulse-heart.js';
 import { elasticSlider } from './elastic-slider.js';
+import { numberFlow } from './number-flow.js';
 import { statusMark } from './status-mark.js';
 import { shinyText } from './shiny-text.js';
 import { initSpotlight } from './spotlight.js';
@@ -20,6 +21,7 @@ export function mountNewUi($, list) {
   initBorderGlow(list);
   initRubberAll(); initSquish(); initPulseHeart();
   elasticSlider($('#vol'), { icon: $('.vol svg') });
+  numberFlow($('.vol'), $('#vol'));
   statusMark($('#dot'));
   shinyText($('#nowSub'));
   initSpotlight($('.player'));

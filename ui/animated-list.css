@@ -1,16 +1,33 @@
 /* Based on React Bits AnimatedList (MIT + Commons Clause, © David Haz), ported to plain JS/CSS. */
 
-/* список — контейнер для скользящей рамки выбора (offsetTop/Left строк считаются от него) */
-:root[data-ui="new"] #list { position: relative; --rb-al-spring: linear(0, .1 6%, .42 15%, .74 26%, .93 38%, 1.02 50%, 1.03 60%, 1.01 74%, 1 100%); }
+@property --rb-al-ft { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --rb-al-fb { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --rb-al-cover { syntax: '<length>'; inherits: false; initial-value: 0px; }
 
-/* появление: мягкий подъём с едва заметной пружиной; рамка выбора и ready остаются как были.
-   Анимируются только строки в первом экране, остальные ниже линии прокрутки и так не видны. */
-:root[data-ui="new"] #list .row, :root[data-ui="new"] #list .crow {
-  animation: rb-al-pop .5s var(--rb-al-spring) backwards; animation-delay: calc(var(--i) * 26ms);
+/* список — контейнер для скользящей рамки выбора (offsetTop/Left строк считаются от него).
+   Пружина из оригинала AnimatedList; затухание краёв (fadeSize 56) считается от верха плавающего плеера, поэтому
+   подложку .app::after (она делала то же самое) выключаем: иначе было бы двойное затухание. */
+:root[data-ui="new"] #list { position: relative; --rb-al-spring: linear(0, 0.0603, 0.2033, 0.3821, 0.5633, 0.7258, 0.8584, 0.9574, 1.0242, 1.0634, 1.0809, 1.0828, 1.0747, 1.0613, 1.046, 1.0313, 1.0186, 1.0085, 1.0012, 0.9965, 0.994, 0.9931, 0.9933, 0.9941, 0.9953, 0.9966, 0.9978, 0.9988, 1); }
+:root[data-ui="new"] #list[data-rb-al] {
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.000) calc(var(--rb-al-ft) * 0), rgba(0,0,0,0.027) calc(var(--rb-al-ft) * 0.15), rgba(0,0,0,0.163) calc(var(--rb-al-ft) * 0.3), rgba(0,0,0,0.407) calc(var(--rb-al-ft) * 0.45), rgba(0,0,0,0.683) calc(var(--rb-al-ft) * 0.6), rgba(0,0,0,0.896) calc(var(--rb-al-ft) * 0.75), rgba(0,0,0,0.991) calc(var(--rb-al-ft) * 0.9), rgba(0,0,0,1.000) calc(var(--rb-al-ft) * 1), rgba(0,0,0,1.000) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 1), rgba(0,0,0,0.991) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.9), rgba(0,0,0,0.896) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.75), rgba(0,0,0,0.683) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.6), rgba(0,0,0,0.407) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.45), rgba(0,0,0,0.163) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.3), rgba(0,0,0,0.027) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.15), rgba(0,0,0,0.000) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0));
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.000) calc(var(--rb-al-ft) * 0), rgba(0,0,0,0.027) calc(var(--rb-al-ft) * 0.15), rgba(0,0,0,0.163) calc(var(--rb-al-ft) * 0.3), rgba(0,0,0,0.407) calc(var(--rb-al-ft) * 0.45), rgba(0,0,0,0.683) calc(var(--rb-al-ft) * 0.6), rgba(0,0,0,0.896) calc(var(--rb-al-ft) * 0.75), rgba(0,0,0,0.991) calc(var(--rb-al-ft) * 0.9), rgba(0,0,0,1.000) calc(var(--rb-al-ft) * 1), rgba(0,0,0,1.000) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 1), rgba(0,0,0,0.991) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.9), rgba(0,0,0,0.896) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.75), rgba(0,0,0,0.683) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.6), rgba(0,0,0,0.407) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.45), rgba(0,0,0,0.163) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.3), rgba(0,0,0,0.027) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.15), rgba(0,0,0,0.000) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0));
 }
-:root[data-ui="new"] #list .row:nth-child(n+14), :root[data-ui="new"] #list .crow:nth-child(n+16),
-:root[data-ui="new"] #list .row.ready { animation: none; }
-@keyframes rb-al-pop { from { opacity: 0; transform: translate3d(0, 10px, 0) scale(.94); } }
+:root[data-ui="new"] .app::after { display: none; }
+
+/* строки: появление и уход за край (slide). Только независимые translate/scale/opacity: transform остаётся за drag и hover.
+   Задержка (--rb-al-d) нужна для stagger при первом показе и ставится JS-ом только на этот момент. */
+:root[data-ui="new"] #list[data-rb-al] .row, :root[data-ui="new"] #list[data-rb-al] .crow {
+  animation: none;
+  transition: translate .62s var(--rb-al-spring) var(--rb-al-d, 0s), scale .62s var(--rb-al-spring) var(--rb-al-d, 0s), opacity .3s cubic-bezier(.22, 1, .36, 1) var(--rb-al-d, 0s),
+    transform .25s var(--ease), background-color .3s ease, border-color .45s ease, box-shadow .3s ease;
+}
+:root[data-ui="new"] #list[data-rb-al][data-rb-al-boot] .row, :root[data-ui="new"] #list[data-rb-al][data-rb-al-boot] .crow { transition: none !important; }
+:root[data-ui="new"] #list[data-rb-al] [data-al] { opacity: 0; scale: .98; pointer-events: none; }
+:root[data-ui="new"] #list[data-rb-al] [data-al="above"] { translate: 0 -28px; }
+:root[data-ui="new"] #list[data-rb-al] [data-al="below"] { translate: 0 28px; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="new"] #list[data-rb-al] [data-al] { translate: none; scale: none; }
+}
 
 /* выбор клавиатурой: вместо статичной рамки на строке — общая рамка, скользящая между строками */
 :root[data-ui="new"] #list[data-rb-al] .row.kbd, :root[data-ui="new"] #list[data-rb-al] .crow.kbd { box-shadow: none; }
