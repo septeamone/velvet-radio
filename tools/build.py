@@ -5,6 +5,14 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent
 version = json.loads((root / 'manifest.json').read_text('utf-8'))['version']
+
+# «Что нового» обязательно в каждом обновлении: карточки подготовлены под ту же версию, что в manifest.json (см. CLAUDE.md, «Выпуск обновления»).
+import os, re as _re
+_m = _re.search(r"WHATS_NEW_FOR\s*=\s*'([^']+)'", (root / 'lifecycle.js').read_text('utf-8'))
+if (not _m or _m.group(1) != version) and not os.environ.get('NO_WHATS_NEW'):
+    raise SystemExit(f"Для версии {version} не подготовлено «Что нового» (в lifecycle.js стоит {_m.group(1) if _m else 'ничего'}).\n"
+                     "Обновите WHATS_NEW_STEPS в ui/tour.js, тексты wn_* (ru и en) в i18n.js и WHATS_NEW_FOR в lifecycle.js, затем запустите node tools/test-update.mjs.\n"
+                     "Если выпуск без видимых изменений, соберите с NO_WHATS_NEW=1 (карточки тогда не покажутся).")
 files = ['manifest.json', 'background.js', 'offscreen.html', 'offscreen.js', 'nowplaying.js',
          'stations.js', 'icy-sources.js', 'lifecycle.js', 'i18n.js', 'settings.js', 'popup.html', 'popup.js', 'popup.css', 'popup-v2.css', 'boot.js', 'vendor/hls.min.js', 'flags/LICENSE', 'THIRD_PARTY_NOTICES.md']
 files += sorted(p.relative_to(root).as_posix() for d in ('icons', 'logos') for p in (root / d).glob('*.png'))

@@ -17,7 +17,7 @@ try {
   const id = sw.url().split('/')[2];
   const url = `chrome-extension://${id}/popup.html`;
   const page = await ctx.newPage();
-  page.on('pageerror', (e) => errors.push(e.message)); page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  page.on('pageerror', (e) => errors.push(e.message)); page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });   // ответы сторонних серверов песен (429 и т.п.) не наша ошибка
   const open = async () => { await page.goto(url); await page.waitForSelector('.row'); await sleep(900); };
   const shot = async (n) => { await sleep(750); await page.screenshot({ path: path.join(out, n + '.png') }); };
   const stored = () => page.evaluate(async () => (await chrome.storage.local.get('tour')).tour);

@@ -85,7 +85,12 @@ h1 { font-size: 22px; font-weight: 650; letter-spacing: -.02em; }
 
 /* — список — */
 .list { flex: 1; min-height: 0; overflow-y: auto; list-style: none; padding: 6px 2px calc(var(--ph) + 20px); margin: -6px -2px 0;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12px); mask-image: linear-gradient(to bottom, transparent 0, #000 12px); display: flex; flex-direction: column; gap: 6px; scrollbar-width: thin; scrollbar-color: var(--track) transparent; }
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12px); mask-image: linear-gradient(to bottom, transparent 0, #000 12px); display: flex; flex-direction: column; gap: 6px; }
+/* Полоса прокрутки списка: дорожка кончается над плеером (список едет под ним, и полоса раньше уезжала за плеер вместе со своим ползунком) */
+.list::-webkit-scrollbar { width: 8px; }
+.list::-webkit-scrollbar-track { background: transparent; margin-top: 8px; margin-bottom: calc(var(--ph) + 14px); }
+.list::-webkit-scrollbar-thumb { background: var(--track); border-radius: 4px; border: 2px solid transparent; background-clip: content-box; }
+.list::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--text) 32%, transparent); background-clip: content-box; }
 .row { display: flex; align-items: center; gap: 11px; padding: 5px 9px; border-radius: 14px; cursor: pointer; flex: none; animation: rise .45s var(--ease) backwards; animation-delay: calc(var(--i) * 18ms); transition: transform .25s var(--ease), background-color .3s ease, border-color .45s ease, box-shadow .3s ease, opacity .3s ease; }
 .row:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--glass) 60%, var(--glass-hi)); }
 .row:active { transform: scale(.985); }

@@ -43,6 +43,10 @@ try {
   await page.click('#qbtn', { force: true }); await sleep(400);
   check(!(await page.isVisible('#qWrap')), 'и список не открывается');
 
+  // --- полоса прокрутки списка заканчивается над плеером (раньше ползунок уезжал под него)
+  const sb = await page.evaluate(() => ({ margin: parseFloat(getComputedStyle(document.querySelector('#list'), '::-webkit-scrollbar-track').marginBottom), player: document.querySelector('.player').offsetHeight }));
+  check(sb.margin >= sb.player, `дорожка полосы прокрутки списка оставляет место под плеер: отступ снизу ${sb.margin} px, высота плеера ${sb.player} px`);
+
   // --- заглушить
   await page.evaluate(() => chrome.storage.local.set({ last: 'europaplus' })); await page.reload(); await page.waitForSelector('.row'); await sleep(1200);
   const v0 = +(await page.inputValue('#vol'));
