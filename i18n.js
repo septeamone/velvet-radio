@@ -4,7 +4,7 @@ import { GENRES, COUNTRIES } from './stations.js';
 const STR = {
   ru: {
     search: 'Поиск станции', searchCountries: 'Поиск страны или станции',
-    tabRussia: 'Россия', tabFav: 'Избранное', tabCountries: 'Страны',
+    tabFav: 'Избранное', tabCountries: 'Страны',
     pick: 'Выберите станцию', pickHint: 'Нажмите на любую из списка',
     retry: 'Повторить', playPause: 'Играть / пауза', volume: 'Громкость', theme: 'Сменить тему',
     telegram: 'Мой Telegram', language: 'Язык: русский', favAdd: 'В избранное', quality: 'Качество',
@@ -17,6 +17,7 @@ const STR = {
     sSaver: 'Экономия трафика', sSaverD: 'По умолчанию играть самое низкое качество',
     sViz: 'Визуализатор звука', sVizD: 'Волна под плеером. Выключите, чтобы плеер стал ниже и на экране помещалось больше станций',
     sClassic: 'Классический интерфейс', sClassicD: 'Прежний вид окна со стеклянными панелями',
+    sHome: 'Моя страна', sHomeD: 'Её станции откроются на первой вкладке', makeHome: 'Сделать главной', isHome: 'Главная',
     sFade: 'Плавные переходы', sFadeD: 'Прежняя станция играет, пока новая подключается, затем звук плавно перетекает',
     sResume: 'Играть при запуске Chrome', sResumeD: 'Продолжить последнюю станцию',
     sSync: 'Синхронизация', sSyncD: 'Избранное, порядок и качество между компьютерами через аккаунт Chrome',
@@ -32,7 +33,7 @@ const STR = {
   },
   en: {
     search: 'Search stations', searchCountries: 'Search country or station',
-    tabRussia: 'Russia', tabFav: 'Favorites', tabCountries: 'Countries',
+    tabFav: 'Favorites', tabCountries: 'Countries',
     pick: 'Pick a station', pickHint: 'Tap any station in the list',
     retry: 'Retry', playPause: 'Play / pause', volume: 'Volume', theme: 'Toggle theme',
     telegram: 'My Telegram', language: 'Language: English', favAdd: 'Add to favorites', quality: 'Quality',
@@ -45,6 +46,7 @@ const STR = {
     sSaver: 'Data saver', sSaverD: 'Play the lowest quality by default',
     sViz: 'Sound visualizer', sVizD: 'The wave under the player. Turn it off for a shorter player and more stations on screen',
     sClassic: 'Classic interface', sClassicD: 'The previous look with glass panels',
+    sHome: 'My country', sHomeD: 'Its stations open on the first tab', makeHome: 'Make it first', isHome: 'First tab',
     sFade: 'Smooth transitions', sFadeD: 'The old station keeps playing while the new one connects, then the sound crossfades',
     sResume: 'Resume when Chrome starts', sResumeD: 'Continue the last station',
     sSync: 'Sync', sSyncD: 'Favorites, order and quality across computers via your Chrome account',
@@ -83,6 +85,7 @@ let names = null;
 const dn = { ru: new Intl.DisplayNames(['ru'], { type: 'region' }), en: new Intl.DisplayNames(['en'], { type: 'region' }) };
 function build() {
   names = new Map();
+  names.set('RU', { ru: 'Россия', en: 'Russia', hay: norm(`${dn.ru.of('RU')} ${dn.en.of('RU')} ru russia россия рф`) });
   for (const c of COUNTRIES) {
     const shortRu = { US: 'США', AE: 'ОАЭ' }[c.cc];
     names.set(c.cc, { ru: shortRu ?? dn.ru.of(c.cc), en: dn.en.of(c.cc), hay: norm([dn.ru.of(c.cc), dn.en.of(c.cc), c.cc, ...c.aliases].join(' ')) });
@@ -90,7 +93,9 @@ function build() {
 }
 export const countryName = (cc) => { if (!names) build(); return names.get(cc)?.[lang] ?? cc; };
 export const countryMatches = (cc, q) => { if (!names) build(); const hay = names.get(cc)?.hay ?? ''; return norm(q).split(/\s+/).every((w) => hay.includes(w)); };
+let homeCc = 'RU';                                  // станции главной страны находят по названию, а не по стране
+export const setHomeCc = (cc) => { homeCc = cc; };
 export const stationMatches = (s, q) => {
-  const hay = norm(`${s.name} ${s.alt ?? ''} ${genreAll(s.genre)} ${s.country === 'RU' ? '' : `${dn.ru.of(s.country)} ${dn.en.of(s.country)}`}`);
+  const hay = norm(`${s.name} ${s.alt ?? ''} ${genreAll(s.genre)} ${s.country === homeCc ? '' : `${dn.ru.of(s.country)} ${dn.en.of(s.country)}`}`);
   return norm(q).split(/\s+/).every((w) => hay.includes(w));
 };

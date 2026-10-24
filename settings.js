@@ -1,7 +1,7 @@
 // Настройки, резервная копия, синхронизация между компьютерами и проверка станций. Только данные, разрешений не требует.
 import { STATIONS, shown } from './stations.js';
 
-export const DEFAULTS = { saver: false, buffer: 9, fade: true, resume: false, sync: false, classic: false, showViz: true };
+export const DEFAULTS = { saver: false, buffer: 9, fade: true, resume: false, sync: false, classic: false, showViz: true, home: 'RU' };
 export const getSettings = async () => ({ ...DEFAULTS, ...((await chrome.storage.local.get('settings')).settings ?? {}) });
 export async function saveSettings(patch) {
   const next = { ...(await getSettings()), ...patch };
@@ -29,6 +29,7 @@ export async function importBackup(obj) {
   if (['list', 'tiles'].includes(d.view)) out.view = d.view;
   if (typeof d.last === 'string' && ids.has(d.last)) out.last = d.last;
   if (d.settings && typeof d.settings === 'object') out.settings = { ...DEFAULTS, ...Object.fromEntries(Object.entries(d.settings).filter(([k]) => k in DEFAULTS)) };
+  if (out.settings && !STATIONS.some((s) => s.country === out.settings.home)) out.settings.home = DEFAULTS.home;
   await chrome.storage.local.set(out);
   return Object.keys(out).length;
 }

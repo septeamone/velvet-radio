@@ -1,7 +1,7 @@
 import { STATIONS, LOGOS, COUNTRIES, maxKbps, shown as visibleQ, sortByOrder, pickKbps, stationsOf } from './stations.js';
 import { getSettings, saveSettings, exportBackup, importBackup, pullSync, pushSync, checkStations, DEFAULTS } from './settings.js';
 import { LIVE, fetchTrack } from './nowplaying.js';
-import { t, notice as noticeText, detectLang, setLang, getLang, genreName, countryName, countryMatches, stationMatches, stationsWord } from './i18n.js';
+import { t, notice as noticeText, detectLang, setLang, getLang, genreName, countryName, countryMatches, stationMatches, stationsWord, setHomeCc } from './i18n.js';
 
 const $ = (s) => document.querySelector(s);
 const list = $('#list');
@@ -101,17 +101,18 @@ function buildSeg(s) {
   return seg;
 }
 
-const isRu = (s) => s.country === 'RU';
+const home = () => (stationsOf(ui.settings.home).length ? ui.settings.home : 'RU');   // главная страна: её станции на первой вкладке
+const isHome = (s) => s.country === home();
 const flagSrc = (cc) => `flags/${cc.toLowerCase()}.svg`;
 const countriesTop = () => ui.tab === 'countries' && !ui.country;
-const countryList = () => COUNTRIES.filter((c) => stationsOf(c.cc).length);
+const countryList = () => [{ cc: 'RU' }, ...COUNTRIES].filter((c) => c.cc !== home() && stationsOf(c.cc).length);
 
 const genreKey = (g) => (typeof g === 'string' ? g : g.ru);
 function basePool() {
-  return ui.tab === 'all' ? STATIONS.filter(isRu)
+  return ui.tab === 'all' ? stationsOf(home())
     : ui.tab === 'fav' ? STATIONS.filter((s) => ui.favs.has(s.id))
     : ui.country ? stationsOf(ui.country)
-    : STATIONS.filter((s) => !isRu(s));        // вкладка «Страны» без выбранной страны: станции показываем только как результат поиска
+    : STATIONS.filter((s) => !isHome(s));        // вкладка «Страны» без выбранной страны: станции показываем только как результат поиска
 }
 function visible() {
   const q = ui.query.trim();
@@ -135,7 +136,7 @@ function stationRow(s, i) {
   setLogo(li.querySelector('.logo'), s);
   setMq(li.querySelector('.name'), s.name);
   const genre = li.querySelector('.genre');
-  if (!isRu(s) && !(ui.tab === 'countries' && ui.country)) {            // в избранном и поиске показываем, из какой страны станция
+  if (!isHome(s) && !(ui.tab === 'countries' && ui.country)) {            // в избранном и поиске показываем, из какой страны станция
     const f = Object.assign(new Image(), { className: 'cflag-s', alt: '', src: flagSrc(s.country) });
     genre.append(f, ` ${countryName(s.country)} · `);
   }
@@ -199,6 +200,8 @@ function syncChrome() {
     $('#cname').textContent = countryName(ui.country);
     $('#ccount').textContent = stationsWord(stationsOf(ui.country).length);
   }
+  $('#chome').hidden = !inside;
+  if (inside) { $('#chome').textContent = t(ui.country === home() ? 'isHome' : 'makeHome'); $('#chome').disabled = ui.country === home(); }
   $('#q').placeholder = t(top ? 'searchCountries' : 'search');
 }
 
@@ -207,6 +210,8 @@ function applyStatic() {
   document.querySelectorAll('[data-ta]').forEach((el) => el.setAttribute('aria-label', t(el.dataset.ta)));
   document.querySelectorAll('[data-tt]').forEach((el) => { el.title = t(el.dataset.tt); });
   $('#langLabel').textContent = getLang().toUpperCase();
+  setHomeCc(home());
+  tabs.querySelector('[data-tab=all]').textContent = countryName(home());
 }
 
 function openCountry(cc) {
@@ -375,6 +380,17 @@ tabs.addEventListener('click', (e) => {
   syncChrome();
   renderList();
 });
+// Сделать страну главной: её станции встают на первую вкладку, прежняя главная (по умолчанию Россия) уходит во вкладку «Страны»
+async function setHome(cc) {
+  if (cc === home()) return;
+  ui.settings = await saveSettings({ home: cc });
+  ui.country = null; ui.genre = null; ui.query = ''; $('#q').value = '';
+  applyStatic();
+  ui.tab = 'all'; tabs.dataset.tab = 'all';
+  tabs.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.dataset.tab === 'all'));
+  syncChrome(); renderList(); list.scrollTop = 0;
+}
+$('#chome').addEventListener('click', () => setHome(ui.country));
 $('#cback').addEventListener('click', () => { ui.country = null; ui.genre = null; ui.query = ''; $('#q').value = ''; syncChrome(); renderList(); });
 $('#vtoggle').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-view]');
@@ -636,9 +652,17 @@ function syncSettingsUI() {
   const seg = $('#bufseg'), vals = [4, 9, 14];
   seg.style.setProperty('--i', Math.max(0, vals.indexOf(ui.settings.buffer)));
   seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', +b.dataset.k === ui.settings.buffer));
+  fillHomeSel();
   $('#ver').textContent = `Velvet Radio ${chrome.runtime.getManifest().version}`;
   renderHealth();
 }
+function fillHomeSel() {
+  const sel = $('#homeSel'), cs = [{ cc: 'RU' }, ...COUNTRIES].filter((c) => stationsOf(c.cc).length).map((c) => c.cc);
+  cs.sort((a, b) => countryName(a).localeCompare(countryName(b), getLang()));
+  sel.replaceChildren(...cs.map((cc) => Object.assign(document.createElement('option'), { value: cc, textContent: countryName(cc) })));
+  sel.value = home();
+}
+$('#homeSel').addEventListener('change', async (e) => { await setHome(e.target.value); syncSettingsUI(); });
 settingsEl.addEventListener('change', async (e) => {
   const k = e.target.dataset?.set;
   if (!k) return;

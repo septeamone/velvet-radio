@@ -45,7 +45,7 @@
 
     <nav class="tabs glass" role="tablist">
       <span class="thumb"></span>
-      <button role="tab" data-tab="all" class="on" data-t="tabRussia"></button>
+      <button role="tab" data-tab="all" class="on"></button>
       <button role="tab" data-tab="fav" data-t="tabFav"></button>
       <button role="tab" data-tab="countries" data-t="tabCountries"></button>
     </nav>
@@ -55,6 +55,7 @@
       <img id="cflag" class="cflag-lg" alt="">
       <span id="cname" class="cname"></span>
       <span id="ccount" class="ccount"></span>
+      <button id="chome" class="pill" hidden></button>
     </div>
 
     <ul id="list" class="list"></ul>
@@ -92,6 +93,7 @@
         <label class="set"><span class="st"><b data-t="sFade"></b><small data-t="sFadeD"></small></span><input type="checkbox" class="sw" data-set="fade"></label>
         <label class="set"><span class="st"><b data-t="sResume"></b><small data-t="sResumeD"></small></span><input type="checkbox" class="sw" data-set="resume"></label>
         <label class="set"><span class="st"><b data-t="sSync"></b><small data-t="sSyncD"></small></span><input type="checkbox" class="sw" data-set="sync"></label>
+        <div class="set"><span class="st"><b data-t="sHome"></b><small data-t="sHomeD"></small></span><select id="homeSel" class="pill sel" data-ta="sHome"></select></div>
         <div class="set"><span class="st"><b data-t="sBuffer"></b><small data-t="sBufferD"></small></span>
           <div id="bufseg" class="seg" style="--n:3"><i class="seg-thumb"></i><button data-k="4">4</button><button data-k="9">9</button><button data-k="14">14</button></div></div>
         <div class="set"><span class="st"><b data-t="sBackup"></b><small data-t="sBackupD"></small></span>
