@@ -4,7 +4,7 @@ import { chromium } from 'playwright-core';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const out = path.resolve(process.argv[2] ?? 'home-shots'); fs.mkdirSync(out, { recursive: true });
+const out = path.resolve(process.argv[2] ?? path.join(os.tmpdir(), 'vr-home-shots')); fs.mkdirSync(out, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const base = path.join(os.homedir(), 'AppData/Local/ms-playwright');
 const exe = fs.readdirSync(base).filter((x) => /^chromium-\d+$/.test(x)).sort().reverse().map((d) => path.join(base, d, 'chrome-win64/chrome.exe')).find(fs.existsSync);
