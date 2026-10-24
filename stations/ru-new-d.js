@@ -79,4 +79,7 @@ export default [
   { id: 'knigavsluh', name: 'Радио Книга Вслух', country: 'RU', genre: 'talk', mark: 'КВ', hue: 160,
     alt: 'Kniga Vslukh Audiobooks Книга вслух аудиокниги',
     qualities: [q(128, 'https://radio-soyuz.ru:1045/stream')] },
+  { id: 'spdeep', name: 'Soundpark Deep', country: 'RU', genre: 'house', mark: 'SP', hue: 250,
+    alt: 'Саундпарк Дип Sound Park Deep Soundpark Deep House',
+    qualities: [{ ...hls(96, 'https://h.getradio.me/spdeep/hls.m3u8'), note: 'HLS AAC 96 kbps: выше у Soundpark Deep потока нет' }] },
 ];
