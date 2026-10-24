@@ -15,11 +15,14 @@ export default [
     alt: 'Radio Vanya Радио Ваня',
     qualities: [
       hid(64, 'https://icecast-radiovanya.cdnvideo.ru/radiovanya'),
-      { ...q(96, 'http://icecast-radiovanya.cdnvideo.ru:8000/rv_spb'), note: 'AAC 96 kbps: эфир Санкт-Петербурга, выше у Радио Ваня потока нет' },
+      { ...hls(96, 'https://radiovanya-hls.cdnvideo.ru/radiovanya-live/radiovanya.stream/playlist.m3u8'), note: 'HLS AAC (моно), заявлено 100 kbps: выше у Радио Ваня потока нет' },
     ] },
   { id: 'piterfm', name: 'Питер FM', country: 'RU', genre: 'rushits', mark: 'П', hue: 215,
     alt: 'Piter FM Питер ФМ Санкт-Петербург',
-    qualities: [q(160, 'https://icecast-piterfm.cdnvideo.ru/piterfm', 'http://icecast-piterfm.cdnvideo.ru/piterfm')] },
+    qualities: [
+      q(160, 'https://icecast-piterfm.cdnvideo.ru/piterfm', 'http://icecast-piterfm.cdnvideo.ru/piterfm'),
+      { ...hls(256, 'https://piterfm-hls.cdnvideo.ru/piterfm-live/piterfm.stream/playlist.m3u8'), note: 'HLS AAC, заявлено 250 kbps' },
+    ] },
   { id: 'eldoradio', name: 'Эльдорадио', country: 'RU', genre: 'pop', mark: 'Эл', hue: 45,
     alt: 'Eldoradio Эльдорадио Санкт-Петербург',
     qualities: [

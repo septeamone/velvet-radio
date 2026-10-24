@@ -47,10 +47,18 @@ const nextApi = (host, slug) => async () => {
   return { artist: t.artist, title: t.title };
 };
 
-// Комик-радио и Relax FM: JSON с их хостинга, в нём бывают рекламы и джинглы (type != 3)
-const gpm = (path) => async () => {
-  const { current: t } = await getJson(`https://hls-01-gpm.hostingradio.ru/${path}/metadata.json`);
-  return t?.type === 3 && t.title ? { artist: t.artist, title: t.title } : null;
+// JSON с хостинга станции (metadata.json), в нём бывают рекламы и джинглы (type != 3)
+const hlsMeta = (url) => async () => {
+  const { current: t } = await getJson(url);
+  return t?.type === 3 && t.title ? { artist: t.artist, title: t.title, caps: true } : null;
+};
+const gpm = (path) => hlsMeta(`https://hls-01-gpm.hostingradio.ru/${path}/metadata.json`);
+
+// Питер FM и Радио Ваня: один бэкенд сайтов, первый элемент плейлиста — играющий трек (названия у них заглавными)
+const playlistV5 = (host, id) => async () => {
+  const j = await getJson(`https://${host}/api/v5/playlists/${id}/`);
+  const t = !j.adnow && j.items?.[0]?.track;
+  return t?.name ? { artist: t.artist?.name, title: t.name, caps: true } : null;
 };
 
 // Название песни прямо из потока (ICY): открываем поток, читаем первый блок метаданных и закрываем.
@@ -78,7 +86,7 @@ const icy = (url, clean = (x) => x) => async () => {
     const title = m && clean(m[1].trim());
     if (!title) return null;
     const [artist, ...rest] = title.split(' - ');
-    return rest.length ? { artist, title: rest.join(' - ') } : { artist: null, title };
+    return rest.length ? { artist, title: rest.join(' - '), caps: true } : { artist: null, title, caps: true };
   } finally { clearTimeout(timer); ctrl.abort(); }
 };
 
@@ -98,6 +106,11 @@ const SOURCES = {
   radio7: emg('radio7'),
   dorognoe: emg('dorognoe'),
   studio21: emg('studio21'),
+  radiovera: hlsMeta('https://hls-01-radiovera.hostingradio.ru/radiovera/metadata.json'),
+  radiozenit: hlsMeta('https://hls-01-radiozenit.hostingradio.ru/radiozenit/metadata.json'),
+  keksfm: hlsMeta('https://hls-01-keks.emgsound.ru/7/metadata.json'),
+  piterfm: playlistV5('radiopiterfm.ru', 8),
+  radiovanya: playlistV5('radiovanya.ru', 0),
   eldoradio: emg('eldoradio'),
   rusongs: icy('http://listen.rusongs.ru/ru-hd'),
   megapolis: icy('http://online.radio-megapolis.ru:8000/megapolis_mp3'),
@@ -118,6 +131,7 @@ const icyClean = (x) => { const s = x.replace(/ - \d+:\d{2}$/, '').trim(); retur
 export async function fetchTrack(stationId) {
   const t = await (SOURCES[stationId] ?? (ICY_SOURCES[stationId] && icy(ICY_SOURCES[stationId], icyClean)))?.();
   if (!t || !t.title) return null;
-  const artist = t.caps && t.artist === t.artist.toUpperCase() ? nice(t.artist) : t.artist;
-  return artist ? `${artist} — ${t.title}` : t.title;
+  const up = (x) => (t.caps && x && x === x.toUpperCase() ? nice(x) : x);
+  const artist = up(t.artist), title = up(t.title);
+  return artist ? `${artist} — ${title}` : title;
 }
