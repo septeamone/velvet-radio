@@ -1,4 +1,5 @@
 import { STATIONS, maxKbps, sortByOrder, pickKbps, stationsOf } from './stations.js';
+import { installedPatch } from './lifecycle.js';
 
 const index = new Map(STATIONS.map((s) => [s.id, s]));
 const byId = (id) => index.get(id);
@@ -153,5 +154,6 @@ chrome.runtime.onStartup.addListener(async () => {
 });
 chrome.runtime.onInstalled.addListener((d) => {
   renderAction(DEFAULT);
-  if (d.reason === 'install') chrome.storage.local.set({ tour: { v: 1, step: 0, done: false } });   // тур для новых пользователей; обновившиеся его не видят
+  const patch = installedPatch(d, chrome.runtime.getManifest().version);   // тур для новых или «Что нового» для обновившихся (lifecycle.js)
+  if (patch) chrome.storage.local.set(patch);
 });

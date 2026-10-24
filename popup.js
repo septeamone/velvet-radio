@@ -383,18 +383,27 @@ async function setHome(cc) {
 $('#chome').addEventListener('click', () => setHome(ui.country));
 
 /* ---------- тур для новых пользователей (код грузится только когда он нужен) ---------- */
-let tourCtl = null;
+let tourCtl = null, wnCtl = null;
+const tourApi = (key) => ({
+  t, lang: getLang, home, countryName, flagSrc, setHome,
+  countries: () => [{ cc: 'RU' }, ...COUNTRIES].map((c) => c.cc).filter((cc) => stationsOf(cc).length),
+  save: (s) => chrome.storage.local.set({ [key]: s }),
+  prepare() { openSettings(false); $('#gpanel').hidden = true; if (ui.tab !== 'all' || ui.country || ui.query || ui.genre) goHomeTab(); list.scrollTop = 0; },
+});
 async function runTour(saved) {
   if (!tourCtl) {
     const { createTour } = await import('./ui/tour.js');
-    tourCtl = createTour({
-      t, lang: getLang, home, countryName, flagSrc, setHome,
-      countries: () => [{ cc: 'RU' }, ...COUNTRIES].map((c) => c.cc).filter((cc) => stationsOf(cc).length),
-      save: (s) => chrome.storage.local.set({ tour: s }),
-      prepare() { openSettings(false); $('#gpanel').hidden = true; if (ui.tab !== 'all' || ui.country || ui.query || ui.genre) goHomeTab(); list.scrollTop = 0; },
-    });
+    tourCtl = createTour(tourApi('tour'));
   }
   tourCtl.start(saved);
+}
+// «Что нового» для тех, кто просто обновился (запись whatsNew ставит background.js при onInstalled/update): те же подсветка и карточки, но только про изменения
+async function runWhatsNew(saved) {
+  if (!wnCtl) {
+    const { createTour, WHATS_NEW_STEPS } = await import('./ui/tour.js');
+    wnCtl = createTour(tourApi('whatsNew'), { steps: WHATS_NEW_STEPS, prefix: 'wn_', done: 'wnDone' });
+  }
+  wnCtl.start(saved);
 }
 $('#btour').addEventListener('click', () => {
   const s = { v: 1, step: 0, done: false, picked: true };      // повтор: выбранную страну не трогаем
@@ -915,7 +924,7 @@ $('#bkeys').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://
   if (ui.settings.sync) await pullSync().catch(() => {});
   applyUi();
   await initTheme();
-  const saved = await chrome.storage.local.get(['favs', 'last', 'quality', 'order', 'lang', 'view', 'health', 'tour']);
+  const saved = await chrome.storage.local.get(['favs', 'last', 'quality', 'order', 'lang', 'view', 'health', 'tour', 'whatsNew']);
   ui.health = saved.health ?? { bad: [] };
   setLang(saved.lang ?? detectLang());
   ui.view = saved.view === 'tiles' ? 'tiles' : 'list';
@@ -932,6 +941,7 @@ $('#bkeys').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://
   renderPlayer();
   // Элементы нового вида подгружаем и подключаем сразу после первого показа окна, чтобы их файлы не задерживали открытие (замер: окно открывается как прежде).
   if (!ui.settings.classic) requestAnimationFrame(() => setTimeout(async () => { fx = (await import('./ui/index.js')).mountNewUi($, list); document.documentElement.classList.add('rb-ready'); }, 0));
-  if (saved.tour && !saved.tour.done) setTimeout(() => runTour(saved.tour), 500);        // новая установка или незаконченный тур: продолжаем с сохранённого шага
+  if (saved.tour && !saved.tour.done) setTimeout(() => runTour(saved.tour), 500);
+  else if (saved.whatsNew && !saved.whatsNew.done && saved.whatsNew.v === chrome.runtime.getManifest().version) setTimeout(() => runWhatsNew(saved.whatsNew), 600);        // новая установка или незаконченный тур: продолжаем с сохранённого шага
   if (ui.favs.size && (!ui.health.t || Date.now() - ui.health.t > 864e5)) runCheck();   // раз в сутки, тихо, пока окно открыто
 })();

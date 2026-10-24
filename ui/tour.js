@@ -5,7 +5,7 @@
 //
 // createTour(api) → { start(state), stop() }. Всё, что касается окна, приходит через api (popup.js): тур ничего не знает о каталоге.
 
-const STEPS = [
+const TOUR_STEPS = [
   { id: 'welcome', sel: ['.tabs'], pick: true, wide: true },        // подсвечены вкладки: видно, как выбор страны меняет первую из них
   { id: 'tabs', sel: ['.tabs'] },
   { id: 'search', sel: ['.searchrow'] },
@@ -13,6 +13,16 @@ const STEPS = [
   { id: 'quality', sel: ['.player'] },
   { id: 'heart', sel: ['#list .row .heart'] },
   { id: 'player', sel: ['.player'] },
+  { id: 'settings', sel: ['#gear'] },
+];
+// «Что нового»: тот же движок, но только про изменения этой версии. Показывается один раз тем, кто просто обновился (не новым пользователям).
+// Тексты: wn_<id>_t / wn_<id>_d в i18n.js. Для следующей версии заменить шаги (и тексты) на новые, номер версии берётся из manifest.json.
+export const WHATS_NEW_STEPS = [
+  { id: 'intro', sel: ['header .brand'], wide: true },
+  { id: 'stations', sel: ['#list'] },
+  { id: 'country', sel: ['.tabs'] },
+  { id: 'player', sel: ['#qbtn'], alt: ['.player'] },
+  { id: 'sound', sel: ['.vol'] },
   { id: 'settings', sel: ['#gear'] },
 ];
 export const TOUR_VERSION = 1;
@@ -30,8 +40,10 @@ export function suggestCountry(available) {
   return available.includes('RU') ? 'RU' : available[0];
 }
 
-export function createTour(api) {
+// cfg: steps — шаги (по умолчанию обучение для новых), prefix — начало ключей текста в i18n, done — ключ надписи последней кнопки
+export function createTour(api, cfg = {}) {
   const { t } = api;
+  const steps = cfg.steps ?? TOUR_STEPS, prefix = cfg.prefix ?? 'tour_', doneKey = cfg.done ?? 'tourDone';
   let root, hole, card, body, titleEl, textEl, pickEl, countEl, dotsEl, backBtn, nextBtn, skipBtn, arrow;
   let state = null, i = 0, active = false, token = 0, suggested = null, lastFocus = null;
 
@@ -51,7 +63,7 @@ export function createTour(api) {
           <div class="tour-pickwrap"><div class="tour-label"></div><div class="tour-pick" role="radiogroup"></div></div>
         </div>
         <div class="tour-foot">
-          <div class="tour-dots" aria-hidden="true">${STEPS.map(() => '<i></i>').join('')}</div>
+          <div class="tour-dots" aria-hidden="true">${steps.map(() => '<i></i>').join('')}</div>
           <div class="tour-actions"><button type="button" class="tour-btn tour-back"></button><button type="button" class="tour-btn tour-next"></button></div>
         </div>
       </section>`;
@@ -64,7 +76,7 @@ export function createTour(api) {
     skipBtn.textContent = t('tourSkip');
     card.setAttribute('aria-label', t('tourAria'));
     backBtn.addEventListener('click', () => go(i - 1, -1));
-    nextBtn.addEventListener('click', () => (i === STEPS.length - 1 ? finish(false) : go(i + 1, 1)));
+    nextBtn.addEventListener('click', () => (i === steps.length - 1 ? finish(false) : go(i + 1, 1)));
     skipBtn.addEventListener('click', () => finish(true));
     root.addEventListener('pointerdown', (e) => {                           // клик по затемнению: мягко «встряхиваем» карточку, окно под ним не трогаем
       if (e.target === root || e.target === hole) { card.classList.remove('nudge'); void card.offsetWidth; card.classList.add('nudge'); }
@@ -98,7 +110,9 @@ export function createTour(api) {
 
   /* ---------- геометрия ---------- */
   function measure(step) {
-    const els = step.sel.map((s) => document.querySelector(s)).filter(Boolean);
+    const seen = (list) => list.map((q) => document.querySelector(q)).filter((e) => e && e.getBoundingClientRect().width > 0);
+    let els = seen(step.sel);
+    if (!els.length && step.alt) els = seen(step.alt);              // например, кнопки качества нет, пока не выбрана станция: подсвечиваем весь плеер
     if (!els.length) return undefined;                                       // элемента нет (например, пустой список): шаг пропускаем
     const h = root.getBoundingClientRect();
     let l = 1e9, tp = 1e9, r = -1e9, b = -1e9;
@@ -122,27 +136,27 @@ export function createTour(api) {
 
   /* ---------- шаги ---------- */
   function fill(step) {
-    const n = i + 1, total = STEPS.length;
-    titleEl.textContent = t(`tour_${step.id}_t`);
-    textEl.textContent = t(`tour_${step.id}_d`);
+    const n = i + 1, total = steps.length;
+    titleEl.textContent = t(`${prefix}${step.id}_t`);
+    textEl.textContent = t(`${prefix}${step.id}_d`);
     card.classList.toggle('wide', !!step.wide);
     body.querySelector('.tour-brand').hidden = !step.wide;
     body.querySelector('.tour-pickwrap').hidden = !step.pick;
     countEl.textContent = t('tourOf', { n, total });
     [...dotsEl.children].forEach((d, k) => { d.className = k < i ? 'done' : k === i ? 'now' : ''; });
     backBtn.style.visibility = i === 0 ? 'hidden' : 'visible';
-    nextBtn.textContent = i === total - 1 ? t('tourDone') : t('tourNext');
+    nextBtn.textContent = i === total - 1 ? t(doneKey) : t('tourNext');
     skipBtn.style.visibility = i === total - 1 ? 'hidden' : 'visible';
   }
 
   async function go(n, dir = 1, first = false) {
     if (n < 0) return;
-    if (n >= STEPS.length) return finish(false);
+    if (n >= steps.length) return finish(false);
     const my = ++token;
     i = n;
-    state = { ...state, v: TOUR_VERSION, step: n, done: false };
+    state = { ...state, v: state.v ?? TOUR_VERSION, step: n, done: false };
     api.save(state);
-    const step = STEPS[n];
+    const step = steps[n];
     api.prepare();
     await frame(); await frame();
     if (my !== token) return;
@@ -162,7 +176,7 @@ export function createTour(api) {
   async function finish(skipped) {
     if (!active) return;
     active = false; token++;
-    state = { ...state, v: TOUR_VERSION, done: true, skipped: !!skipped };
+    state = { ...state, v: state.v ?? TOUR_VERSION, done: true, skipped: !!skipped };
     api.save(state);
     window.removeEventListener('keydown', onKey, true);
     root.classList.add('closing');
@@ -186,7 +200,7 @@ export function createTour(api) {
     else if (e.target.closest?.('.tour-pick') && /^Arrow/.test(e.key)) {
       const c = [...pickEl.children], k = c.indexOf(document.activeElement);
       if (k >= 0) { e.preventDefault(); c[clamp(k + (/Right|Down/.test(e.key) ? 1 : -1), 0, c.length - 1)].focus(); }
-    } else if (e.key === 'ArrowRight') { e.preventDefault(); i === STEPS.length - 1 ? finish(false) : go(i + 1, 1); }
+    } else if (e.key === 'ArrowRight') { e.preventDefault(); i === steps.length - 1 ? finish(false) : go(i + 1, 1); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); go(i - 1, -1); }
     e.stopPropagation();
   }
@@ -199,8 +213,8 @@ export function createTour(api) {
     state = { v: TOUR_VERSION, step: 0, done: false, ...saved };
     build();
     window.addEventListener('keydown', onKey, true);
-    await go(clamp(state.step | 0, 0, STEPS.length - 1), 1, true);
-    if (!state.picked && STEPS[i].pick) { await choose(suggested ?? api.home()); }   // новый пользователь сразу видит свои станции; поменять можно кликом
+    await go(clamp(state.step | 0, 0, steps.length - 1), 1, true);
+    if (!state.picked && steps[i].pick) { await choose(suggested ?? api.home()); }   // новый пользователь сразу видит свои станции; поменять можно кликом
     root.classList.add('open');
   }
   function stop() { active = false; token++; window.removeEventListener('keydown', onKey, true); root?.remove(); }
