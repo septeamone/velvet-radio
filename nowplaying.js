@@ -93,12 +93,17 @@ const SOURCES = {
   retro: emg('retrofm'),
   radio7: emg('radio7'),
   dorognoe: emg('dorognoe'),
+  studio21: emg('studio21'),
+  eldoradio: emg('eldoradio'),
+  rusongs: icy('http://listen.rusongs.ru/ru-hd'),
+  megapolis: icy('http://online.radio-megapolis.ru:8000/megapolis_mp3'),
+  horoshee: icy('https://hr.amgradio.ru/Horoshee'),
   record,
   bbc1xtra: bbc,
 };
 
 // Для списка «что играет везде» берём только лёгкие источники (запрос JSON); ICY открывает сам поток, это тяжело.
-export const LIVE = new Set(Object.keys(SOURCES).filter((id) => !['relax', 'love'].includes(id)));
+export const LIVE = new Set(Object.keys(SOURCES).filter((id) => !['relax', 'love', 'rusongs', 'megapolis', 'horoshee'].includes(id)));
 
 const nice = (s) => s.toLowerCase().replace(/(^|[\s/(-])(\p{L})/gu, (_m, p, c) => p + c.toUpperCase());
 
