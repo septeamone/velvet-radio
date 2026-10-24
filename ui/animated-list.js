@@ -1,9 +1,9 @@
 // Based on React Bits AnimatedList (MIT + Commons Clause, © David Haz), ported to plain JS/CSS.
 //
-// Слой для существующего списка #list (строки .row, страны .crow). Как в оригинале (animation="slide", stagger 0.04, fadeSize 56):
+// Слой для существующего списка #list (строки .row, страны .crow). Как в оригинале (animation="slide", stagger 0.04, fadeSize 28, в оригинале 56):
 //  1) строки, видимые меньше чем на 50%, уходят в скрытое состояние (data-al="above|below": opacity 0, сдвиг, лёгкий scale)
 //     и возвращаются на пружинной кривой linear(...) при входе в видимую зону; при первом показе строки появляются со stagger;
-//  2) мягкое затухание верхнего и нижнего края списка зависит от scrollTop (mask, fadeSize 56px); нижний край считается
+//  2) мягкое затухание верхнего и нижнего края списка зависит от scrollTop (mask, 28px); нижний край считается
 //     от верха плавающего плеера, чтобы не было двойного затухания с подложкой;
 //  3) подсветка выбора с клавиатуры (.kbd, ставит popup.js) — общая рамка, скользит от строки к строке (::after списка).
 // Строки двигаются только через независимые свойства translate/scale/opacity (transform остаётся за drag и hover).
@@ -14,7 +14,7 @@ const STAGGER = 0.04;
 
 // opts: items — классы элементов (по умолчанию строки станций и стран), player — что перекрывает низ списка (null: ничего), fade — ширина затухания краёв.
 // Тот же слой подключается к выпадающему списку стран в настройках (#homeMenu): прокрутка у него такая же, как у списка станций.
-export function initAnimatedList(list, { items = ['row', 'crow'], player: playerEl, fade = 56 } = {}) {
+export function initAnimatedList(list, { items = ['row', 'crow'], player: playerEl, fade = 28 } = {}) {
   const FADE = fade;
   const app = list.closest('.app') ?? list.parentElement;
   const player = playerEl === undefined ? app.querySelector('.player') : playerEl;
