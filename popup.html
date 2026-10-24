@@ -88,21 +88,38 @@
 
     <section id="settings" class="settings glass" hidden>
       <div class="sethead"><button id="setback" class="cback" data-ta="back"><svg viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></svg></button><h2 data-t="settings"></h2></div>
+      <nav class="setnav" id="setnav" aria-label="Разделы">
+        <button data-go="secMain" data-t="navMain" class="on"></button><button data-go="secSound" data-t="navSound"></button><button data-go="secLook" data-t="navLook"></button><button data-go="secData" data-t="navData"></button><button data-go="secMore" data-t="navMore"></button>
+      </nav>
       <div class="setbody">
-        <label class="set"><span class="st"><b data-t="sSaver"></b><small data-t="sSaverD"></small></span><input type="checkbox" class="sw" data-set="saver"></label>
-        <label class="set"><span class="st"><b data-t="sViz"></b><small data-t="sVizD"></small></span><input type="checkbox" class="sw" data-set="showViz"></label>
-        <label class="set"><span class="st"><b data-t="sClassic"></b><small data-t="sClassicD"></small></span><input type="checkbox" class="sw" data-set="classic"></label>
-        <label class="set"><span class="st"><b data-t="sFade"></b><small data-t="sFadeD"></small></span><input type="checkbox" class="sw" data-set="fade"></label>
-        <label class="set"><span class="st"><b data-t="sResume"></b><small data-t="sResumeD"></small></span><input type="checkbox" class="sw" data-set="resume"></label>
-        <label class="set"><span class="st"><b data-t="sSync"></b><small data-t="sSyncD"></small></span><input type="checkbox" class="sw" data-set="sync"></label>
-        <div class="set"><span class="st"><b data-t="sHome"></b><small data-t="sHomeD"></small></span><button id="homeBtn" class="pill sel" aria-haspopup="listbox" aria-expanded="false" data-ta="sHome"><img id="homeFlag" class="hflag" alt=""><span id="homeName"></span><svg class="hchev" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button></div>
-        <div class="set"><span class="st"><b data-t="sBuffer"></b><small data-t="sBufferD"></small></span>
-          <div id="bufseg" class="seg" style="--n:3"><i class="seg-thumb"></i><button data-k="4">4</button><button data-k="9">9</button><button data-k="14">14</button></div></div>
-        <div class="set"><span class="st"><b data-t="sBackup"></b><small data-t="sBackupD"></small></span>
-          <div class="btns"><button id="bexp" class="pill" data-t="sExport"></button><button id="bimp" class="pill" data-t="sImport"></button><input type="file" id="bfile" accept="application/json,.json" hidden></div></div>
-        <div class="set col"><div class="setrow"><span class="st"><b data-t="sCheck"></b><small id="checkInfo"></small></span><button id="bcheck" class="pill" data-t="sCheckBtn"></button></div><ul id="badlist" class="badlist"></ul></div>
-        <div class="set"><span class="st"><b data-t="sKeys"></b><small data-t="sKeysD"></small></span><button id="bkeys" class="pill" data-t="sKeysBtn"></button></div>
-        <div class="set"><span class="st"><b data-t="sTour"></b><small data-t="sTourD"></small></span><button id="btour" class="pill" data-t="sTourBtn"></button></div>
+        <h3 class="setsec" id="secMain" data-t="secMain"></h3>
+        <div class="setgroup" role="group" aria-labelledby="secMain">
+        <div class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.4 3.5 5.2 3.5 8.5s-1.2 6.1-3.5 8.5c-2.3-2.4-3.5-5.2-3.5-8.5S9.7 5.9 12 3.5Z"/></svg></span><span class="st"><b data-t="sHome"></b><small data-t="sHomeD"></small></span><button id="homeBtn" class="pill sel" aria-haspopup="listbox" aria-expanded="false" data-ta="sHome"><img id="homeFlag" class="hflag" alt=""><span id="homeName"></span><svg class="hchev" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button></div>
+        <label class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M10.2 8.9v6.2l5-3.1Z"/></svg></span><span class="st"><b data-t="sResume"></b><small data-t="sResumeD"></small></span><input type="checkbox" class="sw" data-set="resume"></label>
+        <label class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c0-8 5-13.5 14-14.5 0 9-5 14.5-13 14.5"/><path d="M5 19 12.5 11.5"/></svg></span><span class="st"><b data-t="sSaver"></b><small data-t="sSaverD"></small></span><input type="checkbox" class="sw" data-set="saver"></label>
+        </div>
+        <h3 class="setsec" id="secSound" data-t="secSound"></h3>
+        <div class="setgroup" role="group" aria-labelledby="secSound">
+        <label class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg></span><span class="st"><b data-t="sFade"></b><small data-t="sFadeD"></small></span><input type="checkbox" class="sw" data-set="fade"></label>
+        <div class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 5 6v5.5c0 4.2 3 7.2 7 9 4-1.8 7-4.8 7-9V6l-7-2.5Z"/><path d="m9 12 2.2 2.2L15 10"/></svg></span><span class="st"><b data-t="sBuffer"></b><small data-t="sBufferD"></small></span><div id="bufseg" class="seg" style="--n:3"><i class="seg-thumb"></i><button data-k="4" data-t="sBufFast" data-tt="sBufFastT"></button><button data-k="9" data-t="sBufBal" data-tt="sBufBalT"></button><button data-k="14" data-t="sBufSafe" data-tt="sBufSafeT"></button></div></div>
+        </div>
+        <h3 class="setsec" id="secLook" data-t="secLook"></h3>
+        <div class="setgroup" role="group" aria-labelledby="secLook">
+        <label class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h1.5M8.5 8v8M12 5v14M15.5 8v8M18.5 12H20"/></svg></span><span class="st"><b data-t="sViz"></b><small data-t="sVizD"></small></span><input type="checkbox" class="sw" data-set="showViz"></label>
+        <label class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4h13A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-13A1.5 1.5 0 0 1 5.5 4Z"/><path d="M4 9h16"/></svg></span><span class="st"><b data-t="sClassic"></b><small data-t="sClassicD"></small></span><input type="checkbox" class="sw" data-set="classic"></label>
+        </div>
+        <h3 class="setsec" id="secData" data-t="secData"></h3>
+        <div class="setgroup" role="group" aria-labelledby="secData">
+        <label class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 18.5A4.5 4.5 0 0 1 7 9.6a5.5 5.5 0 0 1 10.6 1.4 3.8 3.8 0 0 1-.6 7.5Z"/></svg></span><span class="st"><b data-t="sSync"></b><small data-t="sSyncD"></small></span><input type="checkbox" class="sw" data-set="sync"></label>
+        <div class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h7l4 4v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1Z"/><path d="M14 3.5v4h4"/><path d="M9.5 14l2.5 2.5 2.5-2.5M12 11.5v5"/></svg></span><span class="st"><b data-t="sBackup"></b><small data-t="sBackupD"></small></span><div class="btns"><button id="bexp" class="pill" data-t="sExport"></button><button id="bimp" class="pill" data-t="sImport"></button><input type="file" id="bfile" accept="application/json,.json" hidden></div></div>
+        <div class="set col"><span class="sico" id="checkIco"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7.5"/></svg></span><span class="st"><b data-t="sCheck"></b><small id="checkInfo"></small></span><button id="bcheck" class="pill" data-t="sCheckBtn"></button><ul id="badlist" class="badlist"></ul></div>
+        <div class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.3-5.4"/><path d="M4.5 4.5v3.8h3.8"/></svg></span><span class="st"><b data-t="sReset"></b><small data-t="sResetD"></small></span><button id="breset" class="pill" data-t="sResetBtn"></button></div>
+        </div>
+        <h3 class="setsec" id="secMore" data-t="secMore"></h3>
+        <div class="setgroup" role="group" aria-labelledby="secMore">
+        <div class="set keys"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><path d="M7 10.5h.01M10 10.5h.01M13 10.5h.01M16 10.5h.01M8 14h8"/></svg></span><span class="st"><b data-t="sKeys"></b><small data-t="sKeysD"></small></span><button id="bkeys" class="pill" data-t="sKeysBtn"></button><div id="keyList" class="keylist"></div></div>
+        <div class="set"><span class="sico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.4 8.6-2 4.8-4.8 2 2-4.8Z"/></svg></span><span class="st"><b data-t="sTour"></b><small data-t="sTourD"></small></span><button id="btour" class="pill" data-t="sTourBtn"></button></div>
+        </div>
         <div class="about"><span id="ver"></span> · <a href="https://github.com/septeamone/velvet-radio" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/septeamone/velvet-radio/blob/main/PRIVACY.md" target="_blank" rel="noopener" data-t="sPrivacy"></a></div>
       </div>
     </section>

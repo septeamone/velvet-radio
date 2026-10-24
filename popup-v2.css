@@ -146,3 +146,11 @@
 :root[data-ui="new"] .lang-btn { border-radius: 9px; }
 :root[data-ui="new"] .qwrap[hidden] { transform: translateY(6px) scale(.96); }
 @starting-style { :root[data-ui="new"] .qwrap:not([hidden]) { transform: translateY(6px) scale(.96); } }
+
+/* настройки: карточки-группы, значки у строк, разделы */
+:root[data-ui="new"] .setgroup { background: var(--glass-hi); }
+:root[data-ui="new"][data-theme="dark"] .setgroup { background: color-mix(in srgb, var(--glass-hi) 92%, var(--text) 3%); }
+:root[data-ui="new"] .sico { border-radius: 9px; background: var(--seg); }
+:root[data-ui="new"] .setnav button.on { background: var(--glass-hi); }
+:root[data-ui="new"] .setsec { font-weight: 600; }
+:root[data-ui="new"] .pill { height: 32px; }

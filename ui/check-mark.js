@@ -23,9 +23,11 @@ export function initCheckMark(settingsEl) {
     el('path', { class: 'rb-cm-bang', d: 'M12 7.6v5M12 16.2v.2', pathLength: 1 }),
   );
   mark.append(svg);
-  const head = document.createElement('div');
-  head.className = 'rb-cm-head';
-  st.before(head); head.append(mark, st);
+  // В новых настройках у строки есть место для значка (#checkIco): индикатор состояния занимает его. Иначе (запасной вариант) встаёт слева от текста.
+  const slot = settingsEl.querySelector('#checkIco');
+  let head = null;
+  if (slot) slot.replaceChildren(mark);
+  else { head = document.createElement('div'); head.className = 'rb-cm-head'; st.before(head); head.append(mark, st); }
 
   const sync = () => {
     const mode = btn.disabled ? 'run' : bad.children.length ? 'bad' : /\d/.test(info.textContent) ? 'ok' : 'off';
@@ -42,5 +44,5 @@ export function initCheckMark(settingsEl) {
   document.addEventListener('visibilitychange', vis);
   sync(); vis();
 
-  return { destroy() { mo.disconnect(); document.removeEventListener('visibilitychange', vis); head.before(st); head.remove(); } };
+  return { destroy() { mo.disconnect(); document.removeEventListener('visibilitychange', vis); if (head) { head.before(st); head.remove(); } else mark.remove(); } };
 }

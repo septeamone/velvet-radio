@@ -547,6 +547,7 @@
 
 :root[data-ui="new"] .rb-cm-head { display: flex; align-items: center; gap: 9px; min-width: 0; }
 :root[data-ui="new"] .rb-cm { flex: none; width: 18px; height: 18px; color: var(--muted); transition: color .25s ease; }
+:root[data-ui="new"] .sico .rb-cm { width: 19px; height: 19px; }
 :root[data-ui="new"] .rb-cm[data-rb="run"] { color: var(--text); }
 :root[data-ui="new"] .rb-cm[data-rb="ok"] { color: var(--rb-cm-ok); }
 :root[data-ui="new"] .rb-cm[data-rb="bad"] { color: var(--rb-cm-bad); }

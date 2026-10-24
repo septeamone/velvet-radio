@@ -666,9 +666,55 @@ function syncSettingsUI() {
   seg.style.setProperty('--i', Math.max(0, vals.indexOf(ui.settings.buffer)));
   seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', +b.dataset.k === ui.settings.buffer));
   homeLabel();
+  setbody.scrollTop = 0; spySettings();
+  renderKeys();
   $('#ver').textContent = `Velvet Radio ${chrome.runtime.getManifest().version}`;
   renderHealth();
 }
+/* ---------- настройки: навигация по разделам, подсветка текущего, горячие клавиши, сброс ---------- */
+const setbody = $('.setbody'), setnav = $('#setnav');
+const secs = ['secMain', 'secSound', 'secLook', 'secData', 'secMore'].map((id) => $('#' + id));
+function spySettings() {
+  $('.sethead').classList.toggle('scrolled', setbody.scrollTop > 2);
+  const top = setbody.getBoundingClientRect().top + 28;
+  let act = 0;
+  secs.forEach((s, i) => { if (s.getBoundingClientRect().top <= top) act = i; });
+  if (setbody.scrollTop + setbody.clientHeight >= setbody.scrollHeight - 2) act = secs.length - 1;
+  setnav.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === act));
+}
+setbody.addEventListener('scroll', spySettings, { passive: true });
+setnav.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-go]');
+  if (b) $('#' + b.dataset.go).scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+async function renderKeys() {
+  let cmds = [];
+  try { cmds = await chrome.commands.getAll(); } catch { /* список недоступен: покажем «не задана» */ }
+  const by = Object.fromEntries(cmds.map((c) => [c.name, c.shortcut]));
+  $('#keyList').replaceChildren(...[['toggle', 'kPause'], ['next', 'kNext'], ['prev', 'kPrev']].map(([name, label]) => {
+    const row = Object.assign(document.createElement('div'), { className: 'keyline' });
+    const key = document.createElement('span');
+    const sc = by[name];
+    const pretty = (p) => ({ 'Стрелка вправо': '→', 'Стрелка влево': '←', 'Стрелка вверх': '↑', 'Стрелка вниз': '↓', Right: '→', Left: '←', Up: '↑', Down: '↓', 'Right Arrow': '→', 'Left Arrow': '←' }[p] ?? p);
+    if (sc) (sc.includes('+') ? sc.split('+') : [sc]).forEach((p) => key.append(Object.assign(document.createElement('kbd'), { textContent: pretty(p.trim()) })));
+    else Object.assign(key, { className: 'none', textContent: t('kNone') });
+    row.append(Object.assign(document.createElement('span'), { textContent: t(label) }), key);
+    return row;
+  }));
+}
+let resetTimer = 0;
+$('#breset').addEventListener('click', async () => {
+  const b = $('#breset');
+  if (!b.classList.contains('danger')) {                     // двойное нажатие: случайный клик ничего не сбросит
+    b.classList.add('danger'); b.textContent = t('sResetSure');
+    resetTimer = setTimeout(() => { b.classList.remove('danger'); b.textContent = t('sResetBtn'); }, 4000);
+    return;
+  }
+  clearTimeout(resetTimer);
+  await chrome.storage.local.set({ settings: { ...DEFAULTS } });
+  location.reload();
+});
+
 /* ---------- выпадающие списки «Моя страна» и качество звука: свои, без системной рамки; прокрутка как у списка станций (ui/animated-list.js) ---------- */
 function dropdown({ btn, wrap, menu, items, pick, up = null, minW = 212, min = 1 }) {
   const H = 252;
