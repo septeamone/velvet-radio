@@ -30,7 +30,7 @@ async function capture(lang) {
   try {
     const sw = ctx.serviceWorkers()[0] ?? await ctx.waitForEvent('serviceworker'); const id = sw.url().split('/')[2];
     const page = await ctx.newPage();
-    const open = async (theme) => { await page.evaluate((a) => chrome.storage.local.set(a), { tour: { v: 1, done: true }, lang, theme, view: 'list', favs: FAVS, settings: {} }); await page.reload(); await page.waitForSelector('.row .seg'); await sleep(1800); };
+    const open = async (theme) => { await page.evaluate((a) => chrome.storage.local.set(a), { tour: { v: 1, done: true }, lang, theme, view: 'list', favs: FAVS, settings: {} }); await page.reload(); await page.waitForSelector('.row .kb'); await sleep(1800); };
     const quietSearch = async () => { await page.evaluate(() => { const q = document.querySelector('#q'); q.focus(); q.blur(); }); await page.waitForFunction(() => !document.querySelector('#q').placeholder.includes('|'), null, { timeout: 5000 }).catch(() => {}); await sleep(300); };
     // «тихий» кадр: в рекламе надпись без эха-призраков, а поле поиска с обычной подсказкой (класс no-anim останавливает печать и эхо)
     const shot = async (name) => {
@@ -67,11 +67,11 @@ async function capture(lang) {
     await page.click('.tabs [data-tab=all]'); await sleep(600);
     await page.click('#gbtn'); await sleep(1100); await shot('genres'); await page.click('#gbtn'); await sleep(500);
     // избранное: шесть станций с сердечками
-    await page.evaluate((f) => chrome.storage.local.set({ favs: f }), ['europaplus', 'record', 'retro', 'radio7', 'dorognoe', 'vestifm']); await page.reload(); await page.waitForSelector('.row .seg'); await sleep(1800);
+    await page.evaluate((f) => chrome.storage.local.set({ favs: f }), ['europaplus', 'record', 'retro', 'radio7', 'dorognoe', 'vestifm']); await page.reload(); await page.waitForSelector('.row .kb'); await sleep(1800);
     await page.click('.tabs [data-tab=fav]'); await sleep(1800); await shot('favorites');
     await page.evaluate((f) => chrome.storage.local.set({ favs: f }), FAVS);
     // тёмная и светлая тема с играющей станцией
-    await page.reload(); await page.waitForSelector('.row .seg'); await sleep(1800); await shot('now-dark');
+    await page.reload(); await page.waitForSelector('.row .kb'); await sleep(1800); await shot('now-dark');
     await open('light'); await sleep(1500); await shot('now-light');
     await page.evaluate(() => chrome.runtime.sendMessage({ type: 'stop' })).catch(() => {});
   } finally { await ctx.close(); }

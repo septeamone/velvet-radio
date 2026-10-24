@@ -82,25 +82,6 @@ function setLogo(el, s) {
   el.replaceChildren(img);
 }
 
-function buildSeg(s) {
-  const seg = document.createElement('div');
-  seg.className = 'seg';
-  seg.setAttribute('role', 'group');
-  seg.setAttribute('aria-label', t('quality'));
-  const qs = visibleQ(s);
-  seg.style.setProperty('--n', qs.length);
-  seg.classList.toggle('one', qs.length === 1);
-  seg.append(Object.assign(document.createElement('i'), { className: 'seg-thumb' }));
-  for (const q of qs) {
-    const b = document.createElement('button');
-    b.dataset.k = q.kbps;
-    b.textContent = q.kbps;
-    b.title = q.note ?? `${q.kbps} kbps`;
-    seg.append(b);
-  }
-  return seg;
-}
-
 const home = () => (stationsOf(ui.settings.home).length ? ui.settings.home : 'RU');   // главная страна: её станции на первой вкладке
 const isHome = (s) => s.country === home();
 const flagSrc = (cc) => `flags/${cc.toLowerCase()}.svg`;
@@ -141,7 +122,7 @@ function stationRow(s, i) {
     genre.append(f, ` ${countryName(s.country)} · `);
   }
   genre.append(genreName(s.genre));
-  li.querySelector('.heart').before(buildSeg(s));
+  li.querySelector('.heart').before(Object.assign(document.createElement('span'), { className: 'kb' }));
   if (ui.health.bad.includes(s.id)) { li.classList.add('bad'); li.title = t('badStation'); }
   return li;
 }
@@ -213,6 +194,8 @@ function applyStatic() {
   setHomeCc(home());
   tabs.querySelector('[data-tab=all]').textContent = countryName(home());
   homeLabel();
+  syncMute();
+  for (const el of [$('#nowLogo'), $('#nowTitle')]) el.title = t('jumpTip');
 }
 
 function openCountry(cc) {
@@ -235,10 +218,12 @@ function syncRows() {
     const sel = cur && kbps ? kbps : chosen(s);
     const qs = visibleQ(s);
     const idx = Math.max(0, qs.findIndex((q) => q.kbps === sel));
-    const seg = row.querySelector('.seg');
-    seg.style.setProperty('--i', idx);
-    seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', +b.dataset.k === qs[idx].kbps));
+    const kb = row.querySelector('.kb');
+    kb.textContent = qs[idx].kbps;
+    kb.title = qs[idx].note ?? `${qs[idx].kbps} kbps`;
   });
+  renderQuality();
+  updateLocate();
 }
 
 list.addEventListener('click', (e) => {
@@ -248,8 +233,6 @@ list.addEventListener('click', (e) => {
   if (!row) return;
   const id = row.dataset.id, s = byId(id);
   if (e.target.closest('.heart')) return toggleFav(id, row);
-  const kb = e.target.closest('.seg button');
-  if (kb) return setQuality(s, +kb.dataset.k);
   if (ui.state.stationId === id && active()) send({ type: 'stop' });
   else playStation(id);
 });
@@ -285,7 +268,7 @@ let drag = null, suppressClick = false, autoScroll = 0;
 list.addEventListener('pointerdown', (e) => {
   if (e.button !== 0 || list.classList.contains('locked')) return;
   const row = e.target.closest('.row');
-  if (!row || e.target.closest('.heart, .seg button')) return;
+  if (!row || e.target.closest('.heart')) return;
   drag = { row, pid: e.pointerId, x: e.clientX, y: e.clientY, lastY: e.clientY, active: false };
 });
 
@@ -375,12 +358,15 @@ tabs.addEventListener('click', (e) => {
     if (ui.tab === 'countries' && ui.country) { ui.country = null; syncChrome(); renderList(); }
     return;
   }
-  ui.tab = b.dataset.tab; ui.country = null; ui.genre = null;
-  tabs.dataset.tab = ui.tab;
-  tabs.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+  selectTab(b.dataset.tab);
+});
+function selectTab(name) {
+  ui.tab = name; ui.country = null; ui.genre = null;
+  tabs.dataset.tab = name;
+  tabs.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.dataset.tab === name));
   syncChrome();
   renderList();
-});
+}
 // Сделать страну главной: её станции встают на первую вкладку, прежняя главная (по умолчанию Россия) уходит во вкладку «Страны»
 function goHomeTab() {
   ui.country = null; ui.genre = null; ui.query = ''; $('#q').value = '';
@@ -446,7 +432,7 @@ function renderPlayer() {
     if (logo.dataset.id !== s.id) { logo.dataset.id = s.id; setLogo(logo, s); }
     setMq($('#nowTitle'), s.name);
     const q = kbps ?? chosen(s);
-    let sub = `${genreName(s.genre)} · ${q} kbps`, note = false;
+    let sub = genreName(s.genre), note = false;
     const nt = noticeText(notice);
     if (status === 'error') sub = t('unavailable');
     else if (status === 'loading') { sub = nt ?? t('connecting'); note = !!nt; }
@@ -644,6 +630,7 @@ document.addEventListener('keydown', (e) => {
   if (e.target.matches?.('input[type=range], button')  && e.key !== 'Escape' && e.key !== '/') return;
   const typing = e.target.matches?.('input[type=search]');
   if (e.key === '/' && !typing) { e.preventDefault(); $('#q').focus(); return; }
+  if ((e.key === 'm' || e.key === 'ь') && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); toggleMute(); return; }
   if (e.key === 'Escape') {
     if (typing && $('#q').value) { $('#q').value = ''; ui.query = ''; renderList(); }
     else if (ui.country) $('#cback').click();
@@ -659,7 +646,7 @@ document.addEventListener('keydown', (e) => {
 const settingsEl = $('#settings');
 function openSettings(on) {
   settingsEl.hidden = !on;
-  if (!on) openHomeMenu(false);
+  if (!on) homeDd.open(false);
   $('#gear').classList.toggle('on', on);
   if (on) syncSettingsUI();
 }
@@ -682,66 +669,156 @@ function syncSettingsUI() {
   $('#ver').textContent = `Velvet Radio ${chrome.runtime.getManifest().version}`;
   renderHealth();
 }
-/* ---------- выпадающий список «Моя страна»: свой, без системной рамки; прокрутка как у списка станций (ui/animated-list.js) ---------- */
-const homeMenu = $('#homeMenu'), homeWrap = $('#homeWrap'), homeBtn = $('#homeBtn');
+/* ---------- выпадающие списки «Моя страна» и качество звука: свои, без системной рамки; прокрутка как у списка станций (ui/animated-list.js) ---------- */
+function dropdown({ btn, wrap, menu, items, pick, up = null, minW = 212, min = 1 }) {
+  const H = 252;
+  let shown = [];
+  const rows = () => [...menu.children];
+  function open(on) {
+    if (on === !wrap.hidden) return;
+    btn.setAttribute('aria-expanded', String(on));
+    if (!on) { wrap.hidden = true; return; }
+    shown = items();
+    if (shown.length < min) { btn.setAttribute('aria-expanded', 'false'); return; }
+    const r = btn.getBoundingClientRect(), w = Math.max(minW, r.width);
+    const room = { below: innerHeight - r.bottom - 16, above: r.top - 16 };
+    const need = Math.min(H, shown.length * 34 + 12);
+    const above = up ?? (room.below < need && room.above > room.below);
+    menu.style.maxHeight = Math.min(H, above ? room.above : room.below) - 12 + 'px';
+    wrap.classList.toggle('up', above);
+    Object.assign(wrap.style, { width: w + 'px', left: Math.max(10, Math.min(r.right - w, innerWidth - w - 10)) + 'px',
+      top: above ? 'auto' : r.bottom + 6 + 'px', bottom: above ? innerHeight - r.top + 6 + 'px' : 'auto' });
+    wrap.hidden = false;                         // сначала показываем: модуль прокрутки меряет строки только в видимом списке
+    menu.replaceChildren(...shown.map((it, i) => {
+      const li = document.createElement('li');
+      li.className = 'hrow'; li.dataset.i = i; Object.assign(li.dataset, it.data); li.setAttribute('role', 'option');
+      li.setAttribute('aria-selected', String(!!it.cur));
+      li.classList.toggle('cur', !!it.cur); li.classList.toggle('has-sub', !!it.sub);
+      li.innerHTML = `${it.flag ? '<img class="hflag" alt="">' : ''}<span class="hn"><span class="ht"></span>${it.sub ? '<small class="hs"></small>' : ''}</span><svg class="hck" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>`;
+      if (it.flag) li.querySelector('img').src = it.flag;
+      li.querySelector('.ht').textContent = it.label;
+      if (it.sub) li.querySelector('.hs').textContent = it.sub;
+      return li;
+    }));
+    const cur = rows().find((x) => x.classList.contains('cur'));
+    cur?.classList.add('kbd');
+    if (cur) menu.scrollTop = Math.max(0, cur.offsetTop - (menu.clientHeight - cur.offsetHeight) / 2);
+  }
+  btn.addEventListener('click', () => open(wrap.hidden));
+  btn.addEventListener('keydown', (e) => { if (['ArrowDown', 'ArrowUp'].includes(e.key) && wrap.hidden) { e.preventDefault(); open(true); } });
+  menu.addEventListener('click', (e) => {
+    const li = e.target.closest('.hrow');
+    if (!li) return;
+    open(false);
+    pick(shown[+li.dataset.i]);
+  });
+  document.addEventListener('pointerdown', (e) => { if (!wrap.hidden && !e.target.closest(`#${wrap.id}, #${btn.id}`)) open(false); });
+  window.addEventListener('keydown', (e) => {      // до остальных обработчиков окна: Esc закрывает только список, а не всё окно
+    if (wrap.hidden) return;
+    const its = rows();
+    let k = its.findIndex((x) => x.classList.contains('kbd'));
+    const move = (n) => { its[k]?.classList.remove('kbd'); k = Math.max(0, Math.min(its.length - 1, n)); its[k].classList.add('kbd'); };
+    if (e.key === 'ArrowDown') move(k + 1);
+    else if (e.key === 'ArrowUp') move(k - 1);
+    else if (e.key === 'Home') move(0);
+    else if (e.key === 'End') move(its.length - 1);
+    else if (e.key === 'Enter' || e.key === ' ') its[k]?.click();
+    else if (e.key === 'Escape') { open(false); btn.focus(); }
+    else if (e.key === 'Tab') { open(false); return; }
+    else return;
+    e.preventDefault(); e.stopPropagation();
+  }, true);
+  return { open, get isOpen() { return !wrap.hidden; } };
+}
+
+const homeBtn = $('#homeBtn');
 function homeLabel() {
   $('#homeName').textContent = countryName(home());
   $('#homeFlag').src = flagSrc(home());
 }
-function homeItems() { return [...homeMenu.children]; }
-function openHomeMenu(on) {
-  if (on === !homeWrap.hidden) return;
-  homeBtn.setAttribute('aria-expanded', String(on));
-  if (!on) { homeWrap.hidden = true; return; }
-  const cs = [{ cc: 'RU' }, ...COUNTRIES].filter((c) => stationsOf(c.cc).length).map((c) => c.cc);
-  cs.sort((a, b) => countryName(a).localeCompare(countryName(b), getLang()));
-  const r = homeBtn.getBoundingClientRect(), w = Math.max(212, r.width), H = 252;
-  homeMenu.style.maxHeight = H - 12 + 'px';
-  Object.assign(homeWrap.style, {
-    width: w + 'px', left: Math.max(10, Math.min(r.right - w, innerWidth - w - 10)) + 'px',
-    top: Math.max(10, r.bottom + 6 + H <= innerHeight - 10 ? r.bottom + 6 : r.top - 6 - Math.min(H, cs.length * 34 + 12)) + 'px',
-  });
-  homeWrap.hidden = false;                       // сначала показываем: модуль прокрутки меряет строки только в видимом списке
-  homeMenu.replaceChildren(...cs.map((cc) => {
-    const li = document.createElement('li');
-    li.className = 'hrow'; li.dataset.cc = cc; li.setAttribute('role', 'option');
-    li.setAttribute('aria-selected', String(cc === home()));
-    li.classList.toggle('cur', cc === home());
-    li.innerHTML = '<img class="hflag" alt=""><span class="hn"></span><svg class="hck" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
-    li.querySelector('img').src = flagSrc(cc);
-    li.querySelector('.hn').textContent = countryName(cc);
-    return li;
-  }));
-  const cur = homeItems().find((x) => x.classList.contains('cur'));
-  cur?.classList.add('kbd');
-  if (cur) homeMenu.scrollTop = Math.max(0, cur.offsetTop - (H - 34) / 2);
-}
-homeBtn.addEventListener('click', () => openHomeMenu(homeWrap.hidden));
-homeBtn.addEventListener('keydown', (e) => { if (['ArrowDown', 'ArrowUp'].includes(e.key) && homeWrap.hidden) { e.preventDefault(); openHomeMenu(true); } });
-homeMenu.addEventListener('click', async (e) => {
-  const li = e.target.closest('.hrow');
-  if (!li) return;
-  openHomeMenu(false);
-  await setHome(li.dataset.cc);
-  syncSettingsUI();
+const homeDd = dropdown({
+  btn: homeBtn, wrap: $('#homeWrap'), menu: $('#homeMenu'),
+  items: () => [{ cc: 'RU' }, ...COUNTRIES].map((c) => c.cc).filter((cc) => stationsOf(cc).length)
+    .sort((a, b) => countryName(a).localeCompare(countryName(b), getLang()))
+    .map((cc) => ({ label: countryName(cc), flag: flagSrc(cc), cur: cc === home(), data: { cc } })),
+  pick: async (it) => { await setHome(it.data.cc); syncSettingsUI(); },
 });
-document.addEventListener('pointerdown', (e) => { if (!homeWrap.hidden && !e.target.closest('#homeWrap, #homeBtn')) openHomeMenu(false); });
-$('.setbody').addEventListener('scroll', () => openHomeMenu(false), { passive: true });
-window.addEventListener('keydown', (e) => {      // до остальных обработчиков окна: Esc закрывает только список, а не все настройки
-  if (homeWrap.hidden) return;
-  const its = homeItems();
-  let k = its.findIndex((x) => x.classList.contains('kbd'));
-  const move = (n) => { its[k]?.classList.remove('kbd'); k = Math.max(0, Math.min(its.length - 1, n)); its[k].classList.add('kbd'); };
-  if (e.key === 'ArrowDown') move(k + 1);
-  else if (e.key === 'ArrowUp') move(k - 1);
-  else if (e.key === 'Home') move(0);
-  else if (e.key === 'End') move(its.length - 1);
-  else if (e.key === 'Enter' || e.key === ' ') its[k]?.click();
-  else if (e.key === 'Escape') { openHomeMenu(false); homeBtn.focus(); }
-  else if (e.key === 'Tab') { openHomeMenu(false); return; }
-  else return;
-  e.preventDefault(); e.stopPropagation();
-}, true);
+$('.setbody').addEventListener('scroll', () => homeDd.open(false), { passive: true });
+
+/* ---------- качество звука: кнопка с битрейтом в плеере (вместо трёх кнопок в каждой строке) ---------- */
+const qbtn = $('#qbtn');
+const nowStation = () => byId(ui.state.stationId ?? ui.last);
+const shownKbps = (s) => (ui.state.stationId === s.id && ui.state.status !== 'stopped' && ui.state.kbps ? ui.state.kbps : chosen(s));
+const qualityDd = dropdown({
+  btn: qbtn, wrap: $('#qWrap'), menu: $('#qMenu'), up: true, minW: 210, min: 2,
+  items: () => { const s = nowStation(); return s ? [...visibleQ(s)].reverse().map((q) => ({ label: `${q.kbps} kbps`, sub: q.note, cur: q.kbps === shownKbps(s), data: { k: q.kbps } })) : []; },
+  pick: (it) => { const s = nowStation(); if (s) setQuality(s, +it.data.k); },
+});
+function renderQuality() {
+  const s = nowStation();
+  qbtn.hidden = !s;
+  if (!s) return;
+  const one = visibleQ(s).length < 2;
+  $('#qval').textContent = shownKbps(s);
+  qbtn.classList.toggle('one', one);
+  qbtn.setAttribute('aria-disabled', String(one));
+}
+
+/* ---------- заглушить: клик по значку динамика и клавиша M ---------- */
+const quietIcon = document.querySelector('.vol > svg');
+let preMute = 0.8;
+function syncMute() {
+  const label = t(+vol.value === 0 ? 'unmute' : 'mute');
+  quietIcon.setAttribute('aria-label', label);
+  quietIcon.title = label;
+}
+function toggleMute() {
+  if (+vol.value > 0) { preMute = +vol.value; vol.value = 0; } else vol.value = preMute || 0.8;
+  vol.dispatchEvent(new Event('input', { bubbles: true }));
+}
+quietIcon.setAttribute('role', 'button'); quietIcon.tabIndex = 0;
+quietIcon.addEventListener('click', toggleMute);
+quietIcon.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMute(); } });
+vol.addEventListener('input', syncMute);
+
+/* ---------- вернуться к играющей станции: клик по логотипу и названию в плеере и плавающая кнопка, когда строка вне экрана ---------- */
+const locateBtn = $('#locate');
+let locRaf = 0;
+function updateLocate() {
+  cancelAnimationFrame(locRaf);
+  locRaf = requestAnimationFrame(() => {
+    const { stationId, status } = ui.state;
+    const row = stationId && status !== 'stopped' ? list.querySelector(`.row[data-id="${stationId}"]`) : null;
+    let dir = 0;
+    if (row && !list.classList.contains('sorting')) {
+      const lr = list.getBoundingClientRect(), rr = row.getBoundingClientRect(), bottom = Math.min(lr.bottom, player.getBoundingClientRect().top);
+      if (rr.bottom < lr.top + 14) dir = -1; else if (rr.top > bottom - 14) dir = 1;
+    }
+    locateBtn.hidden = !dir;
+    if (!dir) return;
+    const a = $('.app').getBoundingClientRect(), lr = list.getBoundingClientRect(), pr = player.getBoundingClientRect();
+    locateBtn.dataset.dir = dir;
+    locateBtn.style.top = dir < 0 ? `${lr.top - a.top + 10}px` : `${Math.min(lr.bottom, pr.top) - a.top - 30 - 10}px`;
+  });
+}
+list.addEventListener('scroll', updateLocate, { passive: true });
+function revealPlaying() {
+  const id = ui.state.stationId ?? ui.last, s = byId(id);
+  if (!s) return;
+  let row = list.querySelector(`.row[data-id="${id}"]`);
+  if (!row) {                                           // станция в другой вкладке или скрыта поиском и жанром
+    ui.query = ''; $('#q').value = ''; ui.genre = null;
+    if (isHome(s)) goHomeTab(); else { selectTab('countries'); openCountry(s.country); }
+    row = list.querySelector(`.row[data-id="${id}"]`);
+  }
+  if (!row) return;
+  const cover = Math.max(0, list.getBoundingClientRect().bottom - player.getBoundingClientRect().top);
+  list.scrollTo({ top: Math.max(0, row.offsetTop - (list.clientHeight - cover - row.offsetHeight) / 2), behavior: 'smooth' });
+  row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
+  setTimeout(() => row.classList.remove('flash'), 1500);
+}
+locateBtn.addEventListener('click', revealPlaying);
+for (const el of [$('#nowLogo'), $('#nowTitle')]) { el.addEventListener('click', revealPlaying); el.style.cursor = 'pointer'; }
 settingsEl.addEventListener('change', async (e) => {
   const k = e.target.dataset?.set;
   if (!k) return;

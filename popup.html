@@ -17,9 +17,9 @@
       <h1 class="brand">Velvet Radio</h1>
       <div class="tools">
         <button id="gear" class="icon-btn glass" data-ta="settings" data-tt="settings"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
-        <button id="lang" class="icon-btn glass lang-btn" data-ta="language" data-tt="language"><span id="langLabel">RU</span></button>
+        <button id="lang" class="icon-btn glass lang-btn" data-ta="language" data-tt="language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.4 3.5 5.2 3.5 8.5s-1.2 6.1-3.5 8.5c-2.3-2.4-3.5-5.2-3.5-8.5S9.7 5.9 12 3.5Z"/></svg><span id="langLabel">RU</span></button>
         <a id="tg" class="icon-btn glass tg" href="https://t.me/sushtrsx" target="_blank" rel="noopener" data-ta="telegram" data-tt="telegram">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 3.2 10.2 14.1M21.5 3.2l-6.9 17.6-4.4-6.7-6.7-4.4z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.9 4.4 3.1 11.3c-.7.3-.7 1.2 0 1.5l4.6 1.6 1.8 5.4c.2.6.9.7 1.3.3l2.5-2.4 4.5 3.3c.5.4 1.3.1 1.4-.6l2.9-14.5c.2-.8-.6-1.4-1.2-1.1Z"/><path d="m8 14.5 9.6-6.3-7.4 7.7"/></svg>
         </a>
         <button id="theme" class="icon-btn glass" data-ta="theme">
           <svg class="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/></svg>
@@ -59,6 +59,7 @@
     </div>
 
     <ul id="list" class="list"></ul>
+    <button id="locate" class="locate" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6.5 11.5 12 5l5.5 6.5"/></svg><span data-t="jump"></span></button>
 
     <footer class="player glass">
       <div class="now">
@@ -72,6 +73,7 @@
           <button id="retry" class="retry" data-t="retry"></button>
           <button id="report" class="retry report" data-t="report"></button>
         </div>
+        <button id="qbtn" class="qbtn" aria-haspopup="listbox" aria-expanded="false" data-ta="quality" data-tt="qualityTip" hidden><span id="qval"></span><small>kbps</small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 14 5-5 5 5"/></svg></button>
         <button id="toggle" class="play" data-ta="playPause">
           <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>
           <svg class="i-pause" viewBox="0 0 24 24"><path d="M7.5 5.5h3.2v13H7.5zM13.3 5.5h3.2v13h-3.2z"/></svg>
@@ -107,6 +109,7 @@
   </main>
 
   <div id="homeWrap" class="homewrap" hidden><ul id="homeMenu" class="homemenu" role="listbox" data-ta="sHome"></ul></div>
+  <div id="qWrap" class="homewrap qwrap" hidden><ul id="qMenu" class="homemenu" role="listbox" data-ta="quality"></ul></div>
 
   <script type="module" src="popup.js"></script>
 </body>

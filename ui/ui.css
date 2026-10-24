@@ -110,7 +110,7 @@
    правый край процентов (они стоят справа от строки: 10 px зазор + 46 px) на линии кнопки паузы */
 :root[data-ui="new"] .rb-elastic-host { gap: 8px; width: calc(100% - 56px + 2.7px); margin-left: -2.7px; }
 :root[data-ui="new"] .rb-elastic-host svg { width: 16px; height: 16px; flex: none; will-change: transform; transition: color .2s ease, opacity .25s ease; }
-:root[data-ui="new"] .rb-elastic-quiet { opacity: .6; margin-right: -5.3px; }   /* у «тише» 8 px пустого поля справа, у «громче» 2,7 px: так видимые зазоры до ползунка равны (по 10,7 px) */
+:root[data-ui="new"] .rb-elastic-quiet { opacity: .8; margin-right: -5.3px; }   /* у «тише» 8 px пустого поля справа, у «громче» 2,7 px: так видимые зазоры до ползунка равны (по 10,7 px) */
 :root[data-ui="new"] .rb-elastic-min .rb-elastic-quiet { opacity: 1; color: var(--text); }
 :root[data-ui="new"] .rb-elastic-loud { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: calc(.45 + .55 * var(--rb-v, .8)); }
 :root[data-ui="new"] .rb-elastic-loud path:first-child { fill: currentColor; stroke-width: 1; }
@@ -612,7 +612,7 @@
 
 .tour-meta { display: flex; align-items: center; justify-content: space-between; height: 20px; margin-bottom: 6px; }
 .tour-count { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
-.tour-skip { font: inherit; font-size: 12px; color: var(--muted); padding: 2px 6px; margin-right: -6px; border-radius: 6px; transition: color .2s ease, background-color .2s ease; }
+.tour-skip { font: inherit; font-size: 13px; font-weight: 500; color: var(--muted); padding: 6px 10px; margin: -4px -8px -4px 0; min-height: 28px; border-radius: 8px; transition: color .2s ease, background-color .2s ease; }
 .tour-skip:hover { color: var(--text); background: var(--seg); }
 
 .tour-body { transition: opacity .12s ease, transform .12s ease, filter .12s ease; }

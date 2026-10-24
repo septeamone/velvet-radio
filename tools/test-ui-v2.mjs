@@ -30,7 +30,7 @@ try {
   await sleep(1800);
   check((await state()) === 'new/dark/ready', 'новый вид по умолчанию, эффекты подключились: ' + await state());
   check(await page.evaluate(() => !!document.querySelector('.rb-elastic-wrap') && !!document.querySelector('.dot.rb-sm') && !!document.querySelector('.rb-echo-root')), 'громкость, индикатор и надпись заменены');
-  await page.hover('.row:nth-child(2) .seg button'); await shot('tooltip', 900);
+  await page.hover('.row:nth-child(2) .kb'); await shot('tooltip', 900);
   check(await page.evaluate(() => !!document.querySelector('#rb-wt-tip.on, #rb-wt-tip[data-open], #rb-wt-tip')), 'подсказка создана');
   await page.mouse.move(240, 560);
   await page.click('.row:nth-child(1)'); await shot('dark-loading', 700);

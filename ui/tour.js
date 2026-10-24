@@ -10,7 +10,7 @@ const STEPS = [
   { id: 'tabs', sel: ['.tabs'] },
   { id: 'search', sel: ['.searchrow'] },
   { id: 'row', sel: ['#list .row'] },
-  { id: 'quality', sel: ['#list .row .seg'] },
+  { id: 'quality', sel: ['.player'] },
   { id: 'heart', sel: ['#list .row .heart'] },
   { id: 'player', sel: ['.player'] },
   { id: 'settings', sel: ['#gear'] },

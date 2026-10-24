@@ -50,7 +50,7 @@ try {
   await page.reload(); await page.waitForSelector('#list .row');
   const first = await page.evaluate(() => [...document.querySelectorAll('#list .row')].slice(0, 3).map((r) => r.dataset.id));
   check(JSON.stringify(first) === JSON.stringify(['nashe', 'ultra', 'europaplus']), `порядок станций сохранился: ${first.join(', ')}`);
-  const selected = await page.evaluate(() => ({ ultra: document.querySelector('.row[data-id=ultra] .seg button.on')?.dataset.k, europa: document.querySelector('.row[data-id=europaplus] .seg button.on')?.dataset.k }));
+  const selected = await page.evaluate(() => ({ ultra: document.querySelector('.row[data-id=ultra] .kb')?.textContent, europa: document.querySelector('.row[data-id=europaplus] .kb')?.textContent }));
   check(selected.ultra === '128' && selected.europa === '320', `выбранное качество сохранилось: ultra ${selected.ultra}, europaplus ${selected.europa}`);
   await page.click('.tabs [data-tab=fav]'); await page.waitForTimeout(300);
   const favs = await page.evaluate(() => [...document.querySelectorAll('#list .row')].map((r) => r.dataset.id).sort());

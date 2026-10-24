@@ -46,7 +46,7 @@ try {
   check((await page.$eval('.tour-back', (b) => getComputedStyle(b).visibility)) === 'hidden', 'на первом шаге нет кнопки «Назад»');
 
   const labels = ['welcome', 'tabs', 'search', 'row', 'quality', 'heart', 'player', 'settings'];
-  const targets = { 1: ['.tabs'], 2: ['.searchrow'], 3: ['#list .row'], 4: ['#list .row .seg'], 5: ['#list .row .heart'], 6: ['.player'], 7: ['#gear'] };
+  const targets = { 1: ['.tabs'], 2: ['.searchrow'], 3: ['#list .row'], 4: ['.player'], 5: ['#list .row .heart'], 6: ['.player'], 7: ['#gear'] };
   for (let s = 1; s < 8; s++) {
     await page.click('.tour-next'); await sleep(1000);
     check((await count()) === `${s + 1} из 8`, `шаг ${s + 1}: счётчик «${await count()}»`);
