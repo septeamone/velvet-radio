@@ -27,7 +27,9 @@ try {
       const path = ic.querySelector('path'); const bb = path.getBBox(); const vb = ic.viewBox.baseVal;
       const glyphLeft = q.left + (bb.x - vb.x) / vb.width * q.width;
       const viz = document.querySelector('#viz'), vizOn = viz && getComputedStyle(viz).display !== 'none' && viz.getBoundingClientRect().height > 1;
-      return { iconB: q.bottom, player: r('.player'), logo: r('#nowLogo'), play: r('.play'), num: r('.rb-num'), vol: r('.vol'), glyphLeft, viz: r('#viz'), vizOn };
+      const gl = (svg) => { const b = svg.getBoundingClientRect(), bb = svg.getBBox(), v = svg.viewBox.baseVal, k = b.width / v.width; return { l: b.left + (bb.x - v.x) * k, r: b.left + (bb.x + bb.width - v.x) * k }; };
+      const tr = document.querySelector('.rb-elastic-track').getBoundingClientRect(), gq = gl(document.querySelector('.rb-elastic-quiet')), gd = gl(document.querySelector('.rb-elastic-loud'));
+      return { gapL: tr.left - gq.r, gapR: gd.l - tr.right, iconB: q.bottom, player: r('.player'), logo: r('#nowLogo'), play: r('.play'), num: r('.rb-num'), vol: r('.vol'), glyphLeft, viz: r('#viz'), vizOn };
     });
     const L = m.logo.l - m.player.l, R = m.player.r - m.play.r, T = m.play.t - m.player.t, B = m.player.b - (m.vizOn ? (m.viz.t + m.viz.b) / 2 : m.iconB);
     console.log(`визуализатор ${viz ? 'включён' : 'выключен'}: отступы плеера слева ${L.toFixed(1)}, справа ${R.toFixed(1)}, сверху ${T.toFixed(1)}, снизу до последнего элемента ${B.toFixed(1)}`);
@@ -35,6 +37,7 @@ try {
     check(Math.abs(L - T) <= 1.5, 'отступ сверху равен боковым');
     check(Math.abs(L - B) <= 3, 'снизу до видимого края (значок громкости или линия волны) тот же отступ (±3)');
     check(Math.abs(m.glyphLeft - m.logo.l) <= 1, `значок громкости начинается на линии логотипа (${(m.glyphLeft - m.logo.l).toFixed(1)} px)`);
+    check(Math.abs(m.gapL - m.gapR) <= 0.7, `зазоры между ползунком и значками громкости равны: слева ${m.gapL.toFixed(1)}, справа ${m.gapR.toFixed(1)} px`);
     check(Math.abs(m.num.r - m.play.r) <= 1.5, `правый край процентов на линии кнопки паузы (${(m.num.r - m.play.r).toFixed(1)} px)`);
     if (out) { await sleep(500); await page.screenshot({ path: path.join(out, `player-${viz ? 'viz' : 'noviz'}.png`), clip: { x: 0, y: 440, width: 480, height: 160 } }); }
   }

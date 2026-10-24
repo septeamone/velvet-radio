@@ -27,7 +27,7 @@
    правый край процентов (они стоят справа от строки: 10 px зазор + 46 px) на линии кнопки паузы */
 :root[data-ui="new"] .rb-elastic-host { gap: 8px; width: calc(100% - 56px + 2.7px); margin-left: -2.7px; }
 :root[data-ui="new"] .rb-elastic-host svg { width: 16px; height: 16px; flex: none; will-change: transform; transition: color .2s ease, opacity .25s ease; }
-:root[data-ui="new"] .rb-elastic-quiet { opacity: .6; }
+:root[data-ui="new"] .rb-elastic-quiet { opacity: .6; margin-right: -5.3px; }   /* у «тише» 8 px пустого поля справа, у «громче» 2,7 px: так видимые зазоры до ползунка равны (по 10,7 px) */
 :root[data-ui="new"] .rb-elastic-min .rb-elastic-quiet { opacity: 1; color: var(--text); }
 :root[data-ui="new"] .rb-elastic-loud { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: calc(.45 + .55 * var(--rb-v, .8)); }
 :root[data-ui="new"] .rb-elastic-loud path:first-child { fill: currentColor; stroke-width: 1; }
