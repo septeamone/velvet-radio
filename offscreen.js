@@ -13,10 +13,11 @@ const BANDS = 32;
 let session = 0;           // номер текущего запуска: старые попытки сами отменяются
 let current = null;        // { audio, hls, analyser, data }
 let volume = 0.8;
-// Ухо слышит громкость логарифмически: квадрат делает ползунок «живым» по всей длине. Пол 0.002 (−54 дБ, на слух тишина) нужен, чтобы Chrome
-// не закрыл аудио-документ как «беззвучный» через 30 секунд, если громкость на нуле.
-const level = (v) => Math.max(v * v, 0.002);
+// Ухо слышит громкость логарифмически: квадрат делает ползунок «живым» по всей длине. Пол 0.002 (−54 дБ) оставляет ползунок на 1–4% почти тихим,
+// но не нулевым; ровно 0 — настоящая тишина. Чтобы Chrome не закрыл аудио-документ как «беззвучный» через 30 секунд, при 0 держим неслышный сигнал (keepAlive).
+const level = (v) => (v <= 0 ? 0 : Math.max(v * v, 0.002));
 let fadeOn = true, startWaitS = DEFAULT_WAIT_S;   // из настроек окна
+let keep = null;          // неслышный сигнал, пока громкость ровно 0 (см. syncKeepAlive)
 let vizPort = null;
 let ctx = null;
 let trackTimer = 0, watchdog = 0, vizTimer = 0;
@@ -61,6 +62,25 @@ function dispose() {
   const old = current;
   current = null;
   release(old);
+  syncKeepAlive();
+}
+
+// При громкости 0 музыка выключена полностью, но Chrome закрывает аудио-документ, если 30 секунд нет слышимого звука (порог «тишины» около −72 dBFS).
+// Поэтому на нуле играет синус 25 Гц с амплитудой 0.001 (−60 дБ): ниже порога слуха (на 25 Гц он около 60 дБ SPL) и ниже того, что воспроизводят динамики, но выше порога «тишины» Chrome.
+async function syncKeepAlive() {
+  const need = !!current && volume === 0;
+  if (need && !keep) {
+    ctx ??= new AudioContext({ latencyHint: 'playback' });
+    if (ctx.state !== 'running') await ctx.resume().catch(() => {});
+    if (keep || !(!!current && volume === 0)) return;      // пока ждали, громкость уже подняли
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = 25; g.gain.value = 0.001;
+    o.connect(g); g.connect(ctx.destination); o.start();
+    keep = { o, g };
+  } else if (!need && keep) {
+    try { keep.o.stop(); } catch { /* уже остановлен */ }
+    keep.o.disconnect(); keep.g.disconnect(); keep = null;
+  }
 }
 
 // Пробует один адрес. withCors — нужен для визуализатора; без него звук всё равно играет.
@@ -196,6 +216,7 @@ async function onConnected(st, tier, c, my, wanted, notice) {
   if (my !== session) { release(c); return; }  // пока подключались, выбрали другую станцию
   const old = current;
   current = c;
+  syncKeepAlive();
   if (old && old !== c) fadeOutRelease(old);   // новая готова: старая плавно уходит
   rampIn(c);
   let stalls = 0;
@@ -255,5 +276,5 @@ chrome.runtime.onMessage.addListener((msg) => {
     const c = current;
     fadeOutCurrent().then(() => { if (current === c) dispose(); });
   }
-  else if (msg.cmd === 'volume') { volume = msg.volume; if (current) current.audio.volume = level(volume); }
+  else if (msg.cmd === 'volume') { volume = msg.volume; if (current) current.audio.volume = level(volume); syncKeepAlive(); }
 });
