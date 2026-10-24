@@ -381,16 +381,40 @@ tabs.addEventListener('click', (e) => {
   renderList();
 });
 // Сделать страну главной: её станции встают на первую вкладку, прежняя главная (по умолчанию Россия) уходит во вкладку «Страны»
-async function setHome(cc) {
-  if (cc === home()) return;
-  ui.settings = await saveSettings({ home: cc });
+function goHomeTab() {
   ui.country = null; ui.genre = null; ui.query = ''; $('#q').value = '';
-  applyStatic();
   ui.tab = 'all'; tabs.dataset.tab = 'all';
   tabs.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.dataset.tab === 'all'));
   syncChrome(); renderList(); list.scrollTop = 0;
 }
+async function setHome(cc) {
+  if (cc === home()) return;
+  ui.settings = await saveSettings({ home: cc });
+  applyStatic();
+  goHomeTab();
+}
 $('#chome').addEventListener('click', () => setHome(ui.country));
+
+/* ---------- тур для новых пользователей (код грузится только когда он нужен) ---------- */
+let tourCtl = null;
+async function runTour(saved) {
+  if (!tourCtl) {
+    const { createTour } = await import('./ui/tour.js');
+    tourCtl = createTour({
+      t, lang: getLang, home, countryName, flagSrc, setHome,
+      countries: () => [{ cc: 'RU' }, ...COUNTRIES].map((c) => c.cc).filter((cc) => stationsOf(cc).length),
+      save: (s) => chrome.storage.local.set({ tour: s }),
+      prepare() { openSettings(false); $('#gpanel').hidden = true; if (ui.tab !== 'all' || ui.country || ui.query || ui.genre) goHomeTab(); list.scrollTop = 0; },
+    });
+  }
+  tourCtl.start(saved);
+}
+$('#btour').addEventListener('click', () => {
+  const s = { v: 1, step: 0, done: false, picked: true };      // повтор: выбранную страну не трогаем
+  openSettings(false);
+  chrome.storage.local.set({ tour: s });
+  runTour(s);
+});
 $('#cback').addEventListener('click', () => { ui.country = null; ui.genre = null; ui.query = ''; $('#q').value = ''; syncChrome(); renderList(); });
 $('#vtoggle').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-view]');
@@ -713,7 +737,7 @@ $('#bkeys').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://
   if (ui.settings.sync) await pullSync().catch(() => {});
   applyUi();
   await initTheme();
-  const saved = await chrome.storage.local.get(['favs', 'last', 'quality', 'order', 'lang', 'view', 'health']);
+  const saved = await chrome.storage.local.get(['favs', 'last', 'quality', 'order', 'lang', 'view', 'health', 'tour']);
   ui.health = saved.health ?? { bad: [] };
   setLang(saved.lang ?? detectLang());
   ui.view = saved.view === 'tiles' ? 'tiles' : 'list';
@@ -730,5 +754,6 @@ $('#bkeys').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://
   renderPlayer();
   // Элементы нового вида подгружаем и подключаем сразу после первого показа окна, чтобы их файлы не задерживали открытие (замер: окно открывается как прежде).
   if (!ui.settings.classic) requestAnimationFrame(() => setTimeout(async () => { fx = (await import('./ui/index.js')).mountNewUi($, list); document.documentElement.classList.add('rb-ready'); }, 0));
+  if (saved.tour && !saved.tour.done) setTimeout(() => runTour(saved.tour), 500);        // новая установка или незаконченный тур: продолжаем с сохранённого шага
   if (ui.favs.size && (!ui.health.t || Date.now() - ui.health.t > 864e5)) runCheck();   // раз в сутки, тихо, пока окно открыто
 })();

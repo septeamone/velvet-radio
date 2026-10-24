@@ -17,6 +17,7 @@ try {
   const sw = ctx.serviceWorkers()[0] ?? await ctx.waitForEvent('serviceworker');
   const page = await ctx.newPage();
   await page.goto(`chrome-extension://${sw.url().split('/')[2]}/popup.html`);
+  await page.evaluate(() => chrome.storage.local.set({ tour: { v: 1, done: true } })); await page.reload();   // свежий профиль показывает тур для новых пользователей, в замере его быть не должно
   await page.waitForSelector('#list .row'); await sleep(1500);
 
   const measure = (ms) => page.evaluate((ms) => new Promise((resolve) => {

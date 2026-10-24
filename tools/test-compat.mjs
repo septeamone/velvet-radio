@@ -46,7 +46,7 @@ try {
   await page.goto(`chrome-extension://${sw.url().split('/')[2]}/popup.html`);
   // как у пользователя 1.0.0: избранное, порядок только из 21 станции, сохранённое качество, тема, последняя станция (ни lang, ни view, ни settings)
   const order = ['nashe', 'ultra', 'europaplus', ...oldIds.filter((i) => !['nashe', 'ultra', 'europaplus'].includes(i))];
-  await page.evaluate(([o]) => chrome.storage.local.clear().then(() => chrome.storage.local.set({ favs: ['ultra', 'record', 'bbc1xtra'], order: o, quality: { ultra: 128, europaplus: 320 }, theme: 'dark', last: 'nashe', volume: 0.5 })), [order]);
+  await page.evaluate(([o]) => chrome.storage.local.clear().then(() => chrome.storage.local.set({ tour: { v: 1, done: true }, favs: ['ultra', 'record', 'bbc1xtra'], order: o, quality: { ultra: 128, europaplus: 320 }, theme: 'dark', last: 'nashe', volume: 0.5 })), [order]);
   await page.reload(); await page.waitForSelector('#list .row');
   const first = await page.evaluate(() => [...document.querySelectorAll('#list .row')].slice(0, 3).map((r) => r.dataset.id));
   check(JSON.stringify(first) === JSON.stringify(['nashe', 'ultra', 'europaplus']), `порядок станций сохранился: ${first.join(', ')}`);

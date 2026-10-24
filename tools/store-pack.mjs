@@ -30,7 +30,7 @@ async function capture(lang) {
   try {
     const sw = ctx.serviceWorkers()[0] ?? await ctx.waitForEvent('serviceworker'); const id = sw.url().split('/')[2];
     const page = await ctx.newPage();
-    const open = async (theme) => { await page.evaluate((a) => chrome.storage.local.set(a), { lang, theme, view: 'list', favs: FAVS, settings: {} }); await page.reload(); await page.waitForSelector('.row .seg'); await sleep(1800); };
+    const open = async (theme) => { await page.evaluate((a) => chrome.storage.local.set(a), { tour: { v: 1, done: true }, lang, theme, view: 'list', favs: FAVS, settings: {} }); await page.reload(); await page.waitForSelector('.row .seg'); await sleep(1800); };
     const quietSearch = async () => { await page.evaluate(() => { const q = document.querySelector('#q'); q.focus(); q.blur(); }); await page.waitForFunction(() => !document.querySelector('#q').placeholder.includes('|'), null, { timeout: 5000 }).catch(() => {}); await sleep(300); };
     // «тихий» кадр: в рекламе надпись без эха-призраков, а поле поиска с обычной подсказкой (класс no-anim останавливает печать и эхо)
     const shot = async (name) => {

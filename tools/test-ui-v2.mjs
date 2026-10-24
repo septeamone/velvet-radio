@@ -23,7 +23,7 @@ try {
   const shot = async (n, w = 500) => { await sleep(w); await page.screenshot({ path: path.join(out, n + '.png') }); console.log('снимок', n); };
   const state = () => page.evaluate(() => document.documentElement.dataset.ui + '/' + document.documentElement.dataset.theme + (document.documentElement.classList.contains('rb-ready') ? '/ready' : ''));
   await page.goto(`chrome-extension://${id}/popup.html`); await page.waitForSelector('.row');
-  await page.evaluate(() => chrome.storage.local.set({ lang: 'ru', theme: 'dark', view: 'list', settings: {} }));
+  await page.evaluate(() => chrome.storage.local.set({ tour: { v: 1, done: true }, lang: 'ru', theme: 'dark', view: 'list', settings: {} }));
   await page.reload(); await page.waitForSelector('.row');
   await page.screenshot({ path: path.join(out, 'echo-0.png'), clip: { x: 0, y: 0, width: 480, height: 80 } });
   await sleep(300); await page.screenshot({ path: path.join(out, 'echo-1.png'), clip: { x: 0, y: 0, width: 480, height: 80 } });

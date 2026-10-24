@@ -18,7 +18,7 @@ try {
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errors.push(e.message)); page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto(`chrome-extension://${id}/popup.html`); await page.waitForSelector('.row');
-  await page.evaluate(() => chrome.storage.local.set({ lang: 'ru', theme: 'dark' })); await page.reload(); await page.waitForSelector('.row'); await sleep(800);
+  await page.evaluate(() => chrome.storage.local.set({ tour: { v: 1, done: true }, lang: 'ru', theme: 'dark' })); await page.reload(); await page.waitForSelector('.row'); await sleep(800);
   const tab1 = () => page.textContent('.tabs [data-tab=all]');
   const rowCountries = () => page.evaluate(() => [...document.querySelectorAll('#list .row')].map((r) => r.dataset.id));
   const crow = () => page.evaluate(() => [...document.querySelectorAll('#list .crow .cn')].map((e) => e.textContent));

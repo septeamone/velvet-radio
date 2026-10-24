@@ -151,4 +151,7 @@ chrome.runtime.onStartup.addListener(async () => {
   const { settings, last } = await chrome.storage.local.get(['settings', 'last']);
   if (settings?.resume && byId(last)) await playSaved(last);   // «играть при запуске Chrome» (по настройке)
 });
-chrome.runtime.onInstalled.addListener(() => renderAction(DEFAULT));
+chrome.runtime.onInstalled.addListener((d) => {
+  renderAction(DEFAULT);
+  if (d.reason === 'install') chrome.storage.local.set({ tour: { v: 1, step: 0, done: false } });   // тур для новых пользователей; обновившиеся его не видят
+});

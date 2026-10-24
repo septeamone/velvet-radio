@@ -62,7 +62,7 @@ const favs = ['nashe', 'europaplus', 'record', 'retro', 'mayak', 'ultra'].filter
 
 async function prepare(lang, theme) {
   await page.goto(`chrome-extension://${id}/popup.html`);
-  await page.evaluate(([l, t, f]) => chrome.storage.local.set({ lang: l, theme: t, favs: f, view: 'tiles', settings: { saver: false, buffer: 9, fade: true, resume: false, sync: false } }), [lang, theme, favs]);
+  await page.evaluate(([l, t, f]) => chrome.storage.local.set({ tour: { v: 1, done: true }, lang: l, theme: t, favs: f, view: 'tiles', settings: { saver: false, buffer: 9, fade: true, resume: false, sync: false } }), [lang, theme, favs]);
   await page.evaluate((n) => chrome.storage.local.remove('last').then(() => chrome.storage.local.set({ health: { t: Date.now(), n, bad: [] } })), favs.length);   // без прошлой станции и без автозапуска проверки
   await page.evaluate(() => chrome.storage.session.remove('state'));
   await page.evaluate(() => chrome.runtime.sendMessage({ type: 'stop' }));

@@ -35,7 +35,7 @@ try {
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto(`chrome-extension://${id}/popup.html`);
   await page.waitForSelector('.row');
-  await page.evaluate(() => chrome.storage.local.set({ lang: 'ru', view: 'list', theme: 'light' }));
+  await page.evaluate(() => chrome.storage.local.set({ tour: { v: 1, done: true }, lang: 'ru', view: 'list', theme: 'light' }));
   await page.reload(); await page.waitForSelector('.row'); await sleep(900);
   const shot = async (name) => { await sleep(500); await page.screenshot({ path: path.join(out, name + '.png') }); console.log('снимок', name); };
   const rows = () => page.evaluate(() => document.querySelectorAll('#list .row, #list .crow').length);
