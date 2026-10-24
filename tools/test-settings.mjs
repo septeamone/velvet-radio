@@ -58,6 +58,14 @@ try {
   const keyBox = await page.evaluate(() => { const g = document.querySelector('.set.keys').getBoundingClientRect(); return [...document.querySelectorAll('#keyList .keyline')].every((l) => l.getBoundingClientRect().right <= g.right + 1 && l.getBoundingClientRect().height < 30); });
   check(keys.length === 3 && keyBox, 'горячие клавиши: три строки, помещаются в карточку: ' + keys.join(' | '));
 
+  // --- «Что нового» открывается из настроек в любой момент
+  await page.evaluate(() => { document.querySelector('.setbody').scrollTop = 99999; }); await sleep(400);
+  check((await page.textContent('#newInfo')).includes('1.7') || /\d+\.\d+\.\d+/.test(await page.textContent('#newInfo')), 'у строки «Что нового» указана версия: ' + await page.textContent('#newInfo'));
+  await page.click('#bnew'); await page.waitForSelector('.tour.open', { timeout: 6000 }); await sleep(700);
+  check(/обновился/.test(await page.textContent('.tour-title')) && (await page.textContent('.tour-count')).trim().endsWith('из 6'), '«Что нового» открывается из настроек: ' + (await page.textContent('.tour-title')).trim());
+  await page.click('.tour-skip'); await sleep(600);
+  check(!(await page.$('.tour')), 'карточки закрываются');
+  await page.click('#gear'); await sleep(500);
   // --- сохранение, понятные подписи надёжности потока
   await page.evaluate(() => { document.querySelector('.setbody').scrollTop = 0; }); await sleep(400);
   await page.click('[data-set=resume]', { force: true }); await sleep(500);

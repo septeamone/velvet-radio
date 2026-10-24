@@ -405,6 +405,13 @@ async function runWhatsNew(saved) {
   }
   wnCtl.start(saved);
 }
+// «Что нового» можно открыть снова из настроек в любой момент (после обновления оно показывается само один раз)
+$('#bnew').addEventListener('click', () => {
+  const s = { v: chrome.runtime.getManifest().version, step: 0, done: false };
+  openSettings(false);
+  chrome.storage.local.set({ whatsNew: s });
+  runWhatsNew(s);
+});
 $('#btour').addEventListener('click', () => {
   const s = { v: 1, step: 0, done: false, picked: true };      // повтор: выбранную страну не трогаем
   openSettings(false);
@@ -676,6 +683,7 @@ function syncSettingsUI() {
   seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', +b.dataset.k === ui.settings.buffer));
   homeLabel();
   setbody.scrollTop = 0; spySettings();
+  $('#newInfo').textContent = t('sNewD', { v: chrome.runtime.getManifest().version });
   renderKeys();
   $('#ver').textContent = `Velvet Radio ${chrome.runtime.getManifest().version}`;
   renderHealth();

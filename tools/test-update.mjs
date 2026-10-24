@@ -1,4 +1,4 @@
-// Что увидит пользователь, который просто обновился. Берём последний опубликованный пакет (store-upload/0-пакет) как «старого пользователя»,
+// Что увидит пользователь, который просто обновился. Берём последний опубликованный пакет (tools/previous-releases) как «старого пользователя»,
 // создаём его данные, подменяем файлы свежей сборкой (python tools/build.py → dist/build) в том же профиле Chrome и открываем окно.
 // Решение «что записать при обновлении» берём из настоящего lifecycle.js с теми же данными, что присылает Chrome (reason: 'update', previousVersion).
 // (Событие onInstalled от самого Chrome в безоконном браузере воспроизвести нельзя: перезагрузка расширения там его отключает.
@@ -13,12 +13,12 @@ const out = process.argv[2] ? path.resolve(process.argv[2]) : null; if (out) fs.
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const base = path.join(os.homedir(), 'AppData/Local/ms-playwright');
 const exe = fs.readdirSync(base).filter((x) => /^chromium-\d+$/.test(x)).sort().reverse().map((d) => path.join(base, d, 'chrome-win64/chrome.exe')).find(fs.existsSync);
-// Последний опубликованный пакет: самый новый velvet-radio-X.Y.Z.zip в store-upload/0-пакет с версией ниже текущей (после выпуска кладём туда пакет выпущенной версии)
+// Последний опубликованный пакет: самый новый velvet-radio-X.Y.Z.zip в tools/previous-releases с версией ниже текущей (после выпуска кладём туда пакет выпущенной версии)
 const cmpV = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) - (y[i] ?? 0); return 0; };
 function previousPackage(current) {
-  const dir = path.join(root, 'store-upload', '0-пакет');
+  const dir = path.join(root, 'tools', 'previous-releases');
   const found = fs.readdirSync(dir).map((f) => [f, /^velvet-radio-(\d+\.\d+\.\d+)\.zip$/.exec(f)?.[1]]).filter(([, v]) => v && cmpV(v, current) < 0).sort((a, b) => cmpV(b[1], a[1]))[0];
-  if (!found) throw new Error('В store-upload/0-пакет нет пакета предыдущей версии (нужен velvet-radio-X.Y.Z.zip ниже ' + current + ')');
+  if (!found) throw new Error('В tools/previous-releases нет пакета предыдущей версии (положите velvet-radio-X.Y.Z.zip, версия ниже ' + current + ')');
   return { zip: path.join(dir, found[0]), version: found[1] };
 }
 
