@@ -44,7 +44,7 @@ const nextApi = (host, slug) => async () => {
   const { result } = await getJson(`https://${host}/api/n/current`);
   const t = result.data[slug]?.current;
   if (!t?.title || t.title === 'Реклама') return null;
-  return { artist: t.artist, title: t.title };
+  return { artist: t.artist, title: t.title, caps: true };
 };
 
 // JSON с хостинга станции (metadata.json), в нём бывают рекламы и джинглы (type != 3)
@@ -109,6 +109,13 @@ const SOURCES = {
   radiovera: hlsMeta('https://hls-01-radiovera.hostingradio.ru/radiovera/metadata.json'),
   radiozenit: hlsMeta('https://hls-01-radiozenit.hostingradio.ru/radiozenit/metadata.json'),
   keksfm: hlsMeta('https://hls-01-keks.emgsound.ru/7/metadata.json'),
+  vysotsky: nextApi('rusradio.ru', 'vysockij'),
+  sovclassic: nextApi('rusradio.ru', 'sovclass'),
+  russkijrock: nextApi('rusradio.ru', 'russkijrok'),
+  tntmusic: async () => {
+    const t = await getJson('https://metaserver.hostingradio.ru/tntradio.json');
+    return t.title ? { artist: t.artist, title: t.title, caps: true } : null;
+  },
   piterfm: playlistV5('radiopiterfm.ru', 8),
   radiovanya: playlistV5('radiovanya.ru', 0),
   eldoradio: emg('eldoradio'),
