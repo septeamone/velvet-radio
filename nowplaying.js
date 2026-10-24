@@ -1,3 +1,5 @@
+import { ICY_SOURCES } from './icy-sources.js';
+
 // «Что играет сейчас» — берём из тех же источников, что и официальные сайты станций.
 // Каждый источник возвращает { artist, title } или null; если у станции источника нет — названия песни не будет.
 
@@ -69,7 +71,9 @@ const icy = (url, clean = (x) => x) => async () => {
       next.set(buf); next.set(value, buf.length);
       buf = next;
     }
-    const text = new TextDecoder().decode(buf.subarray(every + 1, need()));
+    const block = buf.subarray(every + 1, need());
+    let text;
+    try { text = new TextDecoder('utf-8', { fatal: true }).decode(block); } catch { text = new TextDecoder('windows-1251').decode(block); }   // часть русских станций отдаёт кодировку Windows-1251
     const m = /StreamTitle='(.*?)';/s.exec(text);
     const title = m && clean(m[1].trim());
     if (!title) return null;
@@ -107,8 +111,12 @@ export const LIVE = new Set(Object.keys(SOURCES).filter((id) => !['relax', 'love
 
 const nice = (s) => s.toLowerCase().replace(/(^|[\s/(-])(\p{L})/gu, (_m, p, c) => p + c.toUpperCase());
 
+// Служебные строки в ICY: джинглы, рекламные паузы, пустые заглушки, время трека в конце
+const icyJunk = /return_to_program|station break|right back after|^\W*$/i;
+const icyClean = (x) => { const s = x.replace(/ - \d+:\d{2}$/, '').trim(); return icyJunk.test(s) ? '' : s; };
+
 export async function fetchTrack(stationId) {
-  const t = await SOURCES[stationId]?.();
+  const t = await (SOURCES[stationId] ?? (ICY_SOURCES[stationId] && icy(ICY_SOURCES[stationId], icyClean)))?.();
   if (!t || !t.title) return null;
   const artist = t.caps && t.artist === t.artist.toUpperCase() ? nice(t.artist) : t.artist;
   return artist ? `${artist} — ${t.title}` : t.title;

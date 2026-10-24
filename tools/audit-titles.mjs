@@ -63,7 +63,7 @@ async function readIcy(url) {
 const todo = STATIONS.filter((s) => !have.has(s.id) && (!only || only.includes(s.id)));
 const res = {};
 let i = 0;
-await Promise.all(Array.from({ length: 5 }, async () => {
+await Promise.all(Array.from({ length: +(arg('--conc') ?? 5) }, async () => {
   while (i < todo.length) {
     const s = todo[i++];
     const urls = [...s.qualities].reverse().flatMap((q) => q.urls.map((u) => (typeof u === 'string' ? { url: u } : u)).filter((u) => !u.hls && !/\.m3u8/.test(u.url)).map((u) => u.url));
@@ -78,5 +78,15 @@ await Promise.all(Array.from({ length: 5 }, async () => {
   }
 }));
 const ok = Object.values(res).filter((r) => r.ok).length;
-console.log(`\nбез источника сейчас: ${todo.length}; читается из потока: ${ok}; не читается: ${todo.length - ok}; уже с источником: ${have.size}`);
+console.log(`
+без источника сейчас: ${todo.length}; читается из потока: ${ok}; не читается: ${todo.length - ok}; уже с источником: ${have.size}`);
 const out = arg('--out'); if (out) fs.writeFileSync(out, JSON.stringify(res, null, 1));
+// --write: дописать найденные адреса в icy-sources.js (генерируемый файл: id станции → поток, из которого читаем название)
+if (process.argv.includes('--write')) {
+  const file = path.join(root, 'icy-sources.js');
+  const old = fs.existsSync(file) ? Object.fromEntries([...fs.readFileSync(file, 'utf8').matchAll(/^\s+'([\w-]+)': '([^']+)',$/gm)].map((m) => [m[1], m[2]])) : {};
+  for (const [id, r] of Object.entries(res)) if (r.ok) old[id] = r.url;
+  const body = Object.entries(old).sort(([a], [b]) => a.localeCompare(b)).map(([id, u]) => `  '${id}': '${u}',`).join('\n');
+  fs.writeFileSync(file, '// ГЕНЕРИРУЕТСЯ: node tools/audit-titles.mjs --write. Станции, у которых название песни читается прямо из потока (ICY, сервер разрешает CORS).\nexport const ICY_SOURCES = {\n' + body + '\n};\n');
+  console.log('записано в icy-sources.js:', Object.keys(old).length);
+}
