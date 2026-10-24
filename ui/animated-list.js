@@ -10,18 +10,21 @@
 // Расходы: один passive scroll-слушатель, rAF планируется только на кадр прокрутки (цикла в покое нет), координаты строк
 // кэшируются (пересчёт при пересборке списка и изменении размеров), классы/атрибуты меняются только у строк, чьё состояние сменилось.
 
-const FADE = 56, STAGGER = 0.04;
+const STAGGER = 0.04;
 
-export function initAnimatedList(list) {
+// opts: items — классы элементов (по умолчанию строки станций и стран), player — что перекрывает низ списка (null: ничего), fade — ширина затухания краёв.
+// Тот же слой подключается к выпадающему списку стран в настройках (#homeMenu): прокрутка у него такая же, как у списка станций.
+export function initAnimatedList(list, { items = ['row', 'crow'], player: playerEl, fade = 56 } = {}) {
+  const FADE = fade;
   const app = list.closest('.app') ?? list.parentElement;
-  const player = app.querySelector('.player');
+  const player = playerEl === undefined ? app.querySelector('.player') : playerEl;
   const known = new WeakSet();
   let rows = [], boxes = [], cover = 0, dirty = true, raf = 0, pendingSort = false;
   let ft = -1, fb = -1, cv = -1;
   let live = false, snapRaf = 0, last = null;
   list.dataset.rbAl = '';
 
-  const isItem = (el) => el.classList?.contains('row') || el.classList?.contains('crow');
+  const isItem = (el) => items.some((c) => el.classList?.contains(c));
 
   /* ---------- видимость строк ---------- */
   function measure() {

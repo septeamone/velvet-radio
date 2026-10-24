@@ -7,8 +7,9 @@
 /* список — контейнер для скользящей рамки выбора (offsetTop/Left строк считаются от него).
    Пружина из оригинала AnimatedList; затухание краёв (fadeSize 56) считается от верха плавающего плеера, поэтому
    подложку .app::after (она делала то же самое) выключаем: иначе было бы двойное затухание. */
-:root[data-ui="new"] #list { position: relative; --rb-al-spring: linear(0, 0.0603, 0.2033, 0.3821, 0.5633, 0.7258, 0.8584, 0.9574, 1.0242, 1.0634, 1.0809, 1.0828, 1.0747, 1.0613, 1.046, 1.0313, 1.0186, 1.0085, 1.0012, 0.9965, 0.994, 0.9931, 0.9933, 0.9941, 0.9953, 0.9966, 0.9978, 0.9988, 1); }
-:root[data-ui="new"] #list[data-rb-al] {
+:root[data-ui="new"] #list { position: relative; }
+:root[data-ui="new"] [data-rb-al] { --rb-al-spring: linear(0, 0.0603, 0.2033, 0.3821, 0.5633, 0.7258, 0.8584, 0.9574, 1.0242, 1.0634, 1.0809, 1.0828, 1.0747, 1.0613, 1.046, 1.0313, 1.0186, 1.0085, 1.0012, 0.9965, 0.994, 0.9931, 0.9933, 0.9941, 0.9953, 0.9966, 0.9978, 0.9988, 1); }
+:root[data-ui="new"] [data-rb-al] {
   -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.000) calc(var(--rb-al-ft) * 0), rgba(0,0,0,0.027) calc(var(--rb-al-ft) * 0.15), rgba(0,0,0,0.163) calc(var(--rb-al-ft) * 0.3), rgba(0,0,0,0.407) calc(var(--rb-al-ft) * 0.45), rgba(0,0,0,0.683) calc(var(--rb-al-ft) * 0.6), rgba(0,0,0,0.896) calc(var(--rb-al-ft) * 0.75), rgba(0,0,0,0.991) calc(var(--rb-al-ft) * 0.9), rgba(0,0,0,1.000) calc(var(--rb-al-ft) * 1), rgba(0,0,0,1.000) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 1), rgba(0,0,0,0.991) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.9), rgba(0,0,0,0.896) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.75), rgba(0,0,0,0.683) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.6), rgba(0,0,0,0.407) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.45), rgba(0,0,0,0.163) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.3), rgba(0,0,0,0.027) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.15), rgba(0,0,0,0.000) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0));
   mask-image: linear-gradient(to bottom, rgba(0,0,0,0.000) calc(var(--rb-al-ft) * 0), rgba(0,0,0,0.027) calc(var(--rb-al-ft) * 0.15), rgba(0,0,0,0.163) calc(var(--rb-al-ft) * 0.3), rgba(0,0,0,0.407) calc(var(--rb-al-ft) * 0.45), rgba(0,0,0,0.683) calc(var(--rb-al-ft) * 0.6), rgba(0,0,0,0.896) calc(var(--rb-al-ft) * 0.75), rgba(0,0,0,0.991) calc(var(--rb-al-ft) * 0.9), rgba(0,0,0,1.000) calc(var(--rb-al-ft) * 1), rgba(0,0,0,1.000) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 1), rgba(0,0,0,0.991) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.9), rgba(0,0,0,0.896) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.75), rgba(0,0,0,0.683) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.6), rgba(0,0,0,0.407) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.45), rgba(0,0,0,0.163) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.3), rgba(0,0,0,0.027) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0.15), rgba(0,0,0,0.000) calc(100% - var(--rb-al-cover) - var(--rb-al-fb) * 0));
 }
@@ -16,23 +17,23 @@
 
 /* строки: появление и уход за край (slide). Только независимые translate/scale/opacity: transform остаётся за drag и hover.
    Задержка (--rb-al-d) нужна для stagger при первом показе и ставится JS-ом только на этот момент. */
-:root[data-ui="new"] #list[data-rb-al] .row, :root[data-ui="new"] #list[data-rb-al] .crow {
+:root[data-ui="new"] [data-rb-al] .row, :root[data-ui="new"] [data-rb-al] .crow, :root[data-ui="new"] [data-rb-al] .hrow {
   animation: none;
   transition: translate .62s var(--rb-al-spring) var(--rb-al-d, 0s), scale .62s var(--rb-al-spring) var(--rb-al-d, 0s), opacity .3s cubic-bezier(.22, 1, .36, 1) var(--rb-al-d, 0s),
     transform .25s var(--ease), background-color .3s ease, border-color .45s ease, box-shadow .3s ease;
 }
-:root[data-ui="new"] #list[data-rb-al][data-rb-al-boot] .row, :root[data-ui="new"] #list[data-rb-al][data-rb-al-boot] .crow { transition: none !important; }
-:root[data-ui="new"] #list[data-rb-al] [data-al] { opacity: 0; scale: .98; pointer-events: none; }
-:root[data-ui="new"] #list[data-rb-al] [data-al="above"] { translate: 0 -28px; }
-:root[data-ui="new"] #list[data-rb-al] [data-al="below"] { translate: 0 28px; }
+:root[data-ui="new"] [data-rb-al][data-rb-al-boot] .row, :root[data-ui="new"] [data-rb-al][data-rb-al-boot] .crow, :root[data-ui="new"] [data-rb-al][data-rb-al-boot] .hrow { transition: none !important; }
+:root[data-ui="new"] [data-rb-al] [data-al] { opacity: 0; scale: .98; pointer-events: none; }
+:root[data-ui="new"] [data-rb-al] [data-al="above"] { translate: 0 -28px; }
+:root[data-ui="new"] [data-rb-al] [data-al="below"] { translate: 0 28px; }
 @media (prefers-reduced-motion: reduce) {
-  :root[data-ui="new"] #list[data-rb-al] [data-al] { translate: none; scale: none; }
+  :root[data-ui="new"] [data-rb-al] [data-al] { translate: none; scale: none; }
 }
 
 /* выбор клавиатурой: вместо статичной рамки на строке — общая рамка, скользящая между строками */
-:root[data-ui="new"] #list[data-rb-al] .row.kbd, :root[data-ui="new"] #list[data-rb-al] .crow.kbd { box-shadow: none; }
-:root[data-ui="new"] #list[data-rb-al] .row.cur.kbd { box-shadow: inset 0 0 0 1px var(--accent); }
-:root[data-ui="new"] #list[data-rb-al]::after {
+:root[data-ui="new"] [data-rb-al] .row.kbd, :root[data-ui="new"] [data-rb-al] .crow.kbd, :root[data-ui="new"] [data-rb-al] .hrow.kbd { box-shadow: none; }
+:root[data-ui="new"] [data-rb-al] .row.cur.kbd { box-shadow: inset 0 0 0 1px var(--accent); }
+:root[data-ui="new"] [data-rb-al]::after {
   content: ''; position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none;
   width: var(--rb-al-w, 0px); height: var(--rb-al-h, 0px);
   transform: translate(var(--rb-al-x, 0px), var(--rb-al-y, 0px));
@@ -41,5 +42,5 @@
   background: color-mix(in srgb, var(--text) 5%, transparent);
   transition: transform .3s var(--ease), width .3s var(--ease), height .3s var(--ease), opacity .18s ease;
 }
-:root[data-ui="new"] #list[data-rb-al][data-rb-al-live]::after { opacity: 1; }
-:root[data-ui="new"] #list[data-rb-al][data-rb-al-snap]::after { transition: opacity .18s ease; }
+:root[data-ui="new"] [data-rb-al][data-rb-al-live]::after { opacity: 1; }
+:root[data-ui="new"] [data-rb-al][data-rb-al-snap]::after { transition: opacity .18s ease; }

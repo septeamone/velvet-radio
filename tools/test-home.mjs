@@ -46,14 +46,32 @@ try {
   check((await tab1()).trim() === 'США', 'после перезагрузки окна главная страна сохранилась');
   // 3. через настройки
   await page.click('#gear'); await sleep(300);
-  check((await page.inputValue('#homeSel')) === 'US', 'в настройках выбрано США');
-  await page.selectOption('#homeSel', 'GB'); await sleep(600);
+  check((await page.textContent('#homeName')).trim() === 'США', 'в настройках выбрано США');
+  // выпадающий список: свой, без системной рамки
+  await page.click('#homeBtn'); await sleep(900);
+  check(await page.isVisible('#homeMenu') && (await page.$$('#homeMenu .hrow')).length >= 29, 'список стран открылся: ' + (await page.$$('#homeMenu .hrow')).length + ' строк');
+  check(await page.$eval('#homeMenu .hrow.cur', (e) => e.dataset.cc) === 'US', 'текущая страна отмечена');
+  const al = await page.$$eval('#homeMenu .hrow', (r) => r.filter((x) => x.dataset.al).length);
+  check(al > 0, 'эффект прокрутки: строки за краем списка спрятаны (' + al + ')');
+  await shot('6-menu');
+  await page.$eval('#homeMenu', (m) => { m.scrollTop = 0; }); await sleep(900);
+  const first = await page.$eval('#homeMenu .hrow', (e) => e.dataset.al ?? 'in');
+  check(first === 'in', 'после прокрутки вверх первая строка снова на месте');
+  await page.keyboard.press('Escape'); await sleep(400);
+  check(!(await page.isVisible('#homeMenu')) && await page.isVisible('#settings'), 'Esc закрывает только список, настройки остались');
+  await page.focus('#homeBtn'); await page.keyboard.press('ArrowDown'); await sleep(700);
+  check(await page.isVisible('#homeMenu'), 'стрелка вниз открывает список с клавиатуры');
+  await page.keyboard.press('Home'); await page.keyboard.press('Enter'); await sleep(900);
+  const picked = (await page.textContent('#homeName')).trim();
+  check(!(await page.isVisible('#homeMenu')) && picked !== 'США', 'Enter выбрал первую страну списка: ' + picked);
+  await page.click('#homeBtn'); await sleep(800); await page.click('#homeMenu .hrow[data-cc=GB]'); await sleep(700);
+  check((await page.textContent('#homeName')).trim() === 'Великобритания', 'клик по строке выбирает страну');
   await page.click('#setback'); await sleep(300);
   check((await tab1()).trim().length > 3 && (await rowCountries()).length >= 20 && (await rowCountries()).some((i) => i.startsWith('gb-')), 'через настройки главной стала Великобритания: ' + (await tab1()).trim());
   await page.click('#lang'); await sleep(400); check(/UK|United Kingdom/.test(await tab1()), 'язык EN меняет подпись вкладки: ' + (await tab1()).trim());
   await shot('4-gb-en');
   // 4. вернуть Россию
-  await page.click('#lang'); await page.click('#gear'); await sleep(300); await page.selectOption('#homeSel', 'RU'); await sleep(500); await page.click('#setback');
+  await page.click('#lang'); await page.click('#gear'); await sleep(300); await page.click('#homeBtn'); await sleep(800); await page.click('#homeMenu .hrow[data-cc=RU]'); await sleep(600); await page.click('#setback');
   check((await tab1()).trim() === 'Россия', 'вернули Россию');
   await page.click('#gear'); await sleep(300); await shot('5-settings');
   check(errors.length === 0, 'ошибок в консоли нет' + (errors.length ? ': ' + errors.join(' | ') : ''));

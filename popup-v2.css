@@ -130,3 +130,11 @@
 :root[data-ui="new"] .name, :root[data-ui="new"] .cn, :root[data-ui="new"] .cname, :root[data-ui="new"] .now-title, :root[data-ui="new"] .st b { font-weight: 560; }
 /* громкость подменяется «резиновой» дорожкой после первого показа окна; до этого прячем обычную, чтобы не было мигания */
 :root[data-ui="new"]:not(.rb-ready) #vol { visibility: hidden; }
+
+/* список стран «Моя страна»: поверхность как у плашек, появляется из угла кнопки (как меню жанров), подсветка клавиатуры — общая скользящая рамка из animated-list */
+:root[data-ui="new"] .homewrap { background: var(--glass-hi); transition: opacity .16s var(--ease), transform .22s var(--ease), display .22s allow-discrete; }
+:root[data-ui="new"] .homewrap[hidden] { opacity: 0; transform: translateY(-6px) scale(.96); pointer-events: none; transition: opacity .1s ease, transform .12s ease, display .12s allow-discrete; }
+@starting-style { :root[data-ui="new"] .homewrap:not([hidden]) { opacity: 0; transform: translateY(-6px) scale(.96); } }
+:root[data-ui="new"] .homemenu::after { border-radius: 8px; }
+:root[data-ui="new"][data-theme="dark"] .homewrap { background: color-mix(in srgb, var(--glass-hi) 88%, var(--text) 12%); box-shadow: 0 18px 48px rgba(0, 0, 0, .55), 0 2px 8px rgba(0, 0, 0, .4); }
+:root[data-ui="new"] .hrow.cur { color: var(--accent); }

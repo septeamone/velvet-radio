@@ -212,6 +212,7 @@ function applyStatic() {
   $('#langLabel').textContent = getLang().toUpperCase();
   setHomeCc(home());
   tabs.querySelector('[data-tab=all]').textContent = countryName(home());
+  homeLabel();
 }
 
 function openCountry(cc) {
@@ -658,6 +659,7 @@ document.addEventListener('keydown', (e) => {
 const settingsEl = $('#settings');
 function openSettings(on) {
   settingsEl.hidden = !on;
+  if (!on) openHomeMenu(false);
   $('#gear').classList.toggle('on', on);
   if (on) syncSettingsUI();
 }
@@ -676,17 +678,70 @@ function syncSettingsUI() {
   const seg = $('#bufseg'), vals = [4, 9, 14];
   seg.style.setProperty('--i', Math.max(0, vals.indexOf(ui.settings.buffer)));
   seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', +b.dataset.k === ui.settings.buffer));
-  fillHomeSel();
+  homeLabel();
   $('#ver').textContent = `Velvet Radio ${chrome.runtime.getManifest().version}`;
   renderHealth();
 }
-function fillHomeSel() {
-  const sel = $('#homeSel'), cs = [{ cc: 'RU' }, ...COUNTRIES].filter((c) => stationsOf(c.cc).length).map((c) => c.cc);
-  cs.sort((a, b) => countryName(a).localeCompare(countryName(b), getLang()));
-  sel.replaceChildren(...cs.map((cc) => Object.assign(document.createElement('option'), { value: cc, textContent: countryName(cc) })));
-  sel.value = home();
+/* ---------- выпадающий список «Моя страна»: свой, без системной рамки; прокрутка как у списка станций (ui/animated-list.js) ---------- */
+const homeMenu = $('#homeMenu'), homeWrap = $('#homeWrap'), homeBtn = $('#homeBtn');
+function homeLabel() {
+  $('#homeName').textContent = countryName(home());
+  $('#homeFlag').src = flagSrc(home());
 }
-$('#homeSel').addEventListener('change', async (e) => { await setHome(e.target.value); syncSettingsUI(); });
+function homeItems() { return [...homeMenu.children]; }
+function openHomeMenu(on) {
+  if (on === !homeWrap.hidden) return;
+  homeBtn.setAttribute('aria-expanded', String(on));
+  if (!on) { homeWrap.hidden = true; return; }
+  const cs = [{ cc: 'RU' }, ...COUNTRIES].filter((c) => stationsOf(c.cc).length).map((c) => c.cc);
+  cs.sort((a, b) => countryName(a).localeCompare(countryName(b), getLang()));
+  const r = homeBtn.getBoundingClientRect(), w = Math.max(212, r.width), H = 252;
+  homeMenu.style.maxHeight = H - 12 + 'px';
+  Object.assign(homeWrap.style, {
+    width: w + 'px', left: Math.max(10, Math.min(r.right - w, innerWidth - w - 10)) + 'px',
+    top: Math.max(10, r.bottom + 6 + H <= innerHeight - 10 ? r.bottom + 6 : r.top - 6 - Math.min(H, cs.length * 34 + 12)) + 'px',
+  });
+  homeWrap.hidden = false;                       // сначала показываем: модуль прокрутки меряет строки только в видимом списке
+  homeMenu.replaceChildren(...cs.map((cc) => {
+    const li = document.createElement('li');
+    li.className = 'hrow'; li.dataset.cc = cc; li.setAttribute('role', 'option');
+    li.setAttribute('aria-selected', String(cc === home()));
+    li.classList.toggle('cur', cc === home());
+    li.innerHTML = '<img class="hflag" alt=""><span class="hn"></span><svg class="hck" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+    li.querySelector('img').src = flagSrc(cc);
+    li.querySelector('.hn').textContent = countryName(cc);
+    return li;
+  }));
+  const cur = homeItems().find((x) => x.classList.contains('cur'));
+  cur?.classList.add('kbd');
+  if (cur) homeMenu.scrollTop = Math.max(0, cur.offsetTop - (H - 34) / 2);
+}
+homeBtn.addEventListener('click', () => openHomeMenu(homeWrap.hidden));
+homeBtn.addEventListener('keydown', (e) => { if (['ArrowDown', 'ArrowUp'].includes(e.key) && homeWrap.hidden) { e.preventDefault(); openHomeMenu(true); } });
+homeMenu.addEventListener('click', async (e) => {
+  const li = e.target.closest('.hrow');
+  if (!li) return;
+  openHomeMenu(false);
+  await setHome(li.dataset.cc);
+  syncSettingsUI();
+});
+document.addEventListener('pointerdown', (e) => { if (!homeWrap.hidden && !e.target.closest('#homeWrap, #homeBtn')) openHomeMenu(false); });
+$('.setbody').addEventListener('scroll', () => openHomeMenu(false), { passive: true });
+window.addEventListener('keydown', (e) => {      // до остальных обработчиков окна: Esc закрывает только список, а не все настройки
+  if (homeWrap.hidden) return;
+  const its = homeItems();
+  let k = its.findIndex((x) => x.classList.contains('kbd'));
+  const move = (n) => { its[k]?.classList.remove('kbd'); k = Math.max(0, Math.min(its.length - 1, n)); its[k].classList.add('kbd'); };
+  if (e.key === 'ArrowDown') move(k + 1);
+  else if (e.key === 'ArrowUp') move(k - 1);
+  else if (e.key === 'Home') move(0);
+  else if (e.key === 'End') move(its.length - 1);
+  else if (e.key === 'Enter' || e.key === ' ') its[k]?.click();
+  else if (e.key === 'Escape') { openHomeMenu(false); homeBtn.focus(); }
+  else if (e.key === 'Tab') { openHomeMenu(false); return; }
+  else return;
+  e.preventDefault(); e.stopPropagation();
+}, true);
 settingsEl.addEventListener('change', async (e) => {
   const k = e.target.dataset?.set;
   if (!k) return;

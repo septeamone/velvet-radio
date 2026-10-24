@@ -30,6 +30,7 @@ export function mountNewUi($, list) {
   mount(initWarmTooltip);                                   // до applyStatic(): системные подсказки не должны успеть появиться
   mount(initGlideSelect, { button: $('#gbtn'), panel: $('#gpanel') });
   mount(initAnimatedList, list);
+  mount(initAnimatedList, $('#homeMenu'), { items: ['hrow'], player: null, fade: 26 });   // выпадающий список «Моя страна»: прокрутка как у списка станций
   mount(initBorderGlow, list);
   mount(initRubberAll); mount(initSquish); mount(initPulseHeart);
   mount(elasticSlider, $('#vol'), { icon: $('.vol svg') });
